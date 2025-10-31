@@ -1,0 +1,74 @@
+/* Estilo para o relatório de saldo de estoque */
+.table {
+    width: 80%;
+    margin-top: 20px;
+    background-color: #fff;
+    border: 2px solid #060606;
+    border-radius: 8px;
+}
+
+.table th {
+    background-color: #faf8f8;  /*cabeçalho da tabela*/
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid #060606;
+    border-radius: 8px;
+}
+
+.table td {
+    text-align: center;
+    border: 1px solid #060606;
+    color: #0b0b0b;
+    font-weight: 800;
+    background-color:azure
+}
+
+.table td:hover {
+background-color: #91d5f4;
+
+}
+
+/* Estilo para a lista de resultados do autocomplete */
+.autocomplete-results {
+    border: 1px solid #ddd;
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #fff;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    
+}
+
+.autocomplete-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.autocomplete-item:hover {
+    background-color: #f0f0f0;
+}
+
+.form-label {
+    font-size: 20px;
+    font-weight: 900;  
+}
+
+.btn-primary {
+    background-color: aqua;
+    margin: 10px;
+    font-size: 15px;
+    font-weight:bolder
+}
+
+.btn-primary:hover {
+    background-color: chartreuse;
+}
+
+
+
+
+
+
+

@@ -1,0 +1,127 @@
+body {
+    background-color: #f0f8ff;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px 0px #0000001a;
+    display:inline-table;
+  
+}
+
+.table {
+    width: 100%;
+    table-layout: auto; /* Permite que a tabela se ajuste ao conteúdo */
+    white-space: nowrap; /* Impede a quebra de linha dentro das células */
+}
+
+thead th {
+   text-align: left;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table th, .table td {
+    text-align: left;
+    min-width: 250px; /* Define uma largura mínima para as colunas */
+}
+
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+label {
+    font-weight: bold;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.search-container input[type="text"] {
+    width: 300px; /* Ajuste a largura conforme necessário */
+    padding: 10px;
+    background-color: rgb(221, 235, 240);
+}
+
+.search-container button {
+    padding: 10px 20px;
+    margin-left: 10px;
+}
+
+
+.actions a {
+    background-color: #90ee90; /* Cor de fundo verde */
+    padding: 5px 10px; /* Adiciona espaço ao redor do texto */
+    display: inline-block; /* Garante que o fundo só ocupe o espaço do texto */
+    border-radius: 5px; /* Arredonda as bordas para um visual mais suave */
+    font-weight: bold; /* Deixa o texto em negrito */
+    font-size: 25px;
+   
+} 
+
+
+.btn-excluir {
+
+    background-color: red;
+    width: 50%;   
+     padding: 5px;
+     margin: 5px 0 10px 0;
+    display:inline-block;
+     border: 1px solid #ccc;
+     border-radius: 4px;
+     box-sizing: border-box;
+     font-size: 15px;
+
+}
+
+.btn-excluir:hover {
+
+    background-color: red;
+    
+
+}
+
+.btn-consultar {
+
+     background-color: aqua; 
+     width: 50%;   
+     padding: 5px;
+     margin: 5px 0 10px 0;
+    display:inline-block;
+     border: 1px solid #ccc;
+     border-radius: 4px;
+     box-sizing: border-box;
+     font-size: 15px;
+    
+    
+}
+
+.btn-consultar:hover {
+
+    background-color: rgb(17, 211, 237);
+}
+
+/* Efeito de hover para as linhas da tabela */
+tbody tr:hover {
+    background-color: #a7a7a7; /* Cor de fundo ao passar o mouse */
+    cursor: pointer; /* Muda o cursor para o ícone de mão */
+    transition: background-color 0.3s ease; /* Adiciona uma transição suave */
+}
+
+

@@ -1,0 +1,46 @@
+.container-os {
+    background-color: #ffffffdd;
+    padding: 25px;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #33333380;
+}
+
+.container-os h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #4a2ac8;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn-os {
+    background-color: #4a2ac8;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-os:hover {
+    background-color: #3921a1;
+}

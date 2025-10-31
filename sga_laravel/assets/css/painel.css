@@ -1,0 +1,145 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    /*background: -webkit-linear-gradient(90deg,#0f1116,#1a1b22); 
+    background: linear-gradient(90deg,#0f1116,#1a1b22);*/
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Painel de título */
+.painel {
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Ajustes dos cartões */
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+/* Cores personalizadas para os cartões */
+.card.entrada {
+    border-left: 5px solid #28a745;
+    border-right: 3px solid #28a745;
+    background: #e3f9e5;
+}
+
+.card.saida {
+ /*   border-left: 5px solid #dc3545;*/
+    border-left: 5px solid #dc3545;
+    border-right: 3px solid #dc3545;
+
+    background: #fde2e2;
+}
+
+.card.saldo-previsao {
+    border-left:  5px solid #007bff;
+    border-right:  3px solid #007bff;
+    background: #e2eefd;
+}
+
+/* Melhorar texto dentro dos cartões */
+.card h2 {
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    color: #555;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.card p {
+    color: #777;
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* Efeito hover nos cards */
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: scale(1.03);
+}
+
+.negativo {
+    color: red !important;
+    font-weight: bold;
+}
+
+.positivo {
+    color: green !important;
+    font-weight: bold;
+}
+
+
+.data-atual {
+    font-size: 35px;
+    font-weight: bold;
+    color: orange;
+    margin-left: 35px;
+    padding-left: 30px;
+    
+    
+}
+
+
+/* graficos começa aqui*/
+.chart-container {
+    background-color: #2dfcda; /* Cor do retângulo de fundo */
+    border-radius: 10px;
+    padding: 10px;
+/*    text-align: center;*/
+    width: 100%; /* Ajuste conforme necessário */
+    margin: 20px auto;
+}
+
+.grafico-header h3 {
+    font-size: 26px;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.grafico-wrapper {
+    width: 100%;
+    height: 350px; /* Aumenta a altura do gráfico */
+    display: flex;
+ /*   justify-content: center;
+    align-items: center;*/
+}
+
+canvas {
+    max-width:100% !important;
+    height: auto !important;  /* Permite que o gráfico ajuste a altura automaticamente */
+}
+
+
+
+/* Ajuste para telas menores */
+@media (max-width: 768px) {
+    .row {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card {
+        margin-bottom: 20px;
+    }
+}

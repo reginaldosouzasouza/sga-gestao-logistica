@@ -1,0 +1,164 @@
+/* Estilo para o título */
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Layout geral do formulário */
+form {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Disposição dos campos */
+.linha {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.campo {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.campo:last-child {
+    margin-right: 0;
+}
+
+/* Estilo para os campos de formulário */
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+/* Botões */
+.linha-botoes {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+button.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.pesquisa-container {
+    display: flex;       
+    justify-content: center;     
+    margin-bottom: 20px;
+}
+
+/* Campo de pesquisa e lista de clientes */
+.pesquisa {
+    margin-bottom: 15px;
+}
+
+#buscaCliente {
+    width: 25%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+#opcoesCliente {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+#opcoesCliente ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#opcoesCliente li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+#opcoesCliente li:hover {
+    background-color: #97eb5b;
+}
+
+/* Ajuste adicional para espaçamento dos campos */
+form .campo {
+    flex: 1;
+    margin: 0 10px;
+}
+
+form .campo:first-child {
+    margin-left: 0;
+}
+
+form .campo:last-child {
+    margin-right: 0;
+}
+
+
+/* Centralizando o rótulo e o campo de pesquisa */
+.campo-pesquisa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.campo-pesquisa label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.campo-pesquisa input {
+    width: 50%; /* Define uma largura menor para não ocupar a tela toda */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+ .pedidos {
+    background-color: #dc3545;
+}

@@ -1,0 +1,134 @@
+body {
+    background-color: #fefefe;
+    font-family: Arial, sans-serif;
+}
+.table-actions {
+    display: flex;
+    justify-content: space-between; /* Espaçamento entre os botões */
+    align-items: center;
+    width: 150px; /* Ajuste conforme necessário */
+}
+
+/*button {
+    margin: 0 5px; /* Adiciona espaçamento entre os botões 
+}*/
+
+.container {
+    max-width: 100%; /* Garante que o container ocupe o espaço total */
+    padding: 20px; /* Ajusta o padding interno */
+    box-sizing: border-box; /* Garante que padding e bordas sejam incluídos no tamanho total */
+}
+
+
+/*.container {
+   max-width: 1400px;
+     margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px 0px #0000001a;
+}*/
+
+.table {
+    width: 100%;
+    table-layout: auto;
+    white-space: nowrap;
+}
+
+thead th {
+    text-align: left;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+   
+}
+
+
+table tbody tr:hover {
+    background-color: #a9ffdf;
+}
+
+.table th, .table td {
+    text-align: left;
+    min-width: 150px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #343a40;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    /*margin-right: 5px;*/
+    margin: 0 5px; /* Adiciona espaçamento entre os botões */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-consultar {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.btn-consultar:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.btn-excluir {
+    background-color: #e42538;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.btn-excluir:hover {
+    background-color: #bd2130;
+    color: white;
+}
+
+.actions a {
+    background-color: #90ee90;
+    padding: 5px 10px;
+    display: inline-block;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.input-group  {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    text-align: center;
+}

@@ -1,0 +1,69 @@
+/* public/css/mecanicos.css */
+
+/* Título */
+h2 {
+    color: purple;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+}
+
+/* Link para novo cadastro */
+a.novo-mecanico {
+    display: inline-block;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 24px;
+     text-decoration: underline;
+
+}
+
+a.novo-mecanico:hover {
+    text-decoration: underline;
+    background-color: rgb(106, 241, 124);
+    color:black;
+}
+
+/* Tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    font-size: 16px;
+}
+
+th {
+    background-color: #f0f0f0;
+}
+
+td a {
+    margin-right: 10px;
+    text-decoration: none;
+    color: #007bff;
+}
+
+td a:hover {
+    text-decoration: underline;
+}
+
+button {
+    padding: 4px 10px;
+    background-color: #f76d7b;
+    color: white;
+    border: none;
+    border-radius: 3px;
+}
+
+button:hover {
+    background-color: #f30a22;
+    text-decoration: underline;
+    cursor: pointer;
+}

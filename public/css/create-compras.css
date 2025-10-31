@@ -1,0 +1,147 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 70%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.form-group, .form-row {
+    display: flex;
+    align-items: center;     /* estava vendo o espaçamento das linhas dos produtos estão muito distante.*/
+    margin-bottom: 8px;
+    
+}
+
+.form-row {
+
+    display: flex;
+    align-items: center;
+    gap: 1px; /* Espaçamento horizontal entre os elementos da linha */
+   /* margin-bottom: 5px; /* Reduz a margem inferior entre os produtos */
+   
+}
+
+.form-group label {
+    flex: 1;
+    font-weight: bold;
+    color: #555;
+    margin-right: 10px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group select {
+    flex: 3;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
+}
+
+#itens-container .form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 5px;
+    align-items: center;
+}
+
+#itens-container select,
+#itens-container input {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+.btn {
+    padding: 10px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.submit-btn {
+    background-color: #28a745;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    
+}
+
+
+.form-row-label {
+    font-weight: bold;
+    color: #333;
+    padding: 8px 0;
+    text-align: center;
+   
+}
+
+
+
+
+h3 {
+    margin-top: 30px;
+    color: #333;
+}
+
+.btn-adicionar_item {
+    background-color: rgba(103, 103, 150, 0.768);
+    font-size: 17px;
+    color:#ffffff;
+    
+}
+
+.btn-adicionar_item:hover {
+    background-color: #70ef8e;
+}
+#valor-total-compra {
+    font-weight: bold;
+    color: #333;
+}
+
+
+
+/* Estilo para o cabeçalho dos rótulos */
+.form-row-label {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 5px;
+    font-weight: bold;
+    color: #333;
+    padding-bottom: 8px;
+    text-align: center;
+}
+
+#itens-container .form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 5px;
+    align-items: center;
+}
+

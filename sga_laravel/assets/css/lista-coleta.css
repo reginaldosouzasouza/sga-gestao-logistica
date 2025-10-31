@@ -1,0 +1,204 @@
+
+.container {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.short-input {
+    flex-basis: 22%; /* Ajustar o tamanho do campo para caberem juntos */
+}
+
+
+.medium-input {
+    flex-basis: 48%; /* Tamanho maior para campos como nome e endereço */
+}
+
+input[type="text"], textarea, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+
+
+}
+
+
+input[type="text"]:hover {
+
+    background-color: #afe4f2;
+}
+
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-limpar {
+    display: block;
+    width: 24%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight:bolder ;
+    background-color: #ffffff;
+    color: rgb(3, 3, 3);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}    
+
+.btn-limpar:hover {
+    background-color: red;
+}
+
+.btn-adicionar {
+    display: block;
+    width: 24%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight:bolder ;
+    background-color:#007bff;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}    
+
+.btn-adicionar:hover {
+    background-color: rgb(64, 109, 19);
+}    
+
+.btn-salvar {
+    display: block;
+    width: 24%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight:bolder ;
+    background-color:#007bff;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}    
+
+.btn-salvar:hover {
+    background-color: rgb(64, 109, 19);
+}    
+
+button:hover {
+    background-color: #007bff;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+label {
+    font-size: 16px;  /* Tamanho da fonte */
+    font-weight: bold;  /* Negrito */
+    color: #333;  /* Cor do texto */
+    text-transform: uppercase; /* Texto em maiúsculas, se necessário */
+    margin-bottom: 5px;  /* Espaçamento inferior */
+}
+
+/* seção dos pedidos*/
+.pedidos {
+
+    background-color: rgb(202, 202, 202);
+}
+
+#total-pedido {
+font-size: 55px;
+color:rgb(65, 125, 5);
+font-weight: bolder;
+}
+
+section p  {
+    font-size: 35px;
+    }
+
+
+    .mensagem-erro {
+        color: #721c24;        
+        padding: 10px;
+        margin: 25px 0;
+        font-weight: bold;
+        
+    }
+
+    .mensagem-minimo {
+        color: #ea4812;        
+        padding: 10px;
+        margin: 25px 0;
+        font-weight: bold;
+        
+    }
+    
+
+    .list-group-item:hover {
+        background-color: #7ce955;
+        color: white;
+        cursor: pointer;
+    }
+
+
+    #limpar-busca {
+        background-color: #a8a6a6;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    #limpar-busca:hover{
+        background-color: #c35454;
+        color: white;
+        cursor: pointer;
+    }
+
+
+    aside {
+       
+        display: flex;
+        justify-content: space-between;
+        align-items: center; 
+    }
+
+    
+    
+    .pagamentos {
+        /* Aumentando a largura dos campos */
+        width: 45%; /* Ajuste conforme necessário */
+        
+    }
+
+
+    
+
+
+

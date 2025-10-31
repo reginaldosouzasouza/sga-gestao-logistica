@@ -1,0 +1,100 @@
+/* Centraliza o campo principal de busca */
+.campo-principal {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.campo-principal input {
+    width: 50%; /* Campo de busca centralizado e em destaque */
+    padding: 10px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Estilização para as linhas de campos */
+.linha {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+/* Define o estilo para os campos */
+.campo {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.campo:last-child {
+    margin-right: 0; /* Remove o espaço à direita do último campo da linha */
+}
+
+.campo label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.campo input, .campo textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Estilização específica para o campo de observação */
+.campo-observacao {
+    width: 100%;
+}
+
+.campo-observacao textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Estilização para os botões */
+.linha-botoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo específico para o botão de cancelar */
+button#cancelarButton {
+    background-color: #dc3545;
+}
+
+button#cancelarButton:hover {
+    background-color: #c82333;
+}
+
+input[type="text"],
+textarea {
+    background-color: #f0f0f0; /* Cor cinza claro */
+    border: 1px solid #ccc; /* Borda para definição */
+    padding: 10px; /* Espaçamento interno */
+    border-radius: 5px; /* Bordas arredondadas */
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    background-color: #e0e0e0; /* Cor um pouco mais escura ao focar */
+    outline: none; /* Remove o contorno padrão */
+}
+

@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/core/public
+RewriteRule ^(.*)$ /core/public/$1 [L]

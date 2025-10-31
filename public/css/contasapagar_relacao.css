@@ -1,0 +1,124 @@
+/* Estilizando a tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+th, td {
+    padding: 12px 15px;
+    border: 1px   solid #000; /* Cor preta */
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+td {
+    border-bottom: 1px solid #ddd;
+}
+
+tr {
+    border-bottom: 2px solid #000;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    padding: 8px 12px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #2980b9;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+
+
+/* definir as cores de fundo para cada status  */
+
+
+.bg-warning {
+    background-color: #edc894 !important; /* Cor laranja para pendente */
+    color: #030303;
+}
+
+.bg-warning:hover {
+    background-color: #ef9e2c !important; /* Cor laranja para pendente */
+   
+}
+
+
+
+.bg-success {
+    background-color: #5cb85c !important; /* Cor verde para pago */
+    color:  #030303;
+}
+
+.bg-danger {
+    background-color: #ee2d26 !important; /* Cor vermelha para atrasado */
+    color:  #030303;
+}
+
+
+tr {
+    transition: background-color 0.3s ease;
+}
+
+
+
+/* Estilo do formulário de filtro */
+.form-filtro {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-control {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.btn-primary {
+    margin-top: 20px;
+}

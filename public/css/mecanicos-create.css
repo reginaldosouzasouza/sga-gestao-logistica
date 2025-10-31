@@ -1,0 +1,67 @@
+/* Estilização do container externo */
+.container {
+    width: 100%;
+    height: 100vh;
+    background-color: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Card de formulário */
+.card {
+    background-color: #fff;
+    padding: 30px;
+    width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: green;
+    font-weight: bold;
+}
+
+.form-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+button, .cancelar-link {
+    padding: 10px 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+button {
+    background-color: #28a745;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.cancelar-link {
+    background-color: #dc3545;
+}
+
+.cancelar-link:hover {
+    background-color: #c82333;
+}
+

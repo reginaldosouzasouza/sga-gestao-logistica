@@ -1,0 +1,123 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff; /* Fundo azul claro */
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.client-form {
+    margin-bottom: 20px;
+}
+
+
+input[type="text"] {
+    text-transform: uppercase;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+
+}
+
+table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+table tbody tr:hover {
+    background-color: #a8a8a8;
+    cursor: pointer; /* Muda o cursor para o ícone de mão */
+    transition: background-color 0.3s ease; /* Adiciona uma transição suave */
+   
+}
+
+
+.btn {
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px 0;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-salvar {
+    background-color: green;
+}
+
+.btn-editar {
+    background-color: blue;
+}
+
+.btn-excluir {
+    background-color: red;
+}
+
+.btn-adicionar {
+    background-color: green;
+    text-align: LEFT;
+ /*   display: block;*/
+    width: 150px;
+    margin: 20px auto 0;
+}
+
+.btn-adicionar:hover {
+    background-color: darkgreen;
+}
+
+.btn-salvar:hover, .btn-editar:hover, .btn-excluir:hover {
+    opacity: 0.8;
+}
+
+textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    
+}
+
+#search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    text-align: center;
+}
+
+.total-clientes {
+    font-size: 18px;
+    color: #343a40;
+}
+
+

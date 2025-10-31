@@ -1,0 +1,112 @@
+/*body {
+    background: linear-gradient(to right, #3498db, #2c3e50);
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}*/
+
+/* Configuração geral da tela de login */
+body {
+    background: linear-gradient(to right, #4b4747d9, #325679);
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contêiner externo com borda */
+.outer-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 720px;
+    border: 2px solid #333;
+}
+
+/* Título do sistema */
+.system-title {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.highlight {
+    color: #ff8000;
+    font-weight: bold;
+}
+
+/* Caixa de login */
+.login-box {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Formulário */
+.login-form {
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Campos do formulário */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Botão de login */
+.btn-login {
+    width: 100%;
+    padding: 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-login:hover {
+    background: #1b689b;
+}
+
+/* Informações do desenvolvedor */
+.developer {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+.dev-highlight {
+    font-weight: bold;
+    color: #ff8000;
+}
+
+.contato {
+    font-weight:bolder;
+    font-size: 25px;
+}
+
+
+

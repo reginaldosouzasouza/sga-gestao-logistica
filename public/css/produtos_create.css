@@ -1,0 +1,54 @@
+.container {
+    max-width: 800px; /* Definindo uma largura máxima */
+    margin: 0 auto; /* Centralizando o container */
+    background-color: #f7f9fc;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 20px;
+}
+
+form {
+    margin-top: 20px;
+}
+
+label {
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 5px; /* Espaçamento entre o label e o input */
+}
+
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px; /* Espaçamento entre os campos de input */
+    width: 100%;
+}
+
+textarea.form-control {
+    resize: none; /* Impede redimensionamento */
+    height: 100px; /* Altura do campo de texto */
+}
+
+button[type="submit"] {
+    display: block;
+    margin: 20px auto; /* Centraliza o botão */
+    background-color: #28a745;
+    border-color: #28a745;
+    padding: 10px 20px;
+    font-size: 16px;
+    width: 50%; /* Ajusta a largura do botão */
+}
+
+button[type="submit"]:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}

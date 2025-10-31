@@ -1,0 +1,144 @@
+/* Estilos para a página de edição de compra */
+
+/* Estilo geral */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 40px;
+}
+
+/* Título da página */
+h1 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+/* Subtítulo para Detalhes da Compra */
+h3.detalhes-compra {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #0056b3;
+    margin-top: 30px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #007bff;
+}
+
+/* Estilo dos campos de formulário */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.form-control:disabled {
+    background-color: #f5f5f5;
+}
+
+/* Botão de salvar */
+button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.btn-voltar_index {
+    background-color: #9cbfe592;
+    color: rgb(0, 0, 0);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bolder;
+}
+
+.btn-voltar_index:hover {
+    background-color: #5bf59b;
+}
+
+button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* Efeito de hover nos inputs */
+.form-control:hover {
+    border-color: #007bff;
+}
+
+/* Estilo da Tabela de Itens da Compra */
+.table-container {
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+}
+
+thead {
+    background-color: #007bff;
+    color: white;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+    background-color: #b6b2b2;
+}
+
+/* Estilo para mensagens de sucesso ou erro */
+.alert {
+    padding: 15px;
+    background-color: #f44336;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.alert.success {
+    background-color: #4CAF50;
+}
+
+.alert.info {
+    background-color: #2196F3;
+}
+
+.alert.warning {
+    background-color: #ff9800;
+}

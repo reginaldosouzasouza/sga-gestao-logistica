@@ -1,0 +1,132 @@
+body {
+    background-color: #fefefe;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+     max-width: 1400px; /* Aumente a largura do container */
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px 0px #0000001a;
+}
+
+.table {
+    width: 100%;
+    table-layout: auto; /* Permite que a tabela se ajuste ao conteúdo */
+    white-space: nowrap; /* Impede a quebra de linha dentro das células */
+}
+
+thead th {
+    text-align: left;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table th, .table td {
+    text-align: left;
+    min-width: 150px; /* Define uma largura mínima para as colunas */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #343a40;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center; /* Centraliza os botões */
+}
+
+.btn-consultar {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.btn-consultar:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.btn-excluir {
+    background-color: #e42538;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.btn-excluir:hover {
+    background-color: #bd2130;
+    color: white;
+}
+
+.actions a {
+    background-color: #90ee90; /* Cor de fundo verde */
+    padding: 5px 10px; /* Adiciona espaço ao redor do texto */
+    display: inline-block; /* Garante que o fundo só ocupe o espaço do texto */
+    border-radius: 5px; /* Arredonda as bordas para um visual mais suave */
+    font-weight: bold; /* Deixa o texto em negrito */
+    font-size: 25px;
+   
+}     
+
+.btn-atualizar {
+    background-color: #53e415;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.btn-atualizar:hover {
+    background-color: #53e415;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+#search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    text-align: center;
+}
+
+ 
+

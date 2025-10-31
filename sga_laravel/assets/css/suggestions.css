@@ -1,0 +1,48 @@
+#cliente-suggestions {
+    background: rgb(254, 15, 15); /* Cor de fundo vermelha para testar */
+    border: 1px solid #ddd;
+    list-style: none;
+    padding: 5px;
+    position: absolute;
+    z-index: 999;
+    display: none;
+    max-height: 150px;
+    overflow-y: auto;
+    width: 200px;
+}
+
+.busca {
+    background-color: brown; /* Adiciona uma cor de fundo para testar */
+}
+
+#cliente-suggestions li {
+    padding: 5px;
+    cursor: pointer;
+}
+
+#cliente-suggestions li:hover {
+    background-color: #f0f0f0;
+}
+
+.suggestions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    background-color: rgb(225, 24, 24); /* Cor para testar */
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+}
+
+.suggestions-list li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestions-list li:hover {
+    background-color: #f0f0f0;
+}
+
