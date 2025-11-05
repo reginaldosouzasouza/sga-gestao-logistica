@@ -1,28 +1,34 @@
-# Imagem base com PHP 8.2 + Composer
+# PHP 8.2 + Composer
 FROM php:8.2-cli
 
-# Instalar extensões necessárias
+# Dependências de sistema e headers para extensões
 RUN apt-get update && apt-get install -y \
-    git unzip libzip-dev libpng-dev libonig-dev libxml2-dev zip curl && \
-    docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    git unzip zip curl \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    libzip-dev zlib1g-dev \
+    libonig-dev libxml2-dev \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Instalar o Composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Definir diretório de trabalho
+# App
 WORKDIR /app
-
-# Copiar o projeto para o container
 COPY . .
 
-# Instalar dependências Laravel
+# Instalar dependências do Laravel
+# (se der problema de plataforma, podemos trocar por --ignore-platform-reqs)
 RUN composer install --no-dev --optimize-autoloader
 
-# Gerar cache de configuração
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+# Preparar caches (não falhar se .env ainda não existir)
+RUN php artisan key:generate --force || true
+RUN php artisan config:cache || true
+RUN php artisan route:cache  || true
+RUN php artisan view:cache   || true
 
-# Expor a porta padrão
 EXPOSE 8000
 
-# Comando de inicialização
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Sobe migrations e inicia o servidor
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT}
+
