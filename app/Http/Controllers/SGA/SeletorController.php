@@ -10,3 +10,4 @@ class SeletorController extends Controller
         return view('sga.seletor');
     }
 }
+

@@ -1,0 +1,35 @@
+# Imagem base com PHP 8.2 e Composer
+#FROM php:8.2-cli
+
+# Instalar dependências do sistema e extensões PHP necessárias
+RUN apt-get update && apt-get install -y \
+    git unzip zip curl libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libonig-dev libxml2-dev && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Instalar o Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Definir o diretório de trabalho
+WORKDIR /app
+
+# Copiar o projeto Laravel para dentro do container
+COPY . .
+
+# Instalar dependências Laravel (ignorando verificações de plataforma)
+RUN composer install --ignore-platform-reqs --no-dev --optimize-autoloader
+
+# Gerar chave e otimizar caches Laravel
+RUN php artisan key:generate --force || true
+RUN php artisan config:cache || true
+RUN php artisan route:cache || true
+RUN php artisan view:cache || true
+
+# Expor a porta padrão do Laravel
+EXPOSE 8000
+
+# Comando de inicialização:
+# - Realiza as migrations automaticamente
+# - Inicia o servidor Laravel na porta do Render
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT}
+

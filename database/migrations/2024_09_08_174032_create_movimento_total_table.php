@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
     
             // Foreign key para relacionar com a tabela pedidos_de_coleta
-            $table->foreign('pedido_de_coleta_id')->references('id')->on('pedidos_de_coleta')->onDelete('cascade');
+            $table->foreign('pedido_de_coleta_id')->references('id')->on('pedido_de_coletas')->onDelete('cascade');
         });
     }
     
