@@ -28,6 +28,7 @@
                 <th>Fornecedor</th>
                 <th>Nota Fiscal</th>
                 <th>Preço Total</th>
+                <th>Parcela</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -38,6 +39,14 @@
                     <td>{{ optional($compra->fornecedor)->nome }}</td>
                     <td>{{ $compra->nota_fiscal }}</td>
                     <td>{{ number_format($compra->total, 2, ',', '.') }}</td> <!-- Usa o campo total da compra -->
+                   <td>
+                    @if($compra->contasAPagar->count() > 1)
+                        {{ $compra->contasAPagar->count() }}x
+                    @else
+                        -
+                    @endif
+                    </td>
+                    
                     <td>
                         <!-- Botões de ações -->
                         <a href="{{ route('compras.edit', $compra->id) }}" class="btn btn-primary">Consultar/Alterar</a>

@@ -51,12 +51,29 @@
                     <td>{{ $cliente->cidade }}</td>
                    <td>{{ $cliente->observacao }}</td>
                     <td>
-                        <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-editar">Consultar/Alterar</a>
+
+                    @if(auth()->user()->temPermissao('cliente_editar'))
+                        <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-editar">
+                            Consultar/Alterar
+                        </a>
+                    @endif
+
+                    @if(auth()->user()->temPermissao('cliente_excluir'))
+                        <form action="{{ route('clientes.destroy', $cliente->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-excluir"
+                                onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
+                                Excluir
+                            </button>
+                        </form>
+                    @endif
+                     <!--   <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-editar">Consultar/Alterar</a>
                         <form action="{{ route('clientes.destroy', $cliente->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-excluir" onclick="return confirm('Tem certeza que deseja excluir este cliente?')">Excluir</button>
-                        </form>
+                        </form>-->
                     </td>
                 </tr>
                 @endforeach

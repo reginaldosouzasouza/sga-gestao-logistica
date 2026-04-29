@@ -39,4 +39,8 @@ class OrdemServico extends Model
     'updated_at',
 ];
 
+protected $casts = [
+    'valor' => 'decimal:2',
+];
+
 }

@@ -1,0 +1,58 @@
+body {
+    background-color: #f5f7fb;
+}
+
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.card-header {
+    background-color: #f8fafc;
+    font-weight: 600;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8fafc;
+    vertical-align: middle;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.badge-status {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.badge-aberto {
+    background-color: #198754;
+    color: #fff;
+}
+
+.badge-cancelado {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-acoes {
+    min-width: 72px;
+}
+
+.vale-gas-page .table td,
+.vale-gas-page .table th {
+    padding: 12px 10px;
+}
+
+.vale-gas-page .titulo-pagina {
+    font-weight: 700;
+    color: #1f2937;
+}

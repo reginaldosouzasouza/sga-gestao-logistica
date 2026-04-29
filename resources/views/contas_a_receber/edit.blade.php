@@ -15,7 +15,8 @@
         </div>
     @endif
 
-    <form action="{{ route('contas_a_receber.update', $contaAReceber->id) }}" method="POST">
+    <form method="POST"
+          action="{{ route('contas_a_receber.update', $contaAReceber->id) . '?' . http_build_query(request()->query()) }}">
         @csrf
         @method('PUT')
 
@@ -32,27 +33,32 @@
 
         <div class="form-group">
             <label for="descricao">Descrição</label>
-            <input type="text" name="descricao" class="form-control" value="{{ $contaAReceber->descricao }}" required>
+            <input type="text" name="descricao" class="form-control"
+                   value="{{ $contaAReceber->descricao }}" required>
         </div>
 
         <div class="form-group">
             <label for="valor">Valor</label>
-            <input type="number" name="valor" class="form-control" value="{{ $contaAReceber->valor }}" required step="0.01">
+            <input type="number" name="valor" class="form-control"
+                   value="{{ $contaAReceber->valor }}" required step="0.01">
         </div>
 
         <div class="form-group">
             <label for="data_venda">Data de Venda</label>
-            <input type="date" name="data_venda" class="form-control" value="{{ old('data_venda', $contaAReceber->data_venda ?? now()->format('Y-m-d')) }}">
+            <input type="date" name="data_venda" class="form-control"
+                   value="{{ old('data_venda', $contaAReceber->data_venda ?? now()->format('Y-m-d')) }}">
         </div>
-        
+
         <div class="form-group">
             <label for="data_vencimento">Data de Vencimento</label>
-            <input type="date" name="data_vencimento" class="form-control" value="{{ $contaAReceber->data_vencimento }}" required>
+            <input type="date" name="data_vencimento" class="form-control"
+                   value="{{ $contaAReceber->data_vencimento }}" required>
         </div>
 
         <div class="form-group">
             <label for="data_recebimento">Data de Recebimento</label>
-            <input type="date" name="data_recebimento" class="form-control" value="{{ $contaAReceber->data_recebimento }}">
+            <input type="date" name="data_recebimento" class="form-control"
+                   value="{{ $contaAReceber->data_recebimento }}">
         </div>
 
         <div class="form-group">
@@ -70,22 +76,21 @@
             <label for="prazo">Prazo</label>
             <select name="prazo" class="form-control">
                 @foreach($prazos as $prazo)
-                    <option value="{{ $prazo->id }}" {{ old('prazo', $contaAReceber->prazo ?? '') == $prazo->id ? 'selected' : '' }}>
+                    <option value="{{ $prazo->id }}"
+                        {{ old('prazo', $contaAReceber->prazo ?? '') == $prazo->id ? 'selected' : '' }}>
                         {{ $prazo->prazo }}
                     </option>
                 @endforeach
             </select>
         </div>
 
-
         <div class="form-group">
             <label for="status">Status</label>
-                <select name="status" class="form-control">
-                    <option value="pendente" {{ $contaAReceber->status == 'pendente' ? 'selected' : '' }}>Pendente</option>
-                    <option value="recebido" {{ $contaAReceber->status == 'recebido' ? 'selected' : '' }}>Recebido</option>
-                    <option value="atrasado" {{ $contaAReceber->status == 'atrasado' ? 'selected' : '' }}>Atrasado</option>
-                </select>
-
+            <select name="status" class="form-control">
+                <option value="pendente" {{ $contaAReceber->status == 'pendente' ? 'selected' : '' }}>Pendente</option>
+                <option value="recebido" {{ $contaAReceber->status == 'recebido' ? 'selected' : '' }}>Recebido</option>
+                <option value="atrasado" {{ $contaAReceber->status == 'atrasado' ? 'selected' : '' }}>Atrasado</option>
+            </select>
         </div>
 
         <div class="form-group">
@@ -94,8 +99,12 @@
         </div>
 
         <button type="submit" class="btn btn-success">Salvar Alterações</button>
-        <a href="{{ route('contas_a_receber.index') }}" class="btn btn-secondary">Cancelar</a>
+
+        <!-- Cancelar mantendo filtros -->
+        <a href="{{ route('contas_a_receber.index') . '?' . http_build_query(request()->query()) }}"
+           class="btn btn-secondary">
+            Cancelar
+        </a>
     </form>
 </div>
 @endsection
-

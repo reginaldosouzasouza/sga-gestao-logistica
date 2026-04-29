@@ -50,11 +50,29 @@
             </div>
 
             <div class="form-group">
+                <label for="parcelas">Parcelas:</label>
+                <select name="parcelas" required>
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                    <option value="4">4x</option>
+                    <option value="5">5x</option>
+                    <option value="6">6x</option>
+                    <option value="7">7x</option>
+                    <option value="8">8x</option>
+                    <option value="9">9x</option>
+                    <option value="10">10x</option>
+                    <option value="11">11x</option>
+                    <option value="12">12x</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label for="prazo_id">Prazo de Pagamento:</label>
                 <select name="prazo_id" required>
                     <option value="" disabled selected>Selecione um Prazo</option>
                     @foreach($prazos as $prazo)
-                        <option value="{{ $prazo->id }}">{{ $prazo->prazo }}</option>
+                        <option value="{{ $prazo->id }}">{{ $prazo->prazo }} dias</option>                       
                     @endforeach
                 </select>
             </div>

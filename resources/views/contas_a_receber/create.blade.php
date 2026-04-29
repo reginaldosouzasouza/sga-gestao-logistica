@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Cirar Contas a Receber')
+
 @section('content')
 <div class="container">
     <h1>Criar Conta a Receber</h1>

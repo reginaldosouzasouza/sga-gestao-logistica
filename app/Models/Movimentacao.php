@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\MovimentacaoItem;
+
 
 class Movimentacao extends Model
 {
@@ -25,7 +27,10 @@ class Movimentacao extends Model
         'forma_pagamento_id',  // Verifique se este campo está aqui
         'prazo_id',  // Verifique se este campo está aqui
         'valor_total',  // Certifique-se de que este campo está aqui
-        'quantidade'  // Adicione aqui se estiver faltando
+        'quantidade',  // Adicione aqui se estiver faltando
+        'origem_tipo',
+        'origem_id',
+        'gerar_financeiro'
     ];
 
     public function itens()

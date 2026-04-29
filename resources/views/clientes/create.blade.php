@@ -16,7 +16,7 @@
         
         <div class="row">
             <div class="col-50">
-                <label for="cpf">CPF</label>
+                <label for="cpf">CPF / CNPJ</label>
                 <input type="text" name="cpf" value="{{ old('cpf') }}">
             </div>
             <div class="col-50">

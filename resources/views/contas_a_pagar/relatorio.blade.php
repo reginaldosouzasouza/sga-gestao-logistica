@@ -56,20 +56,41 @@
             </div>
 
             
+            
+
             <div class="col-md-2">
-                <label>Data de Vencimento:</label>
-                <input type="date" name="data_vencimento" class="form-control" value="{{ request('data_vencimento') }}">
-            </div>
+                <label>Data de Vencimento Inicial:</label>
+                <input type="date" name="data_vencimento_inicial" class="form-control" value="{{ request('data_vencimento_inicial') }}">
+
+                <label>Final:</label>
+                <input type="date" name="data_vencimento_final" class="form-control"  value="{{ request('data_vencimento_final') }}">
+            </div>     
+
+
             <div class="col-md-2">
-                <label>Data de Pagamento:</label>
-                <input type="date" name="data_pagamento" class="form-control" value="{{ request('data_pagamento') }}">
+                <label>Data de Pagamento Inicial:</label>
+                <input type="date" name="data_pagamento_inicial" class="form-control" value="{{ request('data_pagamento_inicial') }}">
+
+                <label>Final:</label>
+                <input type="date" name="data_pagamento_final" class="form-control" value="{{ request('data_pagamento_final') }}">
             </div>
+
+
+                        
+            
+
+
             <div class="col-md-1">
                 <label>&nbsp;</label>
                 <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
             </div>
         </div>
     </form>
+
+    <a href="{{ route('contas-a-pagar.exportar', request()->query()) }}"
+   class="btn btn-success">
+    📥 Exportar Excel
+</a>
 
     <hr>
 

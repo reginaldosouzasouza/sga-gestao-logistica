@@ -19,7 +19,9 @@ class Produto extends Model
         'unidade_de_medida',
         'estoque_minimo',
         'codigo_barras',
-        'modulo_id', 
+        'modulo_id',
+        'margem_percentual', // ← ADICIONADO
+        'margem_valor',      // ← ADICIONADO
     ];
 
     /**
@@ -32,7 +34,6 @@ class Produto extends Model
 
     /**
      * Relacionamento com a tabela 'movimentacoes_itens'
-     * (se você tiver uma tabela de itens relacionados a movimentações)
      */
     public function movimentacoesItens()
     {
@@ -43,6 +44,4 @@ class Produto extends Model
     {
         return $this->belongsTo(Modulo::class, 'modulo_id');
     }
-
 }
-

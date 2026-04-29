@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Vasilhame - GÁS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .page-title {
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    color: #1a1a2e;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+  .page-subtitle {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 24px;
+  }
+
+  /* PRODUTO SELECTOR */
+  .produto-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .produto-row label {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #333;
+  }
+  .produto-row select, .produto-row input[type="date"] {
+    padding: 8px 14px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .produto-row select:focus, .produto-row input[type="date"]:focus {
+    border-color: #3b82f6;
+  }
+
+  /* MAIN GRID */
+  .dashboard {
+    max-width: 900px;
+    margin: 0 auto;
+    border: 3px solid #c084fc;
+    border-radius: 18px;
+    background: #fff;
+    padding: 30px 24px 24px;
+  }
+
+  /* TOTAL CARD ROW */
+  .total-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .card-total {
+    background: #2563eb;
+    border-radius: 16px;
+    padding: 16px 32px;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    min-width: 130px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+  }
+
+  .total-arrow {
+    font-size: 2.2rem;
+    color: #1a1a2e;
+    font-weight: 900;
+    user-select: none;
+  }
+
+  .total-input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .total-input-wrap label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .total-input-wrap input {
+    width: 120px;
+    padding: 10px 14px;
+    border: 2px solid #2563eb;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    text-align: center;
+    color: #1e3a8a;
+    outline: none;
+  }
+  .total-input-wrap input:focus { border-color: #1d4ed8; background: #eff6ff; }
+
+  .total-label-txt {
+    font-weight: 900;
+    font-size: 1rem;
+    color: #1e3a8a;
+    line-height: 1.3;
+  }
+
+  /* CARDS ROW */
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  .card-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label {
+    font-weight: 900;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1a1a2e;
+    text-align: center;
+  }
+
+  .card-value {
+    border-radius: 16px;
+    padding: 14px 0;
+    width: 100%;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    text-align: center;
+    color: #1a1a2e;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+  .card-cheio   { background: #86efac; }
+  .card-vazio   { background: #22d3ee; }
+  .card-emp     { background: #fdba74; }
+  .card-vendido { background: #f87171; }
+
+  .arrow-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    color: #1a1a2e;
+    font-weight: 900;
+    user-select: none;
+  }
+
+  .card-input-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+  .card-input-wrap input {
+    width: 90%;
+    padding: 8px 10px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    text-align: center;
+    color: #1a1a2e;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .card-input-wrap input:focus { border-color: #7c3aed; background: #faf5ff; }
+  .card-input-wrap span {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #777;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* BADGE de cheio vem do estoque */
+  .from-estoque {
+    font-size: 0.68rem;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* AVISO SOMA */
+  .aviso {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #374151;
+    padding: 14px 10px;
+    border-top: 2px dashed #c084fc;
+    margin-top: 10px;
+  }
+
+  .status-bar {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 10px;
+  }
+  .status-ok   { background: #dcfce7; color: #166534; }
+  .status-erro { background: #fee2e2; color: #991b1b; }
+
+  /* BOTOES */
+  .btns-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 11px 28px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-salvar   { background: #22c55e; color: #fff; box-shadow: 0 4px 12px rgba(34,197,94,0.35); }
+  .btn-limpar   { background: #e5e7eb; color: #374151; }
+  .btn-historico{ background: #6366f1; color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+
+  /* HISTORICO */
+  .historico-wrap {
+    max-width: 900px;
+    margin: 24px auto 0;
+    display: none;
+  }
+  .historico-wrap.show { display: block; }
+  .historico-wrap h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    color: #1a1a2e;
+    margin-bottom: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    background: #1e3a8a;
+    color: #fff;
+    padding: 9px 10px;
+    text-align: center;
+    font-weight: 700;
+  }
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+    color: #374151;
+  }
+  tr:nth-child(even) td { background: #f8faff; }
+
+  @media (max-width: 600px) {
+    .cards-row { grid-template-columns: repeat(2, 1fr); }
+    .card-value { font-size: 2.2rem; }
+  }
+
+  /* EMPRESTIMOS */
+  .emprestimo-section {
+    max-width: 900px; margin: 24px auto 0;
+    background: #fff; border: 3px solid #fdba74;
+    border-radius: 18px; padding: 24px;
+  }
+  .emprestimo-section h3 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    letter-spacing: 2px; color: #1a1a2e; margin-bottom: 16px;
+  }
+  .emp-form {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px; align-items: end; margin-bottom: 20px;
+  }
+  .emp-form-field { display: flex; flex-direction: column; gap: 4px; }
+  .emp-form-field label {
+    font-size: 0.72rem; font-weight: 700; color: #555;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .emp-form-field input {
+    padding: 9px 12px; border: 2px solid #ccc; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .emp-form-field input:focus { border-color: #f97316; background: #fff7ed; }
+  .btn-add-emp {
+    padding: 10px 20px; background: #f97316; color: #fff; border: none;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 900;
+    font-size: 0.95rem; cursor: pointer; white-space: nowrap;
+    transition: transform 0.1s; align-self: end;
+  }
+  .btn-add-emp:active { transform: scale(0.97); }
+  .emp-table-wrap { overflow-x: auto; }
+  .emp-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .emp-table th { background: #ea580c; color: #fff; padding: 9px 10px; text-align: center; font-weight: 700; }
+  .emp-table td { padding: 8px 10px; border-bottom: 1px solid #fed7aa; text-align: center; color: #374151; }
+  .emp-table tr:nth-child(even) td { background: #fff7ed; }
+  .badge-pendente  { background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; }
+  .badge-devolvido { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; }
+  .btn-devolver {
+    padding: 4px 12px; background: #22c55e; color: #fff; border: none;
+    border-radius: 8px; font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: 0.78rem; cursor: pointer;
+  }
+  .btn-devolver:disabled { background: #d1d5db; color: #9ca3af; cursor: default; }
+  @media (max-width: 700px) { .emp-form { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="page-title">🔥 Controle de Vasilhame — GÁS</div>
+<div class="page-subtitle">Revenda de Gás · Gestão de Inventário</div>
+
+<!-- FILTROS -->
+<div class="produto-row">
+  <label>Produto:</label>
+  <select id="produto">
+    <option value="P13">Botijão P13</option>
+    <option value="P45">Botijão P45</option>
+    <option value="P20">Botijão P20</option>
+  </select>
+  <label>Data:</label>
+  <input type="date" id="data-movimentacao">
+</div>
+
+<!-- DASHBOARD PRINCIPAL -->
+<div class="dashboard">
+
+  <!-- TOTAL -->
+  <div class="total-row">
+    <div>
+      <div class="card-label" style="margin-bottom:6px;">TOTAL DE VASILHAME</div>
+      <div class="card-total" id="card-total">0</div>
+    </div>
+    <div class="total-arrow">↔</div>
+    <div class="total-input-wrap">
+      <label>Total informado</label>
+      <input type="number" id="input-total" placeholder="0" min="0">
+    </div>
+    <div class="total-label-txt">⬅ ESTA INFORMAÇÃO<br>SERÁ DIGITADA</div>
+  </div>
+
+  <!-- 4 CARDS -->
+  <div class="cards-row">
+
+    <!-- CHEIO -->
+    <div class="card-item">
+      <div class="card-label">CHEIO</div>
+      <div class="card-value card-cheio" id="card-cheio">0</div>
+      <div class="arrow-icon">↕</div>
+      <div class="card-input-wrap">
+        <input type="number" id="input-cheio" placeholder="0" min="0">
+        <span>✏️ Será Digitado</span>
+      </div>
+    </div>
+
+    <!-- VAZIO -->
+    <div class="card-item">
+      <div class="card-label">VAZIO</div>
+      <div class="card-value card-vazio" id="card-vazio">0</div>
+      <div class="arrow-icon">↕</div>
+      <div class="card-input-wrap">
+        <input type="number" id="input-vazio" placeholder="0" min="0">
+        <span>✏️ Será Digitado</span>
+      </div>
+    </div>
+
+    <!-- EMPRESTADO -->
+    <div class="card-item">
+      <div class="card-label">EMPRESTADO</div>
+      <div class="card-value card-emp" id="card-emp">0</div>
+      <div class="arrow-icon">↕</div>
+      <div class="card-input-wrap">
+        <input type="number" id="input-emp" placeholder="0" min="0">
+        <span>✏️ Será Digitado</span>
+      </div>
+    </div>
+
+    <!-- VENDIDO -->
+    <div class="card-item">
+      <div class="card-label">VENDIDO</div>
+      <div class="card-value card-vendido" id="card-vendido">0</div>
+      <div class="arrow-icon">↕</div>
+      <div class="card-input-wrap">
+        <input type="number" id="input-vendido" placeholder="0" min="0">
+        <span>✏️ Será Digitado</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="aviso">
+    Os cards <strong>CHEIO · VAZIO · EMPRESTADO · VENDIDO</strong> devem ser somados e bater com o card <strong>TOTAL DE VASILHAMES</strong>.
+  </div>
+
+  <div class="status-bar status-ok" id="status-bar">
+    ✅ Preencha os campos acima para validar o total.
+  </div>
+
+  <div class="btns-row">
+    <button class="btn btn-salvar" onclick="salvarRegistro()">💾 Salvar Movimentação</button>
+    <button class="btn btn-limpar" onclick="limparCampos()">🗑 Limpar</button>
+    <button class="btn btn-historico" onclick="toggleHistorico()">📋 Ver Histórico</button>
+  </div>
+</div>
+
+<!-- EMPRESTIMOS -->
+<div class="emprestimo-section">
+  <h3>🤝 Controle de Empréstimos</h3>
+  <div class="emp-form">
+    <div class="emp-form-field">
+      <label>Nome do Cliente</label>
+      <input type="text" id="emp-cliente" placeholder="Ex: João da Silva">
+    </div>
+    <div class="emp-form-field">
+      <label>Quantidade</label>
+      <input type="number" id="emp-qtd" placeholder="0" min="1">
+    </div>
+    <div class="emp-form-field">
+      <label>Data do Empréstimo</label>
+      <input type="date" id="emp-data-saida">
+    </div>
+    <div class="emp-form-field">
+      <label>Previsão de Devolução</label>
+      <input type="date" id="emp-data-prev">
+    </div>
+    <button class="btn-add-emp" onclick="adicionarEmprestimo()">+ Registrar</button>
+  </div>
+
+  <div class="emp-table-wrap">
+    <table class="emp-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Cliente</th>
+          <th>Qtd</th>
+          <th>Saída</th>
+          <th>Previsão Dev.</th>
+          <th>Data Devolução</th>
+          <th>Status</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="emp-body">
+        <tr><td colspan="8" style="color:#aaa;padding:18px">Nenhum empréstimo registrado.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- HISTORICO -->
+<div class="historico-wrap" id="historico-wrap">
+  <h3>📋 Histórico de Movimentações</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Produto</th>
+        <th>Total</th>
+        <th>Cheio</th>
+        <th>Vazio</th>
+        <th>Emprestado</th>
+        <th>Vendido</th>
+        <th>Status</th>
+        <th>Excluir</th>
+      </tr>
+    </thead>
+    <tbody id="historico-body">
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURAÇÃO — ajuste para o seu ambiente
+  // ============================================================
+  const API_BASE  = 'https://seusite.com.br/api';  // ← altere para sua URL
+  const API_TOKEN = localStorage.getItem('sanctum_token') || 'SEU_TOKEN_AQUI'; // ← token Sanctum
+
+  // Helper: cabeçalhos padrão com autenticação
+  function headers() {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${API_TOKEN}`,
+    };
+  }
+
+  // Helper: requisição à API com tratamento de erro
+  async function api(method, path, body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API_BASE + path, opts);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Erro ${res.status}`);
+    }
+    return res.status === 204 ? null : res.json();
+  }
+
+  // ============================================================
+  // INICIALIZAÇÃO
+  // ============================================================
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('data-movimentacao').value = today;
+  document.getElementById('emp-data-saida').value = today;
+
+  function get(id) { return document.getElementById(id); }
+  function val(id)  { return parseInt(get(id).value) || 0; }
+  function formatarData(d) {
+    if (!d) return '—';
+    const [y,m,day] = d.split('T')[0].split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  // ============================================================
+  // ESTOQUE — busca o "cheio" da tabela estoques via API
+  // ============================================================
+  get('produto').addEventListener('change', atualizarCheioEstoque);
+
+  async function atualizarCheioEstoque() {
+    const prod = get('produto').value;
+    try {
+      // Busca quantidade do produto na tabela estoques
+      const data = await api('GET', `/estoques?produto_id=${prod}&tipo_movimentacao=cheio`);
+      // Ajuste o campo conforme o retorno da sua API de estoques
+      const qtd = data?.quantidade ?? data?.[0]?.quantidade ?? 0;
+      get('input-cheio').value = qtd;
+      get('card-cheio').textContent = qtd;
+    } catch {
+      // Fallback local caso a rota de estoque ainda não esteja pronta
+      const fallback = { P13: 19, P45: 8, P20: 5 };
+      const qtd = fallback[prod] ?? 0;
+      get('input-cheio').value = qtd;
+      get('card-cheio').textContent = qtd;
+    }
+    recalcular();
+  }
+
+  // ============================================================
+  // RECALCULAR CARDS
+  // ============================================================
+  ['input-total','input-cheio','input-vazio','input-emp','input-vendido'].forEach(id => {
+    get(id).addEventListener('input', recalcular);
+  });
+
+  function recalcular() {
+    const totalDigitado = val('input-total');
+    const cheio    = val('input-cheio');
+    const vazio    = val('input-vazio');
+    const emp      = val('input-emp');
+    const vendido  = val('input-vendido');
+    const somaCards = cheio + vazio + emp + vendido;
+
+    get('card-total').textContent   = somaCards;
+    get('card-cheio').textContent   = cheio;
+    get('card-vazio').textContent   = vazio;
+    get('card-emp').textContent     = emp;
+    get('card-vendido').textContent = vendido;
+
+    const bar = get('status-bar');
+    const cardTotal = get('card-total');
+
+    if (totalDigitado === 0 && somaCards === 0) {
+      bar.textContent = '✅ Preencha os campos acima para validar o total.';
+      bar.className = 'status-bar status-ok';
+      cardTotal.style.background = '#2563eb';
+    } else if (somaCards === totalDigitado) {
+      bar.textContent = `✅ Soma OK: ${cheio} + ${vazio} + ${emp} + ${vendido} = ${somaCards} ✔ Total ${totalDigitado}`;
+      bar.className = 'status-bar status-ok';
+      cardTotal.style.background = '#2563eb';
+    } else {
+      bar.textContent = `❌ Soma (${somaCards}) não bate com o Total informado (${totalDigitado}). Diferença: ${totalDigitado - somaCards}`;
+      bar.className = 'status-bar status-erro';
+      cardTotal.style.background = '#dc2626';
+    }
+  }
+
+  // ============================================================
+  // MOVIMENTAÇÕES
+  // ============================================================
+  async function salvarRegistro() {
+    const cheio   = val('input-cheio');
+    const vazio   = val('input-vazio');
+    const emp     = val('input-emp');
+    const vendido = val('input-vendido');
+    const soma    = cheio + vazio + emp + vendido;
+    const totalDigitado = val('input-total');
+
+    if (totalDigitado === 0) { alert('Informe o Total de Vasilhames!'); return; }
+    if (soma !== totalDigitado) { alert('A soma dos cards não bate com o Total informado! Corrija antes de salvar.'); return; }
+
+    const btn = document.querySelector('.btn-salvar');
+    btn.textContent = '⏳ Salvando...';
+    btn.disabled = true;
+
+    try {
+      await api('POST', '/vasilhame/movimentacoes', {
+        produto:           get('produto').value,
+        data_movimentacao: get('data-movimentacao').value,
+        total_vasilhame:   totalDigitado,
+        cheio, vazio,
+        emprestado: emp,
+        vendido,
+      });
+      alert('✅ Movimentação salva com sucesso!');
+      await carregarHistorico();
+      get('historico-wrap').classList.add('show');
+    } catch (e) {
+      alert('❌ Erro ao salvar: ' + e.message);
+    } finally {
+      btn.textContent = '💾 Salvar Movimentação';
+      btn.disabled = false;
+    }
+  }
+
+  async function carregarHistorico() {
+    const prod = get('produto').value;
+    try {
+      const dados = await api('GET', `/vasilhame/movimentacoes?produto=${prod}`);
+      renderHistorico(dados);
+    } catch (e) {
+      console.error('Erro ao carregar histórico:', e);
+    }
+  }
+
+  function renderHistorico(lista) {
+    const tbody = get('historico-body');
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="color:#aaa;padding:18px">Nenhuma movimentação registrada.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    lista.forEach(r => {
+      const ok = r.soma_ok;
+      tbody.innerHTML += `
+        <tr>
+          <td>${formatarData(r.data_movimentacao)}</td>
+          <td>${r.produto}</td>
+          <td><strong>${r.total_vasilhame}</strong></td>
+          <td>${r.cheio}</td>
+          <td>${r.vazio}</td>
+          <td>${r.emprestado}</td>
+          <td>${r.vendido}</td>
+          <td style="color:${ok?'#166534':'#991b1b'};font-weight:700">${ok?'✅ OK':'❌ Divergente'}</td>
+          <td><button onclick="excluirMovimentacao(${r.id})" style="background:#fee2e2;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:0.8rem;color:#991b1b;">🗑</button></td>
+        </tr>`;
+    });
+  }
+
+  async function excluirMovimentacao(id) {
+    if (!confirm('Confirma excluir esta movimentação?')) return;
+    try {
+      await api('DELETE', `/vasilhame/movimentacoes/${id}`);
+      await carregarHistorico();
+    } catch (e) {
+      alert('Erro ao excluir: ' + e.message);
+    }
+  }
+
+  function toggleHistorico() {
+    const wrap = get('historico-wrap');
+    wrap.classList.toggle('show');
+    if (wrap.classList.contains('show')) carregarHistorico();
+  }
+
+  function limparCampos() {
+    ['input-total','input-cheio','input-vazio','input-emp','input-vendido'].forEach(id => get(id).value = '');
+    get('input-cheio').value = '';
+    ['card-total','card-cheio','card-vazio','card-emp','card-vendido'].forEach(id => get(id).textContent = '0');
+    const bar = get('status-bar');
+    bar.textContent = '✅ Preencha os campos acima para validar o total.';
+    bar.className = 'status-bar status-ok';
+    get('card-total').style.background = '#2563eb';
+  }
+
+  // ============================================================
+  // EMPRÉSTIMOS
+  // ============================================================
+  async function adicionarEmprestimo() {
+    const cliente = get('emp-cliente').value.trim();
+    const qtd     = parseInt(get('emp-qtd').value) || 0;
+    const saida   = get('emp-data-saida').value;
+    const prevDev = get('emp-data-prev').value;
+
+    if (!cliente) { alert('Informe o nome do cliente!'); return; }
+    if (qtd < 1)  { alert('Informe a quantidade!'); return; }
+    if (!saida)   { alert('Informe a data do empréstimo!'); return; }
+
+    const btn = document.querySelector('.btn-add-emp');
+    btn.textContent = '⏳ Salvando...';
+    btn.disabled = true;
+
+    try {
+      await api('POST', '/vasilhame/emprestimos', {
+        cliente,
+        produto:                  get('produto').value,
+        quantidade:               qtd,
+        data_saida:               saida,
+        data_previsao_devolucao:  prevDev || null,
+      });
+      get('emp-cliente').value = '';
+      get('emp-qtd').value = '';
+      get('emp-data-prev').value = '';
+      await carregarEmprestimos();
+    } catch (e) {
+      alert('Erro ao registrar: ' + e.message);
+    } finally {
+      btn.textContent = '+ Registrar';
+      btn.disabled = false;
+    }
+  }
+
+  async function registrarDevolucao(id) {
+    try {
+      await api('PATCH', `/vasilhame/emprestimos/${id}/devolver`);
+      await carregarEmprestimos();
+    } catch (e) {
+      alert('Erro ao registrar devolução: ' + e.message);
+    }
+  }
+
+  async function carregarEmprestimos() {
+    try {
+      const dados = await api('GET', '/vasilhame/emprestimos');
+      renderEmprestimos(dados);
+    } catch (e) {
+      console.error('Erro ao carregar empréstimos:', e);
+    }
+  }
+
+  function renderEmprestimos(lista) {
+    const tbody = get('emp-body');
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="color:#aaa;padding:18px">Nenhum empréstimo registrado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    lista.forEach((e, i) => {
+      const devolvido = e.status === 'devolvido';
+      const atrasado  = e.atrasado;
+      const badge = devolvido
+        ? `<span class="badge-devolvido">✅ Devolvido</span>`
+        : atrasado
+          ? `<span class="badge-pendente" style="background:#fee2e2;color:#991b1b">⚠️ Atrasado</span>`
+          : `<span class="badge-pendente">⏳ Pendente</span>`;
+      tbody.innerHTML += `
+        <tr>
+          <td>${lista.length - i}</td>
+          <td style="font-weight:700;text-align:left">${e.cliente}</td>
+          <td><strong>${e.quantidade}</strong></td>
+          <td>${formatarData(e.data_saida)}</td>
+          <td>${e.data_previsao_devolucao ? formatarData(e.data_previsao_devolucao) : '—'}</td>
+          <td>${e.data_devolucao ? formatarData(e.data_devolucao) : '—'}</td>
+          <td>${badge}</td>
+          <td><button class="btn-devolver" onclick="registrarDevolucao(${e.id})" ${devolvido ? 'disabled' : ''}>
+            ${devolvido ? '✔ OK' : 'Devolvido'}
+          </button></td>
+        </tr>`;
+    });
+  }
+
+  // ============================================================
+  // INICIALIZA
+  // ============================================================
+  atualizarCheioEstoque();
+  carregarEmprestimos();
+</script>
+</body>
+</html>

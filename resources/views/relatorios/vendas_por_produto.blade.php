@@ -21,7 +21,7 @@
 
         <div class="form-group">
             <label for="nome_produto">Nome do Bairro</label>
-            <input type="text" name="nome_bairro" id="nome_bairro" class="form-control" placeholder="Digite o nome do Bairro" value="{{ request('nome_produto') }}">
+            <input type="text" name="nome_bairro" id="nome_bairro" class="form-control" placeholder="Digite o nome do Bairro" value="{{ request('nome_bairro') }}">
         </div>
 
         <div class="form-group">
@@ -58,7 +58,7 @@
             @foreach($vendas as $venda)
             <tr>
                
-                <td>{{ \Carbon\Carbon::parse($venda->data_movimentacao)->format('d/m/Y') }}</td>
+                <td>{{ \Carbon\Carbon::parse($venda->data_coleta)->format('d/m/Y') }}</td>
                 <td>{{ $venda->nome_cliente }}</td>
                 <td>{{ $venda->nome_produto }}</td>
                 <td>{{ $venda->quantidade }}</td>

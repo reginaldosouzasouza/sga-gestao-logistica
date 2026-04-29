@@ -17,9 +17,18 @@
     <input type="text" id="search" placeholder="Digite o nome ou telefone para pesquisar o Fornecedor" class="form-control">
 </div>
 
+ 
+
 <div class="actions">
     <a href="{{ route('fornecedores.create') }}" class="btn btn-success">Cadastrar Fornecedor</a>
 </div>
+<hr>
+
+<div class="total-clientes" style="margin-bottom: 10px;">
+        <strong>Total de Fornecedor: {{ $totalfornecedores }}</strong>
+    </div>
+
+
 <div class="container">
 
     <h1>Lista de Fornecedores</h1>
@@ -30,6 +39,7 @@
                 <tr>
                     <th>CNPJ</th>
                     <th>Nome</th>
+                    <th>Natureza</th>
                     <th>Endereço</th>
                     <th>Telefone</th>
                     <th>Cidade</th>
@@ -41,6 +51,7 @@
                 <tr>
                     <td>{{ $fornecedor->cnpj }}</td>
                     <td>{{ $fornecedor->nome }}</td>
+                    <td> {{ $fornecedor->naturezaFinanceira->nome ?? $fornecedor->natureza_financeira ?? '-' }}</td>
                     <td>{{ $fornecedor->endereco }}</td>
                     <td>{{ $fornecedor->telefone }}</td>
                     <td>{{ $fornecedor->cidade }}</td>

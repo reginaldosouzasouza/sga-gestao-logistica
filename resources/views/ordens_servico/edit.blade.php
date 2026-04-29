@@ -24,10 +24,18 @@
             <input type="text" name="servico_realizado" class="form-control" value="{{ $ordem->servico_realizado }}" required>
         </div>
 
+
         <div class="form-group">
             <label>Valor:</label>
-            <input type="number" step="0.01" name="valor" class="form-control" value="{{ $ordem->valor }}" required>
+            <input type="text" name="valor" id="valor" class="form-control valor-monetario" 
+                   value="{{ $ordem->valor }}" required>
         </div>
+
+       
+        <!--<div class="form-group">
+            <label>Valor:</label>
+            <input type="text" step="0.01" name="valor" class="form-control" value="{{ $ordem->valor }}" required>
+        </div>-->
 
         <div class="form-group">
             <label>Status:</label>
@@ -60,4 +68,55 @@
         <a href="{{ route('ordens-servico.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
+
+
+
+
+<!-- Seu formulário aqui -->
+
+<script>
+/**
+ * Aplica máscara de dinheiro brasileiro
+ */
+function aplicarMascaraDinheiro(seletor) {
+    const campos = document.querySelectorAll(seletor);
+    
+    campos.forEach(campo => {
+        if (campo.value) {
+            campo.value = formatarMoeda(campo.value);
+        }
+        
+        campo.addEventListener('input', function(e) {
+            let valor = e.target.value;
+            valor = valor.replace(/\D/g, '');
+            valor = (parseInt(valor) / 100).toFixed(2);
+            e.target.value = formatarMoeda(valor);
+        });
+        
+        campo.addEventListener('blur', function(e) {
+            if (e.target.value === '' || e.target.value === 'R$ 0,00') {
+                e.target.value = 'R$ 0,00';
+            }
+        });
+    });
+}
+
+function formatarMoeda(valor) {
+    if (typeof valor === 'string') {
+        valor = parseFloat(valor.replace(',', '.'));
+    }
+    
+    return valor.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    aplicarMascaraDinheiro('.valor-monetario');
+    aplicarMascaraDinheiro('#valor');
+});
+</script>
+
+
 @endsection

@@ -35,17 +35,6 @@
             justify-content:center;
         }
 
-        /* Contêiner externo com borda */
-        /* .outer-container {
-            background: rgba(255,255,255,0.95);
-            padding:30px;
-            border-radius:15px;
-            box-shadow:0 4px 12px rgba(0,0,0,0.3);
-            text-align:center;
-            width:720px;
-            border:2px solid #333;
-        } */
-
         /* ===== Menu ===== */
         nav { background-color:#333; position:relative; }
         nav li { display:inline-block; position:relative; }
@@ -80,7 +69,7 @@
         /* Cabeçalho (título SGA) */
         .gestao{ display:inline-block; vertical-align:middle; }
         .gestao h1{
-            background-color:var(--accent);  /* cor do módulo */
+            background-color:var(--accent);
             font-family:Arial, sans-serif;
             display:flex; align-items:center; gap:15px;
             margin:0; padding:10px 20px;
@@ -96,77 +85,113 @@
         .dropdown-submenu a{
             white-space:nowrap; max-width:350px; overflow:hidden; text-overflow:ellipsis;
         }
-    </style>
+
+       /* ===== Item desabilitado (módulo caixa) ===== */
+        .menu-desabilitado {
+            pointer-events: none !important;
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+            filter: grayscale(100%);
+        }
+
+        /* Bloqueia o submenu de abrir no hover */
+        .li-desabilitado {
+            pointer-events: none !important;
+        }
+        
+        /* Bloqueia hover e submenu do item desabilitado */
+        .li-desabilitado {
+            pointer-events: none !important;
+        }
+
+        .li-desabilitado > .dropdown-submenu {
+            display: none !important;
+        }
+
+        .li-desabilitado:hover > .dropdown-submenu {
+            display: none !important;
+        }
+
+        
+</style>
+
+
+
 </head>
 
 <body class="mod-{{ $mod }}">
     <!-- Menu principal -->
     <nav>
         <ul>
+            <!-- Cadastro -->
             <li class="dropdown">
                 <a href="#">Cadastro<i class="bi bi-caret-down-fill"></i></a>
                 <div class="dropdown-submenu">
-                    <a href="http://127.0.0.1:8001/clientes" target="_blank">
+                    <a href="http://127.0.0.1:8010/clientes" target="_blank">
                         Clientes <img src="{{ asset('images/imagem/clientes.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/compras" target="_blank">
+                    <a href="http://127.0.0.1:8010/compras" target="_blank">
                         Compras <img src="{{ asset('images/imagem/compras.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/formas_de_pagamento" target="_blank">
+                    <a href="http://127.0.0.1:8010/formas_de_pagamento" target="_blank">
                         Formas de Pagamento <img src="{{ asset('images/imagem/formasdepagamento.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/fornecedores" target="_blank">
+                    <a href="http://127.0.0.1:8010/fornecedores" target="_blank">
                         Fornecedor <img src="{{ asset('images/imagem/fornecedor.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/produtos" target="_blank">
+                    <a href="http://127.0.0.1:8010/produtos" target="_blank">
                         Produtos <img src="{{ asset('images/imagem/produtos.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/veiculos" target="_blank">
+                    <a href="http://127.0.0.1:8010/veiculos" target="_blank">
                         Veículos <img src="{{ asset('images/imagem/veiculos.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/usuarios" target="_blank">
+                    <a href="http://127.0.0.1:8010/usuarios" target="_blank">
                         Usuários <img src="{{ asset('images/imagem/usuarios.png') }}" class="imagem">
                     </a>
                 </div>
             </li>
 
-            <li class="dropdown">
-                <a href="#">Movimentação<i class="bi bi-caret-down-fill"></i></a>
+            <!-- Movimentação — desabilitado no módulo caixa -->
+          <li class="dropdown {{ $mod === 'caixa' ? 'li-desabilitado' : '' }}">
+                <a href="#" class="{{ $mod === 'caixa' ? 'menu-desabilitado' : '' }}">
+                    Movimentação<i class="bi bi-caret-down-fill"></i>
+                </a>
                 <div class="dropdown-submenu">
-                    <a href="http://127.0.0.1:8001/movimentacao" target="_blank">
+                    <a href="http://127.0.0.1:8010/movimentacao" target="_blank">
                         Consultar Coletas <img src="{{ asset('images/imagem/detalhes_coleta.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/movimentacao" target="_blank">
+                    <a href="http://127.0.0.1:8010/movimentacao" target="_blank">
                         Listagem de Coleta <img src="{{ asset('images/imagem/detalhes_coleta.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/movimentacao/create" target="_blank">
+                    <a href="http://127.0.0.1:8010/movimentacao/create" target="_blank">
                         Pedidos de Coleta <img src="{{ asset('images/imagem/pedido_coleta.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/compras/create" target="_blank">
+                    <a href="http://127.0.0.1:8010/compras/create" target="_blank">
                         Ordens de Serviços <img src="{{ asset('images/imagem/ordem_de_serviços.png') }}" class="imagem">
                     </a>
                 </div>
             </li>
 
+            <!-- Financeiro -->
             <li class="dropdown">
                 <a href="#">Financeiro<i class="bi bi-caret-down-fill"></i></a>
                 <div class="dropdown-submenu">
-                    <a href="http://127.0.0.1:8001/contas-a-pagar" target="_blank">
+                    <a href="http://127.0.0.1:8010/contas-a-pagar" target="_blank">
                         Contas a Pagar <img src="{{ asset('images/imagem/contas_a_pagar.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/contas_a_receber" target="_blank">
+                    <a href="http://127.0.0.1:8010/contas_a_receber" target="_blank">
                         Contas a Receber <img src="{{ asset('images/imagem/contas_a_receber.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/formas_de_pagamento" target="_blank">
+                    <a href="http://127.0.0.1:8010/formas_de_pagamento" target="_blank">
                         Formas de Pagamento <img src="{{ asset('images/imagem/formasdepagamento.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/fornecedores" target="_blank">
+                    <a href="http://127.0.0.1:8010/fornecedores" target="_blank">
                         Fornecedor <img src="{{ asset('images/imagem/fornecedor.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/produtos" target="_blank">
+                    <a href="http://127.0.0.1:8010/produtos" target="_blank">
                         Produtos de beleza <img src="{{ asset('images/imagem/produtosdebeleza.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/caixa" target="_blank">
+                    <a href="http://127.0.0.1:8010/caixa/consultas" target="_blank">
                         CAIXA <img src="{{ asset('images/imagem/caixaregistradora.png') }}" class="imagem">
                     </a>
                 </div>
@@ -181,8 +206,8 @@
                         <i class="bi bi-caret-down-fill"></i>
                     </a>
                     <div class="dropdown-submenu" id="estoque-submenu">
-                        <a href="http://127.0.0.1:8001/estoques" target="_blank">Movimentação do Estoque</a>
-                        <a href="http://127.0.0.1:8001/relatorios/saldo-estoque" target="_blank">Saldo do Estoque</a>
+                        <a href="http://127.0.0.1:8010/estoques" target="_blank">Movimentação do Estoque</a>
+                        <a href="http://127.0.0.1:8010/relatorios/saldo-estoque" target="_blank">Saldo do Estoque</a>
                     </div>
 
                     <a href="#" class="menu-link" id="vendas-link">
@@ -190,8 +215,8 @@
                         <i class="bi bi-caret-down-fill"></i>
                     </a>
                     <div class="dropdown-submenu" id="vendas-submenu">
-                        <a href="http://127.0.0.1:8001/relatorios/vendas" target="_blank">Vendas</a>
-                        <a href="http://127.0.0.1:8001/relatorios/vendas-por-produto" target="_blank">Vendas por Produto</a>
+                        <a href="http://127.0.0.1:8010/relatorios/vendas" target="_blank">Vendas</a>
+                        <a href="http://127.0.0.1:8010/relatorios/vendas-por-produto" target="_blank">Vendas por Produto</a>
                     </div>
 
                     <a href="#" class="menu-link" id="compras-link">
@@ -199,7 +224,7 @@
                         <i class="bi bi-caret-down-fill"></i>
                     </a>
                     <div class="dropdown-submenu" id="compras-submenu">
-                        <a href="http://127.0.0.1:8001/relatorio-compras" target="_blank">Rel. de Compras</a>
+                        <a href="http://127.0.0.1:8010/relatorio-compras" target="_blank">Rel. de Compras</a>
                     </div>
 
                     <a href="#" class="menu-link" id="relcontasapagar-link">
@@ -207,52 +232,65 @@
                         <i class="bi bi-caret-down-fill"></i>
                     </a>
                     <div class="dropdown-submenu" id="relcontasApagar-submenu">
-                        <a href="http://127.0.0.1:8001/relatorio-contas-a-pagar" target="_blank">Rel. de Contas a Pagar</a>
+                        <a href="http://127.0.0.1:8010/relatorio-contas-a-pagar" target="_blank">Rel. de Contas a Pagar</a>
                     </div>
 
-                    <a href="http://127.0.0.1:8001/dashboard" target="_blank">
+                    <a href="#" class="menu-link" id="relcaixa-link">
+                        CAIXA <img src="{{ asset('images/imagem/contas_a_pagar.png') }}" class="imagem">
+                        <i class="bi bi-caret-down-fill"></i>
+                    </a>
+                    <div class="dropdown-submenu" id="relCaixa-submenu">
+                        <a href="http://127.0.0.1:8010/caixa/consulta" target="_blank">Consulta Caixa</a>
+                        <a href="http://127.0.0.1:8010/relatorios/rel-caixa" target="_blank">Rel. do CAIXA</a>
+                    </div>
+
+                    <a href="http://127.0.0.1:8010/dashboard" target="_blank">
                         GERENCIAL <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/fornecedores" target="_blank">
+                    <a href="http://127.0.0.1:8010/fornecedores" target="_blank">
                         Fornecedor <img src="{{ asset('images/imagem/fornecedor.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/produtos" target="_blank">
+                    <a href="http://127.0.0.1:8010/produtos" target="_blank">
                         Produtos <img src="{{ asset('images/imagem/produtos.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/compras/create" target="_blank">
+                    <a href="http://127.0.0.1:8010/compras/create" target="_blank">
                         Usuários <img src="{{ asset('images/imagem/usuarios.png') }}" class="imagem">
                     </a>
                 </div>
             </li>
 
-            <!-- Oficina -->
+            <!-- Oficina — desabilitado no módulo caixa -->
             <li class="dropdown">
-                <a href="#">Oficina<i class="bi bi-caret-down-fill"></i></a>
+                <a href="#" class="{{ $mod === 'caixa' ? 'menu-desabilitado' : '' }}">
+                    Oficina<i class="bi bi-caret-down-fill"></i>
+                </a>
                 <div class="dropdown-submenu">
-                    <a href="http://127.0.0.1:8001/ordens-servico" target="_blank">
+                    <a href="http://127.0.0.1:8010/ordens-servico" target="_blank">
                         Ordens de Serviço
                         <img src="{{ asset('images/imagem/ordem_de_serviços.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/ordens-servico/create" target="_blank">
+                    <a href="http://127.0.0.1:8010/ordens-servico/create" target="_blank">
                         Criar Ordens de Serviços
                         <img src="{{ asset('images/imagem/nova_ordem_servicos.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/mecanicos" target="_blank">
+                    <a href="http://127.0.0.1:8010/mecanicos" target="_blank">
                         Cad. Mecânicos
                         <img src="{{ asset('images/imagem/mecanico.png') }}" class="imagem">
                     </a>
                 </div>
             </li>
 
-            <!-- Padaria -->
+            <!-- Padaria — desabilitado no módulo caixa -->
             <li class="dropdown">
-                <a href="#">Padaria<i class="bi bi-caret-down-fill"></i></a>
+                <a href="#" class="{{ $mod === 'caixa' ? 'menu-desabilitado' : '' }}">
+                    Padaria<i class="bi bi-caret-down-fill"></i>
+                </a>
                 <div class="dropdown-submenu">
-                    <a href="http://127.0.0.1:8001/padoca/encomendas/create" target="_blank">
+                    <a href="http://127.0.0.1:8010/padoca/encomendas/create" target="_blank">
                         Cadastrar Encomenda
                         <img src="{{ asset('images/imagem/padaria_cadastrar.png') }}" class="imagem">
                     </a>
-                    <a href="http://127.0.0.1:8001/padoca/encomendas" target="_blank">
+                    <a href="http://127.0.0.1:8010/padoca/encomendas" target="_blank">
                         Consultar/Visualizar/alterar
                         <img src="{{ asset('images/imagem/padaria_consulta.png') }}" class="imagem">
                     </a>
@@ -327,4 +365,3 @@
     </script>
 </body>
 </html>
-

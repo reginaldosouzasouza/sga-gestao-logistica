@@ -1,0 +1,218 @@
+body {
+    background: #f4f6fb;
+}
+
+.dashboard-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: #374151;
+}
+
+/* HEADER */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.dashboard-header h1 {
+    color: #1f4fd8;
+}
+
+/* KPI */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 5px solid #1f4fd8;
+}
+
+.kpi-card span {
+    font-size: 14px;
+}
+
+.kpi-card strong {
+    font-size: 22px;
+    display: block;
+    margin-top: 5px;
+}
+
+/* CHARTS */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* OPERACIONAL */
+.operacional-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.info-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.info-card h4 {
+    color: #1f4fd8;
+    margin-bottom: 8px;
+}
+
+
+/* =========================
+   KPIs – cores do protótipo
+========================= */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* Base do card */
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+}
+
+.kpi-icon {
+    font-size: 36px;
+    opacity: 0.9;
+}
+
+.kpi-info span {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.kpi-info strong {
+    font-size: 26px;
+    display: block;
+    margin-top: 4px;
+}
+
+/* Cores iguais ao protótipo 
+/* ===============================
+   KPI BASE
+=============================== */
+.kpi-card {
+    border-radius: 12px;
+    padding: 22px 26px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: all .3s ease;
+}
+
+.kpi-card span {
+    font-size: 15px;
+    opacity: 0.9;
+}
+
+.kpi-card strong {
+    font-size: 26px;
+    font-weight: bold;
+}
+
+/* ===============================
+   CAIXA (DINHEIRO)
+=============================== */
+.kpi-caixa.positivo {
+    background: linear-gradient(135deg, #2e7d32, #66bb6a);
+}
+
+.kpi-caixa.negativo {
+    background: linear-gradient(135deg, #c62828, #ef5350);
+}
+
+/* ===============================
+   CAIXA BANCO (PIX) — FIXO
+=============================== */
+.kpi-banco {
+    background: linear-gradient(135deg, #1565c0, #1e88e5);
+}
+
+/* ===============================
+   RESULTADO DO DIA
+=============================== */
+.kpi-resultado.positivo {
+    background: linear-gradient(135deg, #2e7d32, #66bb6a);
+}
+
+.kpi-resultado.negativo {
+    background: linear-gradient(135deg, #c62828, #ef5350);
+}
+
+#kpiResultadoPct {
+    font-size: 15px;
+    margin-left: 8px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* ===============================
+   ÍCONES
+=============================== */
+.kpi-icon {
+    font-size: 34px;
+    margin-right: 16px;
+    opacity: 0.9;
+}
+
+
+
+.kpi-caixa {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+}
+
+.kpi-banco {
+    background: linear-gradient(135deg, #1565c0, #1e88e5);
+}
+
+.kpi-resultado {
+    background: linear-gradient(135deg, #2e7d32, #66bb6a);
+}
+
+
+.chart-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.chart-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #37474f;
+}
+
+
+

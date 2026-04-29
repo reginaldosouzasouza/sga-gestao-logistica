@@ -49,6 +49,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        'permitir_reabrir_caixa' => env('PERMITIR_REABRIR_CAIXA', false),
+
        
 
 

@@ -17,7 +17,9 @@ class ClienteController extends Controller
     public function index()
     {
         // Obtém todos os clientes do banco de dados
-        $clientes = Cliente::all();
+        // Busca os clientes ordenando pelo campo 'created_at' de forma decrescente (mais recentes primeiro)
+        $clientes = Cliente::orderBy('created_at', 'desc')->get();
+        
         $totalClientes = Cliente::count(); //conta o numero de total de clientes
 
        
@@ -170,15 +172,18 @@ class ClienteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        // Encontra o cliente pelo ID e exclui
-        $cliente = Cliente::findOrFail($id);
-        $cliente->delete();
-
-        // Redireciona para a lista de clientes com uma mensagem de sucesso
-        return redirect()->route('clientes.index')->with('success', 'Cliente excluído com sucesso!');
+   public function destroy($id)
+{
+    if (!auth()->user()->temPermissao('cliente_excluir')) {
+        abort(403, 'Você não tem permissão para excluir clientes.');
     }
+
+    $cliente = Cliente::findOrFail($id);
+    $cliente->delete();
+
+    return redirect()->route('clientes.index')
+        ->with('success', 'Cliente excluído com sucesso.');
+}
 
     public function search(Request $request)
     {

@@ -14,7 +14,10 @@ class MovimentacaoItem extends Model
 
     // Definir os campos que podem ser preenchidos via mass assignment
     protected $fillable = [
-        'movimentacao_id', 'produto_id', 'quantidade', 'valor_unitario', 'valor_total'
+        'movimentacao_id', 
+        'produto_id', 'quantidade', 
+        'valor_unitario', 
+        'valor_total'
     ];
 
     // Relacionamento com a tabela Movimentacao

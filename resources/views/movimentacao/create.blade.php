@@ -104,11 +104,11 @@
             </div>
             <div class="col-md-2">
                 <label for="valor_unitario">Valor Unitário</label>
-                <input type="text" name="produtos[0][valor_unitario]" class="form-control valor-unitario" readonly>
+                <input type="number" step="0.01" name="produtos[0][valor_unitario]" class="form-control valor-unitario" readonly>
             </div>
             <div class="col-md-2">
                 <label for="valor_total">Total do Item</label>
-                <input type="text" name="produtos[0][valor_total]" class="form-control valor-total" readonly>
+                <input type="number" step="0.01" name="produtos[0][valor_total]" class="form-control valor-total" oninput>
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="button" class="btn btn-danger remove-item">Remover</button>
@@ -156,7 +156,7 @@
 
 <script>
 $(document).ready(function() {
-    let itemIndex = 0; // Índice inicial para os itens
+    let itemIndex = 0;
 
     // =======================
     // 🔍 PESQUISA DE CLIENTES
@@ -172,11 +172,22 @@ $(document).ready(function() {
             success: function(data) {
                 let lista = $('#lista-clientes');
                 lista.empty();
+
                 if (data.length > 0) {
                     data.forEach(cliente => {
                         lista.append(`
-                            <button type="button" class="list-group-item list-group-item-action"
-                                onclick="selecionarCliente(${cliente.id}, '${cliente.nome}', '${cliente.telefone}', '${cliente.endereco}', '${cliente.cpf}', '${cliente.numero}', '${cliente.bairro}', '${cliente.cidade}')">
+                            <button type="button"
+                                class="list-group-item list-group-item-action"
+                                onclick="selecionarCliente(
+                                    ${cliente.id},
+                                    '${cliente.nome}',
+                                    '${cliente.telefone}',
+                                    '${cliente.endereco}',
+                                    '${cliente.cpf}',
+                                    '${cliente.numero}',
+                                    '${cliente.bairro}',
+                                    '${cliente.cidade}'
+                                )">
                                 ${cliente.nome} (${cliente.telefone})
                             </button>
                         `);
@@ -200,15 +211,17 @@ $(document).ready(function() {
         $('#lista-clientes').empty();
     };
 
-   
-
-    // Função para adicionar um novo item ao pedido
+    // =======================
+    // ➕ ADICIONAR ITEM
+    // =======================
     $('#add-item').click(function() {
-        itemIndex++; // Incrementa o índice
-        let novoItem = $('.item:first').clone(); // Clona o primeiro item
-        novoItem.find('input, select').val(''); // Limpa os valores dos inputs
+        itemIndex++;
 
-        // Atualiza os nomes dos campos para o novo índice
+        let novoItem = $('.item:first').clone();
+
+        novoItem.find('input, select').val('');
+        novoItem.find('.valor-total').data('manual', false);
+
         novoItem.find('select, input').each(function() {
             let name = $(this).attr('name');
             if (name) {
@@ -217,43 +230,77 @@ $(document).ready(function() {
             }
         });
 
-        novoItem.appendTo('#itens-pedido'); // Adiciona à lista de pedidos
+        novoItem.appendTo('#itens-pedido');
     });
 
-    // Função para remover um item
+    // =======================
+    // ❌ REMOVER ITEM
+    // =======================
     $(document).on('click', '.remove-item', function() {
-        $(this).closest('.item').remove(); // Remove o item clicado
-        calcularTotais(); // Recalcula os totais
+        $(this).closest('.item').remove();
+        calcularTotais();
     });
 
-    // Função para calcular os totais
+    // =======================
+    // 🧮 CALCULAR TOTAIS
+    // =======================
     function calcularTotais() {
         let totalPedido = 0;
+
         $('.item').each(function() {
-            let quantidade = parseFloat($(this).find('.quantidade').val()) || 0;
+            let quantidade    = parseFloat($(this).find('.quantidade').val()) || 0;
             let valorUnitario = parseFloat($(this).find('.valor-unitario').val()) || 0;
-            let totalItem = quantidade * valorUnitario;
-            $(this).find('.valor-total').val(totalItem.toFixed(2));
+            let campoTotal    = $(this).find('.valor-total');
+
+            let totalItem;
+
+            // Se NÃO foi editado manualmente
+            if (!campoTotal.data('manual')) {
+                totalItem = quantidade * valorUnitario;
+                campoTotal.val(totalItem.toFixed(2));
+            } else {
+                totalItem = parseFloat(campoTotal.val()) || 0;
+            }
+
             totalPedido += totalItem;
         });
+
         $('#total-pedido').text(totalPedido.toFixed(2));
     }
 
-    // Atualiza os valores totais do item ao alterar a quantidade ou escolher um produto
+    // =======================
+    // 🔄 PRODUTO / QUANTIDADE
+    // =======================
     $(document).on('change', '.produto-select, .quantidade', function() {
         let item = $(this).closest('.item');
-        let precoVenda = parseFloat(item.find('.produto-select :selected').data('preco')) || 0;
+
+        let precoVenda = parseFloat(
+            item.find('.produto-select :selected').data('preco')
+        ) || 0;
+
         let quantidade = parseFloat(item.find('.quantidade').val()) || 0;
-        let totalItem = precoVenda * quantidade;
+        let totalItem  = precoVenda * quantidade;
 
         item.find('.valor-unitario').val(precoVenda.toFixed(2));
-        item.find('.valor-total').val(totalItem.toFixed(2));
+
+        let campoTotal = item.find('.valor-total');
+        campoTotal.data('manual', false);
+        campoTotal.val(totalItem.toFixed(2));
 
         calcularTotais();
     });
-});
 
+    // =======================
+    // ✍️ TOTAL EDITADO MANUAL
+    // =======================
+    $(document).on('input', '.valor-total', function() {
+        $(this).data('manual', true);
+        calcularTotais();
+    });
+
+});
 </script>
+
 
 
 

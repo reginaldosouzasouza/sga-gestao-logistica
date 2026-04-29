@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Cadastrar Formas de Pagamento')
+
 @section('content')
 <div class="container">
     <h1>Cadastrar Nova Forma de Pagamento</h1>

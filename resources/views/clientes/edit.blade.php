@@ -22,7 +22,7 @@
             </div>
 
             <div class="form-group">
-                <label for="cpf">CPF:</label>
+                <label for="cpf">CPF / CNPJ:</label>
                 <input type="text" name="cpf" id="cpf" value="{{ $cliente->cpf }}" required>
             </div>
 

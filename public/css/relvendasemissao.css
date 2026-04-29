@@ -1,0 +1,123 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+form input, form select {
+    padding: 5px;
+    margin-right: 10px;
+}
+
+/* Totais */
+.totais {
+    background: white;
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 30px;
+}
+
+.totais p {
+    margin: 0;
+    font-size: 15px;
+}
+
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+table td:hover {
+    background-color: aquamarine;
+}
+
+table th {
+    background: #007bff;
+    color: white;
+    text-align: left;
+}
+
+/* Alinha colunas numéricas à direita */
+table td:nth-child(3),
+table td:nth-child(4) {
+    text-align: right;
+}
+
+table th:nth-child(3),
+table th:nth-child(4) {
+    text-align: right;
+}
+
+/* Linha de totais da tabela */
+/* Linha de totais da tabela */
+.linha-total td {
+    background-color: #e9f2ff;
+    font-weight: bold;
+    border-top: 2px solid #007bff;
+}
+
+.linha-total td:nth-child(2) {
+    text-align: right;
+}
+
+.linha-total td:nth-child(3) {
+    text-align: right;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    margin-top: 10px;
+    display: inline-block;
+}
+
+
+@keyframes pulsar {
+    0%   { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70%  { box-shadow: 0 0 0 18px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+#btn-chat {
+    animation: pulsar 2s infinite !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}

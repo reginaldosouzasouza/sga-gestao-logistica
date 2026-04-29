@@ -45,6 +45,7 @@ class Kernel extends HttpKernel
         // seus middlewares já existentes
         'master' => \App\Http\Middleware\CheckMaster::class,
         'funcionario' => \App\Http\Middleware\CheckFuncionario::class,
+        'permissao' => \App\Http\Middleware\CheckPermissao::class,
 
         // ✅ apenas ESTE alias 'module'
         'module' => \App\Http\Middleware\CheckModule::class,

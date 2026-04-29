@@ -1,4 +1,5 @@
 <?php
+//use App\Http\Controllers\ImportacaoDespesasController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\FornecedorController;
@@ -15,7 +16,7 @@ use App\Http\Controllers\ContasAReceberController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\CaixaController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CaixaAberturaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -28,12 +29,44 @@ use App\Http\Controllers\Padoca\EncomendaController;
 use App\Http\Controllers\ModuleEntryController;
 use App\Http\Controllers\SGA\SeletorController;
 use App\Http\Controllers\OficinaEntryController;
-use App\Http\Controllers\GasEntryController;
+//use App\Http\Controllers\GasEntryController;
 use App\Http\Controllers\GerencialEntryController;
 use App\Http\Controllers\PadocaEntryController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MenuController;
 use App\Http\Middleware\CheckMaster;
+use App\Http\Controllers\Gerencial\DashboardController as GerencialDashboardController;
+use App\Http\Controllers\RelCaixaController;
+use App\Http\Controllers\CaixaConsultaController;
+use App\Http\Controllers\Controller; 
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ChatSuporteController;
+use App\Http\Controllers\ClienteProdutoDuracaoController;
+use App\Http\Controllers\RelatorioGasController;
+use App\Http\Controllers\PerfilController; 
+ use App\Http\Controllers\BackupController;
+ use App\Http\Controllers\RelatorioComprasController;
+ use App\Http\Controllers\ControleVasilhameController;
+ use App\Http\Controllers\ValeGasController;
+ use App\Http\Controllers\DashboardEmissaoController;
+ //use App\Http\Controllers\ImportacaoDespesasMensalController;
+ use App\Http\Controllers\DashboardEmissaoInteligenteController;
+ use App\Http\Controllers\DashboardFinanceiroController;
+ use App\Http\Controllers\Financeiro\ImportacaoDespesaController;
+ use App\Http\Controllers\RelatorioVendasEmissaoController;
+ use App\Http\Controllers\VasilhameEmprestimoController;
+ use App\Http\Controllers\RelatorioNaturezaFinanceiraController;
+ use App\Http\Controllers\NaturezaFinanceiraController;
+
+
+ 
+
+
+
+
+
+
+
 
 
 
@@ -79,6 +112,9 @@ Route::get('/relatorios/saldo-estoque', [ProdutoController::class, 'saldoEstoque
 // fornecedores
 Route::resource('fornecedores', FornecedorController::class);
 Route::resource('produtos', ProdutoController::class);
+
+// RELATÓRIO DE MARGEM DE LUCRO
+Route::get('/produtos/relatorio/margem', [ProdutoController::class, 'relatorioMargem'])->name('produtos.relatorio.margem');
 Route::post('/fornecedores/importarXML', [FornecedorController::class, 'importarXML'])->name('fornecedores.importarXML');
 
 
@@ -133,8 +169,25 @@ Route::get('/movimentacao/pesquisar', [MovimentacaoController::class, 'pesquisar
 // ROTA MOVIMENTACAO_ITENS
 Route::resource('movimentacao-itens', MovimentacaoItemController::class);
 
-//RELATÓRIO DE COMPRAS
-Route::get('/relatorio-compras', [ComprasController::class, 'relatorioCompras'])->name('relatorio.compras');
+/*RELATÓRIO DE COMPRAS
+Route::get('/relatorio-compras', [ComprasController::class, 'relatorioCompras'])->name('relatorio.compras');*/
+
+
+// ── Adicione ao seu routes/web.php ──────────────────────────────────────────
+
+
+
+Route::prefix('relatorios')->name('relatorios.')->group(function () {
+
+    // Listagem com filtros
+    Route::get('/compras', [RelatorioComprasController::class, 'index'])
+         ->name('compras');
+
+    // Export CSV
+    Route::get('/compras/export', [RelatorioComprasController::class, 'export'])
+         ->name('compras.export');
+
+});
 
 // rota de RELATÓRIO DE vendas 1
 Route::get('/relatorios/vendas', [RelatorioController::class, 'vendas'])->name('relatorios.vendas');
@@ -151,14 +204,46 @@ Route::get('/relatorios/saldo_estoque', [RelatorioController::class, 'saldoEstoq
 // ROTA VERIFICAR ESTOQUE DO PRODUTO NO MOMENTO DA VENDA
 Route::get('/verificar-estoque', [ProdutoController::class, 'verificarEstoque']);
 
-// rotas financeiro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//rotas financeiro
 Route::post('/contas_a_pagar/store', [ContasAPagarController::class, 'store'])->name('contas_a_pagar.store');
 Route::resource('contas_a_pagar', ContasAPagarController::class);
 Route::get('/contas-a-pagar', [ContasAPagarController::class, 'index'])->name('contas_a_pagar.index');
 Route::get('/contas-a-pagar/{id}/edit', [ContasAPagarController::class, 'edit'])->name('contas_a_pagar.edit');
 Route::put('/contas-a-pagar/{id}', [ContasAPagarController::class, 'update'])->name('contas_a_pagar.update');
 Route::resource('contas-a-pagar', ContasAPagarController::class);
+
+// RELATÓRIO CONTAS A RECEBER
+
+Route::get('/contas_a_receber/exportar', [ContasAReceberController::class, 'exportarCsv'])
+    ->name('contas_a_receber.exportar');
+
+
+Route::get('/contas_a_receber/relatorio', [ContasAReceberController::class, 'relatorio'])
+    ->name('contas_a_receber.relatorio');
+
+
+
 Route::resource('contas_a_receber', ContasAReceberController::class);
+Route::resource('contas-a-receber', ContasAReceberController::class)->names('contas_a_receber');
 Route::get('/contas_a_receber/{id}/edit', [ContasAReceberController::class, 'edit'])->name('contas_a_receber.edit');
 Route::put('/contas_a_receber/{id}', [ContasAReceberController::class, 'update'])->name('contas_a_receber.update');
 Route::delete('/contas_a_receber/{id}', [ContasAReceberController::class, 'destroy'])->name('contas_a_receber.destroy');
@@ -186,33 +271,249 @@ Route::middleware(['auth', 'master'])->group(function () {
    
 });
 
-Route::get('/menu', function () {
+/*Route::get('/menu', function () {
     if (!Auth::check()) {
         return redirect('/login');
     }
     return view('menu');
-});
+});*/
 
 
 // ROTA PARA ACESSAR O SISTEMA
 
 
-Route::middleware(['auth'])->group(function () {
+/*Route::middleware(['auth'])->group(function () {
     Route::get('/menu', function () {
         return view('menu'); // Certifique-se de que o nome do arquivo é menu.blade.php
     })->name('menu');
-});
+});*/
 
 // ROTAS DO CAIXA 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/caixa', [CaixaController::class, 'index'])->name('caixa.index');
-    Route::post('/caixa/abrir', [CaixaController::class, 'abrirCaixa'])->name('caixa.abrir');
-    Route::post('/caixa/fechar', [CaixaController::class, 'fecharCaixa'])->name('caixa.fechar');
-    Route::post('/caixa/movimentacao', [CaixaController::class, 'registrarMovimentacao'])->name('caixa.movimentacao');
+   
+
+    Route::middleware(['auth'])->group(function () {
+
+    // ===============================
+    // ABERTURA DE CAIXA
+    // ===============================
+ // Route::get('/caixa', [CaixaController::class, 'index'])->name('caixa.index');
+
+Route::get('/caixa/abrir', [CaixaController::class, 'abrir']) 
+   ->name('caixa.abrir');
+
+   // ===============================
+    // ROTA -  RELATÓRIO COMPLETO CAIXA
+    // ===============================
+
+Route::get('/relatorios/movimentacao',
+    [\App\Http\Controllers\RelatorioMovimentacaoController::class, 'index'])
+    ->name('relatorios.movimentacao');
+
+Route::get('/relatorios/movimentacao/exportar',
+    [\App\Http\Controllers\RelatorioMovimentacaoController::class, 'exportar'])
+    ->name('relatorios.movimentacao.exportar');
+
+
+    // ===============================
+    // CAIXA OPERACIONAL
+    // ===============================
+    Route::get('/caixa', [CaixaController::class, 'index'])
+        ->name('caixa.index');
+
+    Route::post('/caixa/fechar', [CaixaController::class, 'fecharCaixa'])
+        ->name('caixa.fechar');
+
+    Route::post('/caixa/ajuste', [CaixaController::class, 'ajuste'])
+        ->name('caixa.ajuste');
+
+    Route::get('/caixa/consultas', [CaixaController::class, 'consultas'])
+        ->name('caixa.consultas');
+
+    // ===============================
+    // CONSULTA POR DATA (SEMPRE ÚLTIMA)
+    // ===============================
+    Route::get('/caixa/{data}', [CaixaController::class, 'visualizar'])
+        ->where('data', '\d{4}-\d{2}-\d{2}')
+        ->name('caixa.visualizar');
+
+
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Rotas do Relatório de Caixa
+|--------------------------------------------------------------------------
+|
+| Adicione estas rotas ao seu arquivo routes/web.php
+|
+*/
+
+// Grupo de rotas para relatórios
+Route::prefix('relatorios')->name('rel-caixa.')->group(function () {
+    
+    // Visualizar relatório (HTML)
+    Route::get('/rel-caixa', [RelCaixaController::class, 'index'])->name('index');
+    
+    // Exportar CSV
+    Route::get('/rel-caixa/exportar', [RelCaixaController::class, 'exportar'])->name('exportar');
+    
+    // Imprimir
+    Route::get('/rel-caixa/imprimir', [RelCaixaController::class, 'imprimir'])->name('imprimir');
 });
 
-//DASHBOARD
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| Rotas da API
+|--------------------------------------------------------------------------
+|
+| Adicione estas rotas ao seu arquivo routes/api.php
+|
+*/
+
+// API JSON
+Route::prefix('api')->group(function () {
+    Route::get('/relatorios/rel-caixa', [RelCaixaController::class, 'api']);
+});
+
+});
+
+ // ROTAS PARA EXCLUIR LANÇAMENTOS DO CAIXA
+
+// Caixa (Dinheiro)
+Route::delete('/caixa/movimentacao/{id}', 
+    [CaixaController::class, 'destroyCaixa']
+)->name('caixa.destroy');
+
+// Caixa Banco (PIX)
+Route::delete('/caixa-banco/movimentacao/{id}', 
+    [CaixaController::class, 'destroyCaixaBanco']
+)->name('caixa.banco.destroy');
+
+//  CAIXA - ESTORNO
+Route::post('/caixa/estornar/{id}', 
+    [CaixaController::class, 'estornarCaixa']
+)->name('caixa.estornar');
+
+Route::post('/caixa-banco/estornar/{id}', 
+    [CaixaController::class, 'estornarCaixaBanco']
+)->name('caixa.banco.estornar');
+
+// EXCLUI MOVIMENTACAO
+Route::delete(
+    '/caixa-banco/movimentacao/{id}',
+    [CaixaController::class, 'destroyCaixaBanco']
+)->name('caixa.banco.destroy');
+
+
+
+
+//ROTAS DE RELATÓRIO E CONSULTA MODULO CAIXA
+
+Route::get('/caixa/consulta', [CaixaConsultaController::class, 'index'])
+    ->name('caixa.consulta');
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| S.G.A — Rotas do Dashboard
+|--------------------------------------------------------------------------
+| Adicione essas rotas no seu arquivo routes/api.php
+|
+| Acesso: https://seusite.com.br/api/dashboard/financeiro
+|         https://seusite.com.br/api/dashboard/clientes
+|         https://seusite.com.br/api/dashboard/estoque
+|         https://seusite.com.br/api/dashboard/metas
+|         https://seusite.com.br/api/dashboard/resumo
+|
+| Parâmetros opcionais via query string:
+|   ?meses=6  → filtra os últimos 6 meses (padrão: 12)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('dashboard')->group(function () {
+
+    // Resumo geral — página inicial
+    Route::get('/resumo',      [DashboardController::class, 'resumo']);
+
+    // Módulo 1 — Financeiro
+    // DRE, Fluxo de Caixa, Contas a Pagar e Receber, Top Saídas
+    Route::get('/financeiro',  [DashboardController::class, 'financeiro']);
+
+    // Módulo 2 — Clientes
+    // Carteira, Top clientes, Crescimento, Inadimplência
+    Route::get('/clientes',    [DashboardController::class, 'clientes']);
+
+    // Módulo 3 — Estoque
+    // Posição atual, Críticos, Giro mensal, Top produtos
+    Route::get('/estoque',     [DashboardController::class, 'estoque']);
+
+    // Módulo 4 — Metas
+    // Atingimento de receita, clientes, movimentações e inadimplência
+    Route::get('/metas',       [DashboardController::class, 'metas']);
+
+   
+});
+
+
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard.index');
+
+    Route::get('/dashboard/previsao-financeira', [DashboardController::class, 'previsaoFinanceira'])
+    ->middleware('auth')
+    ->name('dashboard.previsao-financeira');
+
+    Route::get('/dashboard/previsao-financeira',
+[DashboardController::class,'previsaoFinanceira'])
+->name('dashboard.previsao');
+
+Route::get('/dashboard/vendas-por-dia', [DashboardController::class, 'vendasPorDia'])
+    ->name('dashboard.vendas-por-dia');
+
+    Route::get('/dashboard/produtos-mais-vendidos',
+[DashboardController::class,'produtosMaisVendidos']);
+
+Route::get('/dashboard/vendas-por-bairro', [DashboardController::class, 'vendasPorBairro']);
+
+Route::get('/dashboard/vendas-por-cliente', [DashboardController::class, 'vendasPorCliente']);
+
+Route::get('/dashboard/ticket-medio-clientes', [DashboardController::class, 'ticketMedioClientes']);
+
+Route::get('/dashboard/previsao-ruptura', [DashboardController::class, 'previsaoRupturaEstoque']);
+
+
+
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| CORS — config/cors.php
+|--------------------------------------------------------------------------
+| Adicione ou ajuste no seu config/cors.php:
+|
+| 'paths' => ['api/*'],
+| 'allowed_origins' => ['http://localhost:3000', 'https://seusite.com.br'],
+| 'allowed_methods' => ['*'],
+| 'allowed_headers' => ['*'],
+|--------------------------------------------------------------------------
+*/
+
 
 // ROTAS USUARIO NOVOS E ALTERAÇÕES
 Route::middleware(['auth'])->group(function () {
@@ -238,9 +539,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pedidos', [MovimentacaoController::class, 'index'])->name('pedidos');
 });
 
-//EXCLUSAO DE LANÇAMENTOS DO CAIXA
-Route::delete('/caixa/movimentacao/{id}', [CaixaController::class, 'destroy'])
-    ->name('caixa.destroy');
+
 
 
 // módulo OFICINA
@@ -301,17 +600,18 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(CheckMaster::class)
         ->name('modulos.index');
 
-    // Entradas reais dos módulos (só MASTER)
+    /* Entradas reais dos módulos (só MASTER)
     Route::middleware(CheckMaster::class)->group(function () {
         Route::get('/oficina',   [OficinaEntryController::class,   'index'])->name('oficina.entry');
         Route::get('/gas',       [GasEntryController::class,       'index'])->name('gas.entry');
         Route::get('/gerencial', [GerencialEntryController::class, 'index'])->name('gerencial.entry');
         Route::get('/padoca',    [PadocaEntryController::class,    'index'])->name('padoca.entry');
-    });
+    });*/
 
     // ✅ AQUI ESTÁ O NOVO MENU COM PARÂMETRO OPCIONAL
-    Route::get('/menu/{mod?}', [App\Http\Controllers\MenuController::class, 'index'])
-        ->name('menu.index');
+   Route::get('/menu/{modulo}', [App\Http\Controllers\MenuController::class, 'index'])
+    ->name('menu.index')
+    ->where('modulo', 'oficina|gas|gerencial|padoca|caixa');
 
 
 
@@ -336,5 +636,155 @@ Route::middleware('auth')
     ->get('/sga', [SeletorController::class, 'index'])
     ->name('sga.seletor');
 
-// Redirect da raiz - DEVE VIR POR ÚLTIMO
-Route::redirect('/', '/sga');
+/* Redirect da raiz - DEVE VIR POR ÚLTIMO
+Route::redirect('/', '/sga');*/
+
+
+// SÓ PRA IMPORTAR O ARQUIVO DE DESPESAS
+
+//Route::get('/importar-despesas', [ImportacaoDespesasController::class, 'importar']);
+
+
+// RELATÓRIO GERENCIAL DE MARGEM
+Route::get('/relatorios/gerencial/margem', [RelatorioController::class, 'gerencialMargem'])
+     ->name('relatorios.gerencial.margem');
+
+
+   //  chat suporte  inteligente
+
+Route::post('/chat-suporte', [ChatSuporteController::class, 'perguntar'])->name('chat.suporte');
+
+
+// duracao do gás pelo cliente
+
+Route::resource('duracao', ClienteProdutoDuracaoController::class);
+
+Route::get('relatorio/gas', [RelatorioGasController::class, 'index'])->name('relatorio.gas');
+Route::get('relatorio/gas/excel', [RelatorioGasController::class, 'exportarExcel'])->name('relatorio.gas.excel');
+
+// ROTAS DO MANUAL
+Route::get('/manual', function () {
+    return view('manual.index');
+})->name('manual.index');
+
+
+
+Route::get('/manual', function () {
+    return view('manual.index');
+});
+
+
+Route::redirect('/', '/login');
+
+
+// TELAS DE PERMISSAO DE USUÁRIOS
+
+Route::get('/perfis/{perfil}/permissoes', [PerfilController::class, 'permissoes'])
+    ->middleware(['auth'])
+    ->name('perfis.permissoes');
+
+Route::post('/perfis/{perfil}/permissoes', [PerfilController::class, 'salvarPermissoes'])
+    ->middleware(['auth']);
+
+   
+
+Route::get('/perfis/administrador', [PerfilController::class, 'administrador'])->name('perfis.administrador');
+Route::get('/perfis/gerente', [PerfilController::class, 'gerente'])->name('perfis.gerente');
+Route::get('/perfis/operacional', [PerfilController::class, 'operacional'])->name('perfis.operacional');
+Route::get('/perfis/financeiro', [PerfilController::class, 'financeiro'])->name('perfis.financeiro');
+
+    // ROTAS DO BACKUP DO SISTEMA 
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
+    Route::post('/backups/gerar', [BackupController::class, 'gerar'])->name('backups.gerar');
+    Route::get('/backups/download/{id}', [BackupController::class, 'download'])->name('backups.download');
+Route::post('/backups/restaurar/{id}', [BackupController::class, 'restaurar'])->name('backups.restaurar');
+
+});
+
+// rotas do relatóro contas a pagar
+Route::get('/relatorio-contas-a-pagar/exportar', [ContasAPagarController::class, 'exportarExcel'])
+    ->name('contas-a-pagar.exportar');
+
+
+//  CONTROLE DE VASILHAMES - GÁS
+Route::resource('controle-vasilhames', ControleVasilhameController::class);
+
+
+// tela do vale gás
+Route::prefix('vale-gas')->name('vale-gas.')->group(function () {
+    Route::get('/', [ValeGasController::class, 'index'])->name('index');
+    Route::get('/novo', [ValeGasController::class, 'create'])->name('create');
+    Route::post('/', [ValeGasController::class, 'store'])->name('store');
+    Route::get('/{id}', [ValeGasController::class, 'show'])->name('show');
+    Route::get('/{id}/editar', [ValeGasController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ValeGasController::class, 'update'])->name('update');
+    Route::post('/{id}/cancelar', [ValeGasController::class, 'cancelar'])->name('cancelar');
+    Route::post('/{id}/iniciar-retirada', [ValeGasController::class, 'iniciarRetirada'])->name('iniciar-retirada');
+
+});
+
+
+// DASHBOARD EMISSÃO 
+Route::get('/dashboard-gerencial-emissao', [DashboardEmissaoController::class, 'index'])->name('dashboard.emissao');
+
+// DASHBOARD EMISSÃO  GÁS E ÁGUA  INTELIGENTE RELATÓRIO
+
+Route::get('/dashboard/emissao/gas', [DashboardEmissaoInteligenteController::class, 'gas'])
+    ->name('dashboard.emissao.gas');
+
+Route::get('/dashboard/emissao/agua', [DashboardEmissaoInteligenteController::class, 'agua'])
+    ->name('dashboard.emissao.agua');
+
+
+    
+// DASHBOARD FINANCEIRO INTELIGENTE -  RELATÓRIO
+
+
+Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'index'])
+    ->name('dashboard.financeiro');
+
+// IMPORTACAO DE DESPESAS PELO EXCEL PARA O SISTEMA
+
+Route::middleware(['auth'])->prefix('financeiro/contas-a-pagar')->group(function () {
+   Route::get('/importar-despesas', [ImportacaoDespesaController::class, 'index'])
+       ->name('contas-pagar.importacao.index');
+
+   Route::post('/importar-despesas', [ImportacaoDespesaController::class, 'importar'])
+        ->name('contas-pagar.importacao.importar');
+});  
+
+// RELATÓRIO POR EMISSAO AGRUPADO POR DATA
+Route::get('/relatorio-vendas-emissao', [RelatorioVendasEmissaoController::class, 'index'])
+    ->name('relatorio.vendas-emissao');
+
+Route::get('/relatorio-vendas-emissao/exportar', [RelatorioVendasEmissaoController::class, 'exportar'])
+    ->name('relatorio.vendas-emissao.exportar');
+
+
+// CONTROLE DE VASILHAME POR CLIENTE
+
+
+Route::prefix('vasilhame-emprestimos')->name('vasilhame-emprestimos.')->group(function () {
+    Route::get('/',             [VasilhameEmprestimoController::class, 'index'])              ->name('index');
+    Route::post('/',            [VasilhameEmprestimoController::class, 'store'])              ->name('store');
+    Route::patch('/{id}/devolver', [VasilhameEmprestimoController::class, 'registrarDevolucao'])->name('devolver');
+    Route::delete('/{id}',      [VasilhameEmprestimoController::class, 'destroy'])            ->name('destroy');
+});
+
+
+// RELATORIO POR NATUREZA financeira
+
+
+
+Route::get('/relatorios/natureza-financeira', [RelatorioNaturezaFinanceiraController::class, 'index'])
+    ->name('relatorios.natureza-financeira');
+
+
+   //  cadastrar natureza financeira
+
+
+Route::resource('naturezas-financeiras', NaturezaFinanceiraController::class);
+

@@ -12,7 +12,7 @@ class FornecedorController extends Controller
      */
     public function index()
     {
-        $fornecedores = Fornecedor::all();
+        $fornecedores = Fornecedor::orderby('nome', 'asc')->get();
         return view('fornecedores.index', compact('fornecedores'));
     }
 

@@ -25,6 +25,8 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
+
+
     protected function schedule(Schedule $schedule)
     {
         // Comando para atualizar o status das contas a pagar diariamente
@@ -33,6 +35,7 @@ class Kernel extends ConsoleKernel
       // Agendar para rodar a cada minuto
       \Log::info('Agendando o comando de atualização de contas a receber.');
       $schedule->command('contas_a_receber:atualizar-status')->everyMinute();
+      $schedule->command('backup:diario')->dailyAt('02:00');
     }
 
     /**

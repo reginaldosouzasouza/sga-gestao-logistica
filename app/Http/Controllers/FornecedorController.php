@@ -4,26 +4,39 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Fornecedor;
+use App\Models\NaturezaFinanceira;
 
 class FornecedorController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $fornecedores = Fornecedor::all();
-       
-        return view('fornecedores.index', compact('fornecedores'));
-    }
+        public function index()
+        {
+            $fornecedores = Fornecedor::with('naturezaFinanceira')
+                ->orderBy('nome', 'asc')
+                ->get();
+
+            return view('fornecedores.index', [
+                'fornecedores' => $fornecedores,
+                'totalfornecedores' => $fornecedores->count()
+            ]);
+        }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('fornecedores.create');
+
+        $naturezas = NaturezaFinanceira::where('ativo', 1)
+            ->orderBy('nome')
+            ->get();
+
+        return view('fornecedores.create', compact('naturezas'));
+       
     }
+
     
     public function store(Request $request)
     {
@@ -38,6 +51,7 @@ class FornecedorController extends Controller
             'cidade' => 'nullable|max:50',
             'email' => 'nullable|email|max:255',
             'observacao' => 'nullable|max:255',
+            'natureza_financeira' => 'nullable|max:255',
         ], [
             'cnpj.unique' => 'Este CNPJ já está cadastrado. Verifique a lista de fornecedores.'    
         ]);
@@ -73,8 +87,13 @@ class FornecedorController extends Controller
     public function edit($id)
     {
         $fornecedor = Fornecedor::findOrFail($id);
-        return view('fornecedores.edit', compact('fornecedor'));
-    }
+       
+        $naturezas = NaturezaFinanceira::where('ativo', 1)
+                ->orderBy('nome')
+                ->get();
+
+        return view('fornecedores.edit', compact('fornecedor', 'naturezas'));
+}
 
     /**
      * Update the specified resource in storage.

@@ -27,6 +27,8 @@ class Compra extends Model
         'data_pagamento',  
         'status', 
         'forma_pagamento_id',
+        'parcela',
+        'total_parcelas'
     ];
 
 
@@ -41,6 +43,11 @@ class Compra extends Model
     public function itensDeCompras()
 {
     return $this->hasMany(ItensDeCompras::class, 'compra_id');
+}
+
+public function contasAPagar()
+{
+    return $this->hasMany(\App\Models\ContasAPagar::class, 'compra_id');
 }
 
 }

@@ -72,9 +72,9 @@ return [
 
     'padaria' => [
         'driver' => 'mysql',
-        'host' => env('PADARIA_DB_HOST', '127.0.0.1'),
+        'host' => env('DB_HOST', '127.0.0.1'),
         'port' => env('PADARIA_DB_PORT', '3306'),
-        'database' => env('PADARIA_DB_DATABASE', 'padaria'),
+        'database' => env('PADARIA_DB_DATABASE', 'marigas'),
         'username' => env('PADARIA_DB_USERNAME', 'root'),
         'password' => env('PADARIA_DB_PASSWORD', ''),
         'unix_socket' => env('DB_SOCKET', ''),

@@ -24,25 +24,26 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'usuario'  => 'required|string',
-            'password' => 'required'
+   public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'usuario'  => 'required|string',
+        'password' => 'required'
+    ]);
+
+    if (!Auth::attempt($credentials)) {
+        return back()->withErrors([
+            'login' => 'Usuário ou senha inválidos.'
         ]);
-
-        $user = User::where('usuario', $credentials['usuario'])->first();
-
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return back()->withErrors(['login' => 'Usuário ou senha inválidos.']);
-        }
-
-        Auth::attempt(['usuario' => $user->usuario, 'password' => $credentials['password']]);
-        $request->session()->regenerate();
-
-        // 👉 PÓS-LOGIN: volta para o que tentou acessar ou para /sga
-        return redirect()->intended(route('sga.seletor'));
     }
+
+    $request->session()->regenerate();
+
+    return redirect()->route('sga.seletor');
+}
+
+// ← REMOVA ou comente o método authenticated() inteiro
+// protected function authenticated($request, $user) { ... }
 
     public function logout(Request $request)
     {
@@ -52,16 +53,7 @@ class LoginController extends Controller
         return redirect()->route('login');
     }
 
-    // Redireciono padrão (fallback)
-protected $redirectTo = '/modulos';
+    
 
-// Redireciono dinâmico por perfil
-protected function authenticated($request, $user)
-{
-    if ($user->tipo_usuario === 'master') {
-        return redirect()->route('modulos.index');
-    }
-    return redirect()->route('menu.index');
-}
 
 }

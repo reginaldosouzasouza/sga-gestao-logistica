@@ -1,0 +1,505 @@
+/* ═══════════════════════════════════════════════
+   relatorio-compras.css
+   Tema: Dark — Plus Jakarta Sans + JetBrains Mono
+═══════════════════════════════════════════════ */
+
+/* ── Google Fonts ───────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* ── Variáveis ──────────────────────────────── */
+:root {
+    --c-bg:           #0f1117;
+    --c-surface:      #181c27;
+    --c-surface2:     #1e2333;
+    --c-border:       rgba(255,255,255,.07);
+    --c-border-h:     rgba(255,255,255,.14);
+    --c-text:         #e8eaf0;
+    --c-muted:        #6b7280;
+    --c-muted2:       #4b5563;
+    --c-accent:       #6366f1;
+    --c-accent-glow:  rgba(99,102,241,.25);
+    --c-green:        #10b981;
+    --c-green-bg:     rgba(16,185,129,.12);
+    --c-red:          #f87171;
+    --c-red-bg:       rgba(248,113,113,.12);
+    --c-yellow:       #fbbf24;
+    --c-yellow-bg:    rgba(251,191,36,.12);
+    --c-blue:         #60a5fa;
+    --c-blue-bg:      rgba(96,165,250,.12);
+    --c-violet:       #a78bfa;
+    --c-violet-bg:    rgba(167,139,250,.12);
+    --radius:         12px;
+    --radius-sm:      8px;
+    --font:           'Plus Jakarta Sans', sans-serif;
+    --font-mono:      'JetBrains Mono', monospace;
+    --shadow:         0 4px 24px rgba(0,0,0,.4);
+}
+
+/* ── Reset básico ───────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Página ─────────────────────────────────── */
+.rc-page {
+    font-family: var(--font);
+    background: var(--c-bg);
+    min-height: 100vh;
+    padding: 2rem 2.5rem 4rem;
+    color: var(--c-text);
+    animation: rcFadeIn .35s ease;
+}
+@keyframes rcFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Topo ───────────────────────────────────── */
+.rc-topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.rc-breadcrumb {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--c-muted);
+    margin-bottom: .4rem;
+}
+.rc-breadcrumb span { color: var(--c-accent); }
+.rc-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--c-text);
+    letter-spacing: -.03em;
+    line-height: 1;
+}
+.rc-title em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--c-accent) 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.rc-actions { display: flex; gap: .6rem; }
+
+/* ── Botões ─────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .55rem 1.1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .18s;
+    border: none;
+    white-space: nowrap;
+}
+.btn-ghost {
+    background: var(--c-surface2);
+    color: var(--c-text);
+    border: 1px solid var(--c-border);
+}
+.btn-ghost:hover {
+    background: var(--c-surface);
+    border-color: var(--c-border-h);
+    color: var(--c-text);
+}
+.btn-accent {
+    background: var(--c-accent);
+    color: #fff;
+    box-shadow: 0 0 20px var(--c-accent-glow);
+}
+.btn-accent:hover {
+    background: #4f52e0;
+    box-shadow: 0 0 30px var(--c-accent-glow);
+    transform: translateY(-1px);
+}
+.btn-danger-ghost {
+    background: transparent;
+    color: var(--c-muted);
+    border: 1px solid var(--c-border);
+}
+.btn-danger-ghost:hover {
+    color: var(--c-red);
+    border-color: var(--c-red);
+    background: var(--c-red-bg);
+}
+
+/* ── Cards de totais ────────────────────────── */
+.rc-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+.rc-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 1.35rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s;
+}
+.rc-card:hover { border-color: var(--c-border-h); }
+.rc-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: var(--card-accent, var(--c-accent));
+}
+.rc-card--total { --card-accent: linear-gradient(90deg, var(--c-accent), #818cf8); }
+.rc-card--geral { --card-accent: var(--c-blue); }
+.rc-card--pago  { --card-accent: var(--c-green); }
+.rc-card--pend  { --card-accent: var(--c-red); }
+.rc-card__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .9rem;
+}
+.rc-card--total .rc-card__icon { background: var(--c-violet-bg); color: var(--c-violet); }
+.rc-card--geral .rc-card__icon { background: var(--c-blue-bg);   color: var(--c-blue); }
+.rc-card--pago  .rc-card__icon { background: var(--c-green-bg);  color: var(--c-green); }
+.rc-card--pend  .rc-card__icon { background: var(--c-red-bg);    color: var(--c-red); }
+.rc-card__label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--c-muted);
+    margin-bottom: .3rem;
+}
+.rc-card__value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--c-text);
+    font-family: var(--font-mono);
+    letter-spacing: -.02em;
+}
+.rc-card--pago .rc-card__value { color: var(--c-green); }
+.rc-card--pend .rc-card__value { color: var(--c-red); }
+
+/* ── Painel de filtros ──────────────────────── */
+.rc-filter-panel {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    margin-bottom: 1.75rem;
+    overflow: hidden;
+    transition: border-color .2s;
+}
+.rc-filter-panel:focus-within { border-color: var(--c-border-h); }
+
+.rc-filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s;
+}
+.rc-filter-header.open { border-bottom-color: var(--c-border); }
+.rc-filter-header-left {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: .82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--c-muted);
+}
+.rc-filter-header-left svg { color: var(--c-accent); }
+.rc-filter-chevron {
+    color: var(--c-muted);
+    transition: transform .22s;
+}
+.rc-filter-chevron.open { transform: rotate(180deg); }
+
+.rc-filter-body {
+    padding: 1.75rem 1.5rem;
+    display: grid;
+   grid-template-columns: repeat(3, 1fr) 1.2fr;  /* 3 períodos + fornecedor */
+    gap: 1.5rem 2rem;                               /* mais espaço horizontal */
+}
+.rc-filter-body.hidden { display: none; }
+
+.rc-field { display: flex; flex-direction: column; gap: .5rem; }
+.rc-field label {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--c-muted);
+}
+.rc-field input,
+.rc-field select {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: .65rem .9rem;
+    font-size: .85rem;
+    font-family: var(--font);
+    color: var(--c-text);
+    transition: border-color .15s, box-shadow .15s;
+    width: 100%;
+    height: 42px;
+}
+.rc-field input::placeholder { color: var(--c-muted2); }
+.rc-field input:focus,
+.rc-field select:focus {
+    outline: none;
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px var(--c-accent-glow);
+}
+.rc-field select option { background: var(--c-surface2); }
+
+/* ── Input date: abre calendário ao clicar em qualquer área ── */
+.rc-field input[type="date"] {
+    cursor: pointer;
+    position: relative;
+}
+.rc-field input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ── Par de datas (De / Até) ────────────────── */
+.rc-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+}
+.rc-range-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+}
+.rc-range-separator span {
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--c-muted2);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    flex-shrink: 0;
+}
+
+.rc-filter-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--c-border);
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+}
+
+/* ── Tabela ─────────────────────────────────── */
+.rc-table-wrap {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.rc-table-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.rc-table-title {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--c-muted);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.rc-table-count {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    background: var(--c-accent);
+    color: #fff;
+    padding: .15rem .55rem;
+    border-radius: 99px;
+    font-weight: 600;
+}
+
+.rc-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.rc-table th {
+    padding: .8rem 1.1rem;
+    text-align: left;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--c-muted);
+    border-bottom: 1px solid var(--c-border);
+    background: var(--c-surface2);
+    white-space: nowrap;
+}
+.rc-table th:first-child { padding-left: 1.5rem; }
+.rc-table th:last-child  { padding-right: 1.5rem; }
+.rc-table td {
+    padding: .85rem 1.1rem;
+    border-bottom: 1px solid var(--c-border);
+    color: var(--c-text);
+    vertical-align: middle;
+}
+.rc-table td:first-child { padding-left: 1.5rem; }
+.rc-table td:last-child  { padding-right: 1.5rem; }
+.rc-table tr:last-child td { border-bottom: none; }
+.rc-table tbody tr { transition: background .12s; }
+.rc-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Células especiais */
+.cell-fornecedor-nome {
+    font-weight: 700;
+    color: var(--c-text);
+    font-size: .85rem;
+}
+.cell-fornecedor-cnpj {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: var(--c-muted);
+    margin-top: .15rem;
+}
+.cell-valor {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--c-text);
+    white-space: nowrap;
+}
+.cell-data {
+    font-family: var(--font-mono);
+    font-size: .8rem;
+    color: var(--c-muted);
+    white-space: nowrap;
+}
+.cell-data strong { color: var(--c-text); font-weight: 600; }
+.cell-desc {
+    color: var(--c-muted);
+    font-size: .82rem;
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Badges ─────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .7rem;
+    border-radius: 99px;
+    font-size: .72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+.badge-pago     { background: var(--c-green-bg);  color: var(--c-green); }
+.badge-pendente { background: var(--c-red-bg);    color: var(--c-red); }
+.badge-dinheiro { background: var(--c-green-bg);  color: var(--c-green); }
+.badge-pix      { background: var(--c-blue-bg);   color: var(--c-blue); }
+.badge-prazo    { background: var(--c-yellow-bg); color: var(--c-yellow); }
+.badge-misto    { background: rgba(251,146,60,.12);  color: #fb923c; }
+.badge-fonte    { background: var(--c-violet-bg); color: var(--c-violet); font-size: .68rem; }
+
+/* ── Rodapé da tabela ───────────────────────── */
+.rc-table tfoot td {
+    padding: .9rem 1.1rem;
+    background: var(--c-surface2);
+    border-top: 2px solid var(--c-border);
+    font-weight: 800;
+    font-family: var(--font-mono);
+    font-size: .9rem;
+    color: var(--c-text);
+}
+.rc-table tfoot td:first-child { padding-left: 1.5rem; }
+.rc-table tfoot .tfoot-label {
+    font-family: var(--font);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--c-muted);
+    display: block;
+    margin-bottom: .2rem;
+}
+
+/* ── Estado vazio ───────────────────────────── */
+.rc-empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--c-muted);
+}
+.rc-empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius);
+    background: var(--c-surface2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--c-muted2);
+}
+.rc-empty h3 { font-size: 1rem; font-weight: 700; color: var(--c-text); margin-bottom: .4rem; }
+.rc-empty p  { font-size: .85rem; }
+
+/* ── Scrollbar ──────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--c-bg); }
+::-webkit-scrollbar-thumb { background: var(--c-surface2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-muted2); }
+
+/* ── Print ──────────────────────────────────── */
+@media print {
+    .rc-filter-panel,
+    .rc-actions { display: none !important; }
+    .rc-page { background: #fff; color: #000; padding: 0; }
+    .rc-table-wrap,
+    .rc-card { box-shadow: none; border-color: #ddd; background: #fff; }
+    .rc-card__value,
+    .rc-title,
+    .rc-table td { color: #000 !important; }
+    .badge { border: 1px solid currentColor; }
+}

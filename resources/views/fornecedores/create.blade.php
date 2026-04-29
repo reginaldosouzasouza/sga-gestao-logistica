@@ -62,6 +62,17 @@
             <textarea class="form-control" id="observacao" name="observacao" rows="3">{{ $observacao ?? '' }}</textarea>
         </div>
 
+        <div class="form-group">
+            <label>Natureza Financeira</label>
+            <select name="natureza_financeira" class="form-control" required>
+                <option value="estoque">Estoque (CMV)</option>
+                <option value="operacional">Operacional</option>
+                <option value="administrativa">Administrativa</option>
+                <option value="financeiro">Financeiro</option>
+                <option value="pessoal">Pessoal / Retirada</option>
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-success">Salvar</button>
     </form>
 </div>

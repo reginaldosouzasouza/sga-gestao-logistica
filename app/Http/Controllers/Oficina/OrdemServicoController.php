@@ -53,9 +53,9 @@ class OrdemServicoController extends Controller
         return view('ordens-servico.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    /*
+      Store a newly created resource in storage.
+     
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -73,6 +73,10 @@ class OrdemServicoController extends Controller
         return redirect()->route('ordens-servico.index')
             ->with('success', 'Ordem de serviço criada com sucesso!');
     }
+     */
+
+
+
 
     /**
      * Display the specified resource.
@@ -92,10 +96,13 @@ class OrdemServicoController extends Controller
         return view('ordens-servico.edit', compact('ordem'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+
+
+
+   
+
+
+   /* public function update(Request $request, string $id)
     {
         $validated = $request->validate([
             'data_lancamento' => 'required|date',
@@ -112,7 +119,109 @@ class OrdemServicoController extends Controller
 
         return redirect()->route('ordens-servico.index')
             ->with('success', 'Ordem de serviço atualizada com sucesso!');
+    }*/
+
+
+ 
+
+    /**
+     * Converte valor brasileiro (R$ 1.500,00) para float (1500.00)
+     */
+    private function converterValorBrasileiro($valor)
+    {
+        if (empty($valor)) {
+            return 0;
+        }
+        
+        // Remove "R$" e espaços
+        $valor = str_replace(['R$', ' '], '', $valor);
+        
+        // Remove pontos (separador de milhar)
+        $valor = str_replace('.', '', $valor);
+        
+        // Substitui vírgula (separador decimal) por ponto
+        $valor = str_replace(',', '.', $valor);
+        
+        return (float) $valor;
     }
+
+    public function store(Request $request)
+
+    {
+
+         abort(500, 'ENTROU NO STORE DA ORDEM DE SERVIÇO');
+
+      
+
+        // Converte o valor antes da validação
+        $request->merge([
+            'valor' => $this->converterValorBrasileiro($request->valor) / 100
+        ]);
+
+        $validated = $request->validate([
+            'data_lancamento' => 'required|date',
+            'cliente' => 'required|string|max:255',
+            'placa' => 'required|string|max:20',
+            'servico_realizado' => 'required|string',
+            'data_prevista_entrega' => 'required|date',
+            'valor' => 'required|numeric|min:0',
+            'status' => 'required|string',
+        ]);
+
+        
+            // 3️⃣ DEBUG AQUI (ANTES DE GRAVAR)
+        dd([
+            'valor_request'   => $request->input('valor'),
+            'valor_validated' => $validated['valor'],
+            'tipo'            => gettype($validated['valor']),
+        ]);
+       
+       
+       
+       
+       
+        OrdemServico::create($validated);
+
+        return redirect()->route('ordens-servico.index')
+            ->with('success', 'Ordem de serviço criada com sucesso!');
+    }
+
+    public function update(Request $request, string $id)
+    {
+        // Converte o valor antes da validação
+        $request->merge([
+            'valor' => $this->converterValorBrasileiro($request->valor) / 100
+        ]);
+
+        $validated = $request->validate([
+            'data_lancamento' => 'required|date',
+            'cliente' => 'required|string|max:255',
+            'placa' => 'required|string|max:20',
+            'servico_realizado' => 'required|string',
+            'data_prevista_entrega' => 'required|date',
+            'valor' => 'required|numeric|min:0',
+            'status' => 'required|string',
+        ]);
+
+        $ordem = OrdemServico::findOrFail($id);
+        $ordem->update($validated);
+
+        return redirect()->route('ordens-servico.index')
+            ->with('success', 'Ordem de serviço atualizada com sucesso!');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Remove the specified resource from storage.

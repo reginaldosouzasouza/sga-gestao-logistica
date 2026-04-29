@@ -1,0 +1,112 @@
+/* ===== Layout Geral ===== */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* ===== Card do Filtro ===== */
+
+form {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* GRID ORGANIZADO */
+form .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* Cada bloco */
+form .row > div {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+form label {
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+/* Inputs e selects */
+form input,
+form select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    transition: 0.2s;
+}
+
+form input:focus,
+form select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Botão */
+button {
+    background: #007bff;
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* ===== Tabela ===== */
+
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+table th {
+    background: #007bff;
+    color: white;
+    text-align: left;
+    padding: 12px;
+}
+
+table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Zebra */
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Hover linha inteira */
+table tbody tr:hover {
+    background-color: #d1f2eb;
+    transition: 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.total h3 {
+    color:rgb(12, 12, 12);
+}

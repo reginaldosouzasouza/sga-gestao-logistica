@@ -47,6 +47,28 @@
             <textarea class="form-control" id="observacao" name="observacao" rows="3">{{ $fornecedor->observacao }}</textarea>
         </div>
 
+        <div class="form-group">
+          
+            <label for="natureza_financeira_id" class="form-label">Natureza Financeira</label>
+
+            <select 
+                name="natureza_financeira_id" 
+                id="natureza_financeira_id" 
+                class="form-control"
+            >
+                <option value="">Selecione...</option>
+
+                @foreach ($naturezas as $natureza)
+                    <option value="{{ $natureza->id }}"
+                        {{ old('natureza_financeira_id', $fornecedor->natureza_financeira_id ?? '') == $natureza->id ? 'selected' : '' }}>
+                        {{ $natureza->nome }}
+                    </option>
+                @endforeach
+            </select>
+
+  
+        </div>
+
         <button type="submit" class="btn-atualizar">Atualizar</button>
     </form>
 </div>

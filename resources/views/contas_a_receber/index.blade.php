@@ -9,7 +9,7 @@
 <body>
 
 <div class="container">
-  
+
     <h1>Relação de Contas a Receber</h1>
 
     <!-- Exibição de Mensagens de Sucesso ou Informações -->
@@ -25,21 +25,14 @@
         </div>
     @endif
 
-      <!-- Campo para Atualizar o Status Contas a Receber de "pendente para atrasado'   -->
-
+    <!-- Atualizar status pendente -> atrasado -->
     <form action="{{ route('contas_a_receber.atualizar-status') }}" method="POST" style="display: inline;">
-    @csrf
-        <button type="submit" class="botao-status" title="Atualizar Status de Pendente para Atrasado com vencimentos anterior à data atual">
+        @csrf
+        <button type="submit" class="botao-status"
+                title="Atualizar Status de Pendente para Atrasado com vencimentos anterior à data atual">
             Atualizar Status
         </button>
     </form>
-
-
-   
-
-   
-
-    
 
     <!-- Formulário de Filtro -->
     <form method="GET" action="{{ route('contas_a_receber.index') }}" class="form-filtro mb-3">
@@ -53,7 +46,7 @@
             <select name="status" class="form-control">
                 <option value="">Todos</option>
                 <option value="pendente" {{ request('status') == 'pendente' ? 'selected' : '' }}>Pendente</option>
-                <option value="Recebido" {{ request('status') == 'Recebido' ? 'selected' : '' }}>Recebido</option>
+                <option value="recebido" {{ request('status') == 'recebido' ? 'selected' : '' }}>Recebido</option>
                 <option value="atrasado" {{ request('status') == 'atrasado' ? 'selected' : '' }}>Atrasado</option>
             </select>
         </div>
@@ -63,7 +56,7 @@
             <select name="forma_pagamento_id" class="form-control">
                 <option value="">Todas</option>
                 @foreach($formasDePagamento as $forma)
-                    <option value="{{ $forma->id }}" {{ request('forma_pagamento_id') == $forma->id ? 'selected' : '' }}>
+                    <option value="{{ $forma->id }}" {{ (string)request('forma_pagamento_id') === (string)$forma->id ? 'selected' : '' }}>
                         {{ $forma->nome }}
                     </option>
                 @endforeach
@@ -74,16 +67,11 @@
             <label for="data_venda_inicial"><strong>Data da Venda Inicial:</strong></label>
             <input type="date" name="data_venda_inicial" value="{{ request('data_venda_inicial') }}" class="form-control">
         </div>
+
         <div class="form-group">
             <label for="data_venda_final"><strong>Data da Venda Final:</strong></label>
             <input type="date" name="data_venda_final" value="{{ request('data_venda_final') }}" class="form-control">
         </div>
-       
-
-      <!--  <div class="form-group">
-            <label for="data_venda"><strong>Data de Venda:</strong></label>
-            <input type="date" name="data_venda" value="{{ request('data_venda') }}" class="form-control">
-        </div>-->
 
         <div class="form-group">
             <label for="data_vencimento"><strong>Data de Vencimento:</strong></label>
@@ -96,41 +84,45 @@
         </div>
 
         <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
+
+        <!-- (Opcional) Botão limpar filtros -->
+        <a href="{{ route('contas_a_receber.index') }}" class="btn btn-secondary mt-2">Limpar</a>
     </form>
 
-    
-       <!-- Exibição de Total de Registros e Faturas -->
-        <p>Total de Registros: <strong>{{ $totalContas }}</strong></p>
-        <p>Total de Faturas: <strong>{{ number_format($valorTotalFaturas, 2, ',', '.') }}</strong></p>
-
+    <!-- Totais -->
+    <p>Total de Registros: <strong>{{ $totalContas }}</strong></p>
+    <p>Total de Faturas: <strong>{{ number_format($valorTotalFaturas, 2, ',', '.') }}</strong></p>
 
     <a href="{{ route('contas_a_receber.create') }}" class="btn btn-success mb-3">Adicionar Nova Conta</a>
 
     <table class="table table-striped">
         <thead>
-            <tr>
-                <th>Cliente</th>
-                <th>Forma de Pagamento</th>
-                <th>Valor</th>
-                <th>Data da Venda</th>
-                <th>Data de Vencimento</th>
-                <th>Data de Recebimento</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
+        <tr>
+            <th>Cliente</th>
+            <th>Forma de Pagamento</th>
+            <th>Valor</th>
+            <th>Data da Venda</th>
+            <th>Data de Vencimento</th>
+            <th>Data de Recebimento</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
         </thead>
+
         <tbody>
-            @foreach($contasAReceber as $conta)
+        @foreach($contasAReceber as $conta)
             <tr class="
-                @if($conta->status == 'pendente') bg-warning 
-                @elseif($conta->status == 'recebido') bg-success 
-                @elseif($conta->status == 'atrasado') bg-danger 
+                @if($conta->status == 'pendente') bg-warning
+                @elseif($conta->status == 'recebido') bg-success
+                @elseif($conta->status == 'atrasado') bg-danger
                 @endif">
+
                 <td>{{ $conta->cliente->nome }}</td>
                 <td>{{ $conta->formaPagamento->nome }}</td>
                 <td>{{ number_format($conta->valor, 2, ',', '.') }}</td>
                 <td>{{ \Carbon\Carbon::parse($conta->data_venda)->format('d/m/Y') }}</td>
                 <td>{{ \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y') }}</td>
+
                 <td>
                     @if ($conta->data_recebimento)
                         {{ \Carbon\Carbon::parse($conta->data_recebimento)->format('d/m/Y') }}
@@ -139,7 +131,7 @@
                     @endif
                 </td>
 
-               <td>
+                <td>
                     @if($conta->status == 'pendente')
                         <span style="color: white; font-weight: bold;">Pendente</span>
                     @elseif($conta->status == 'recebido')
@@ -152,15 +144,23 @@
                 </td>
 
                 <td>
-                    <a href="{{ route('contas_a_receber.edit', $conta->id) }}" class="btn btn-primary">Editar</a>
-                    <form action="{{ route('contas_a_receber.destroy', $conta->id) }}" method="POST" style="display:inline;">
+                    <!-- EDITAR mantendo filtros -->
+                    <a href="{{ route('contas_a_receber.edit', $conta->id) . '?' . http_build_query(request()->query()) }}"
+                       class="btn btn-primary">
+                        Editar
+                    </a>
+
+                    <!-- EXCLUIR mantendo filtros -->
+                    <form action="{{ route('contas_a_receber.destroy', $conta->id) . '?' . http_build_query(request()->query()) }}"
+                          method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Excluir</button>
                     </form>
                 </td>
+
             </tr>
-            @endforeach
+        @endforeach
         </tbody>
     </table>
 </div>

@@ -20,6 +20,12 @@
         @csrf
         @method('PUT')
 
+
+        <input type="hidden"
+       name="return_url"
+       value="{{ url()->previous() }}">
+
+
         <div class="form-group">
             <label for="fornecedor_id">Fornecedor</label>
             <select name="fornecedor_id" class="form-control" required>
