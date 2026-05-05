@@ -1,18 +1,17 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relação de Contas a Receber</title>
+@extends('layouts.app')
+
+@section('title', 'Relação de Contas a Receber')
+
+@section('styles')
     <link rel="stylesheet" href="{{ asset('css/contasareceber_relacao.css') }}">
-</head>
-<body>
+@endsection
+
+@section('content')
 
 <div class="container">
 
     <h1>Relação de Contas a Receber</h1>
 
-    <!-- Exibição de Mensagens de Sucesso ou Informações -->
     @if(session('success'))
         <div class="alert alert-success" style="color: green; font-weight: bold;">
             {{ session('success') }}
@@ -25,7 +24,6 @@
         </div>
     @endif
 
-    <!-- Atualizar status pendente -> atrasado -->
     <form action="{{ route('contas_a_receber.atualizar-status') }}" method="POST" style="display: inline;">
         @csrf
         <button type="submit" class="botao-status"
@@ -34,7 +32,6 @@
         </button>
     </form>
 
-    <!-- Formulário de Filtro -->
     <form method="GET" action="{{ route('contas_a_receber.index') }}" class="form-filtro mb-3">
         <div class="form-group">
             <label for="cliente"><strong>Cliente:</strong></label>
@@ -85,85 +82,92 @@
 
         <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
 
-        <!-- (Opcional) Botão limpar filtros -->
-        <a href="{{ route('contas_a_receber.index') }}" class="btn btn-secondary mt-2">Limpar</a>
+        <a href="{{ route('contas_a_receber.index') }}" class="btn btn-secondary mt-2">
+            Limpar
+        </a>
     </form>
 
-    <!-- Totais -->
     <p>Total de Registros: <strong>{{ $totalContas }}</strong></p>
     <p>Total de Faturas: <strong>{{ number_format($valorTotalFaturas, 2, ',', '.') }}</strong></p>
 
-    <a href="{{ route('contas_a_receber.create') }}" class="btn btn-success mb-3">Adicionar Nova Conta</a>
+    <a href="{{ route('contas_a_receber.create') }}" class="btn btn-success mb-3">
+        Adicionar Nova Conta
+    </a>
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Cliente</th>
-            <th>Forma de Pagamento</th>
-            <th>Valor</th>
-            <th>Data da Venda</th>
-            <th>Data de Vencimento</th>
-            <th>Data de Recebimento</th>
-            <th>Status</th>
-            <th>Ações</th>
-        </tr>
-        </thead>
+    <div class="table-responsive">
+        <table class="table table-striped tabela-contas-receber">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Forma de Pagamento</th>
+                    <th>Valor</th>
+                    <th>Data da Venda</th>
+                    <th>Data de Vencimento</th>
+                    <th>Data de Recebimento</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
 
-        <tbody>
-        @foreach($contasAReceber as $conta)
-            <tr class="
-                @if($conta->status == 'pendente') bg-warning
-                @elseif($conta->status == 'recebido') bg-success
-                @elseif($conta->status == 'atrasado') bg-danger
-                @endif">
+            <tbody>
+                @foreach($contasAReceber as $conta)
+                    <tr class="
+                        @if($conta->status == 'pendente') bg-warning
+                        @elseif($conta->status == 'recebido') bg-success
+                        @elseif($conta->status == 'atrasado') bg-danger
+                        @endif">
 
-                <td>{{ $conta->cliente->nome }}</td>
-                <td>{{ $conta->formaPagamento->nome }}</td>
-                <td>{{ number_format($conta->valor, 2, ',', '.') }}</td>
-                <td>{{ \Carbon\Carbon::parse($conta->data_venda)->format('d/m/Y') }}</td>
-                <td>{{ \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y') }}</td>
+                        <td>{{ $conta->cliente->nome }}</td>
+                        <td>{{ $conta->formaPagamento->nome }}</td>
+                        <td>{{ number_format($conta->valor, 2, ',', '.') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($conta->data_venda)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y') }}</td>
 
-                <td>
-                    @if ($conta->data_recebimento)
-                        {{ \Carbon\Carbon::parse($conta->data_recebimento)->format('d/m/Y') }}
-                    @else
-                        -
-                    @endif
-                </td>
+                        <td>
+                            @if ($conta->data_recebimento)
+                                {{ \Carbon\Carbon::parse($conta->data_recebimento)->format('d/m/Y') }}
+                            @else
+                                -
+                            @endif
+                        </td>
 
-                <td>
-                    @if($conta->status == 'pendente')
-                        <span style="color: white; font-weight: bold;">Pendente</span>
-                    @elseif($conta->status == 'recebido')
-                        <span style="color: black; font-weight: bold;">Recebido</span>
-                    @elseif($conta->status == 'atrasado')
-                        <span style="color: white; font-weight: bold;">Atrasado</span>
-                    @else
-                        {{ ucfirst($conta->status) }}
-                    @endif
-                </td>
+                        <td>
+                            @if($conta->status == 'pendente')
+                                <span style="color: white; font-weight: bold;">Pendente</span>
+                            @elseif($conta->status == 'recebido')
+                                <span style="color: black; font-weight: bold;">Recebido</span>
+                            @elseif($conta->status == 'atrasado')
+                                <span style="color: white; font-weight: bold;">Atrasado</span>
+                            @else
+                                {{ ucfirst($conta->status) }}
+                            @endif
+                        </td>
 
-                <td>
-                    <!-- EDITAR mantendo filtros -->
-                    <a href="{{ route('contas_a_receber.edit', $conta->id) . '?' . http_build_query(request()->query()) }}"
-                       class="btn btn-primary">
-                        Editar
-                    </a>
+                        <td>
+                            <div class="btn-group-acoes">
+                                <a href="{{ route('contas_a_receber.edit', $conta->id) . '?' . http_build_query(request()->query()) }}"
+                                   class="btn btn-primary">
+                                    Editar
+                                </a>
 
-                    <!-- EXCLUIR mantendo filtros -->
-                    <form action="{{ route('contas_a_receber.destroy', $conta->id) . '?' . http_build_query(request()->query()) }}"
-                          method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Excluir</button>
-                    </form>
-                </td>
+                                <form action="{{ route('contas_a_receber.destroy', $conta->id) . '?' . http_build_query(request()->query()) }}"
+                                      method="POST">
+                                    @csrf
+                                    @method('DELETE')
 
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+                                    <button type="submit" class="btn btn-danger">
+                                        Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
 </div>
 
-</body>
-</html>
+@endsection

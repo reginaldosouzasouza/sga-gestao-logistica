@@ -1,10 +1,60 @@
 body {
-    background-color: #fefefe;
+    background-color: #f4f6f9;
     font-family: Arial, sans-serif;
 }
 
-.container {
-     max-width: 1400px; /* Aumente a largura do container */
+.fornecedores-page {
+    width: 100%;
+    padding: 20px 10px;
+}
+
+.card-pesquisa {
+    max-width: 1450px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px 0px #0000001a;
+}
+
+#search {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    text-align: center;
+}
+
+.topo-fornecedores {
+    max-width: 1450px;
+    margin: 0 auto 10px auto;
+}
+
+.btn-cadastrar {
+    background-color: #90ee90;
+    color: #551a8b;
+    padding: 5px 10px;
+    display: inline-block;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 25px;
+    text-decoration: underline;
+}
+
+.btn-cadastrar:hover {
+    background-color: #74df74;
+    color: #3d0f6d;
+}
+
+.total-fornecedores {
+    margin-top: 4px;
+    font-size: 16px;
+    color: #000;
+}
+
+.card-tabela {
+    max-width: 1450px;
     margin: 0 auto;
     padding: 20px;
     background-color: #ffffff;
@@ -12,63 +62,104 @@ body {
     box-shadow: 0px 0px 10px 0px #0000001a;
 }
 
-.table {
-    width: 100%;
-    table-layout: auto; /* Permite que a tabela se ajuste ao conteúdo */
-    white-space: nowrap; /* Impede a quebra de linha dentro das células */
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #343a40;
+    font-size: 32px;
+    font-weight: bold;
 }
 
-thead th {
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabela-fornecedores {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.tabela-fornecedores thead th {
     text-align: left;
     padding: 10px;
     background-color: #f8f9fa;
     border-bottom: 2px solid #dee2e6;
+    color: #000;
+    font-size: 16px;
 }
 
-tbody td {
+.tabela-fornecedores tbody td {
     padding: 10px;
     border-bottom: 1px solid #dee2e6;
-}
-
-.table th, .table td {
-    text-align: left;
-    min-width: 150px; /* Define uma largura mínima para as colunas */
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #343a40;
-}
-
-button {
-    padding: 10px 20px;
+    color: #000;
     font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 5px;
+    vertical-align: middle;
 }
 
-button:hover {
-    background-color: #0056b3;
+.tabela-fornecedores tbody tr {
+    transition: background-color 0.25s ease;
 }
 
-.btn-group {
+.tabela-fornecedores tbody tr:hover {
+    background-color: #eef7ff;
+}
+
+
+
+
+
+.tabela-fornecedores th:nth-child(1),
+.tabela-fornecedores td:nth-child(1) {
+    width: 160px;
+}
+
+.tabela-fornecedores th:nth-child(2),
+.tabela-fornecedores td:nth-child(2) {
+    min-width: 260px;
+}
+
+.tabela-fornecedores th:nth-child(3),
+.tabela-fornecedores td:nth-child(3) {
+    width: 170px;
+}
+
+.tabela-fornecedores th:nth-child(4),
+.tabela-fornecedores td:nth-child(4) {
+    min-width: 280px;
+}
+
+.tabela-fornecedores th:nth-child(5),
+.tabela-fornecedores td:nth-child(5) {
+    width: 160px;
+}
+
+.tabela-fornecedores th:nth-child(6),
+.tabela-fornecedores td:nth-child(6) {
+    width: 140px;
+}
+
+.col-acoes {
+    width: 210px;
+    text-align: center;
+}
+
+.btn-group-acoes {
     display: flex;
-    gap: 10px;
-    justify-content: center; /* Centraliza os botões */
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-consultar {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
+    padding: 6px 10px;
+    border-radius: 4px;
     text-decoration: none;
+    font-size: 15px;
 }
 
 .btn-consultar:hover {
@@ -80,9 +171,11 @@ button:hover {
     background-color: #e42538;
     color: white;
     border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
+    padding: 6px 10px;
+    border-radius: 4px;
     text-decoration: none;
+    font-size: 15px;
+    cursor: pointer;
 }
 
 .btn-excluir:hover {
@@ -90,43 +183,18 @@ button:hover {
     color: white;
 }
 
-.actions a {
-    background-color: #90ee90; /* Cor de fundo verde */
-    padding: 5px 10px; /* Adiciona espaço ao redor do texto */
-    display: inline-block; /* Garante que o fundo só ocupe o espaço do texto */
-    border-radius: 5px; /* Arredonda as bordas para um visual mais suave */
-    font-weight: bold; /* Deixa o texto em negrito */
-    font-size: 25px;
-   
-}     
+@media (max-width: 900px) {
+    .card-pesquisa,
+    .topo-fornecedores,
+    .card-tabela {
+        max-width: 100%;
+    }
 
-.btn-atualizar {
-    background-color: #53e415;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    text-decoration: none;
+    h1 {
+        font-size: 26px;
+    }
+
+    .btn-cadastrar {
+        font-size: 21px;
+    }
 }
-
-.btn-atualizar:hover {
-    background-color: #53e415;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    text-decoration: none;
-}
-
-#search {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    border: 1px solid #ced4da;
-    font-size: 16px;
-    text-align: center;
-}
-
- 
-

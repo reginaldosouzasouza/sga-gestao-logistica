@@ -29,27 +29,31 @@
                 @endforeach
             </select>
         </div>
+        <br>
 
         <div class="form-group">
             <label for="descricao">Descrição</label>
             <input type="text" name="descricao" class="form-control" value="{{ old('descricao') }}" required>
         </div>
-
+        <br>
         <div class="form-group">
             <label for="valor">Valor</label>
             <input type="number" name="valor" class="form-control" value="{{ old('valor') }}" required step="0.01">
         </div>
+          <br>
 
         <div class="form-group">
             <label for="data_venda">Data da Venda</label>
             <input type="date" name="data_venda" id="data_venda" class="form-control" value="{{ old('data_venda', $contaAReceber->data_venda ?? now()->format('Y-m-d')) }}">
         </div>
+        <br>
 
         
         <div class="form-group">
             <label for="data_vencimento">Data de Vencimento</label>
             <input type="date" name="data_vencimento" class="form-control" value="{{ old('data_vencimento') }}" required>
         </div>
+          <br>
 
         
 
@@ -62,6 +66,7 @@
                 @endforeach
             </select>
         </div>
+          
 
         <div class="form-group">
             <label for="prazo">Prazo</label>
@@ -73,12 +78,13 @@
                 @endforeach
             </select>
         </div>
-
+        
 
         <div class="form-group">
             <label for="observacao">Observação</label>
             <textarea name="observacao" class="form-control">{{ old('observacao') }}</textarea>
         </div>
+          <br>
 
         <button type="submit" class="btn btn-success">Salvar</button>
         <a href="{{ route('contas_a_receber.index') }}" class="btn btn-secondary">Cancelar</a>

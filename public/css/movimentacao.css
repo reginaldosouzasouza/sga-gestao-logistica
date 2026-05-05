@@ -134,6 +134,45 @@ h1 {
     background-color: #45a049;
 }
 
+
+
+.search-container form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-container input {
+    max-width: 450px;
+}
+
+.btn-pesquisar {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-pesquisar:hover {
+    background-color: #0056b3;
+}
+
+.btn-limpar {
+    background-color: #6c757d;
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-limpar:hover {
+    background-color: #545b62;
+    color: #fff;
+}
+
 /* Responsividade */
 @media screen and (max-width: 768px) {
     .table, .table tr, .table th, .table td {
@@ -160,6 +199,8 @@ h1 {
         font-weight: bold;
         text-transform: uppercase;
     }
+
+
 
    
 

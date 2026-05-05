@@ -7,9 +7,10 @@ table {
     text-align: left;
 }
 
-th, td {
+th,
+td {
     padding: 12px 15px;
-    border: 1px   solid #000; /* Cor preta */
+    border: 1px solid #000;
     border-collapse: collapse;
 }
 
@@ -26,6 +27,7 @@ td {
 
 tr {
     border-bottom: 2px solid #000;
+    transition: background-color 0.3s ease;
 }
 
 tr:nth-child(even) {
@@ -46,6 +48,7 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Botões padrão */
 .btn {
     padding: 8px 12px;
     background-color: #3498db;
@@ -53,12 +56,16 @@ a:hover {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .btn:hover {
     background-color: #2980b9;
+    color: #fff;
+    text-decoration: none;
 }
 
+/* Botão danger / excluir */
 .btn-danger {
     background-color: #e74c3c;
 }
@@ -67,51 +74,47 @@ a:hover {
     background-color: #c0392b;
 }
 
+/* Botão primary / editar / filtrar */
+.btn-primary {
+    background-color: #3498db;
+}
 
+.btn-primary:hover {
+    background-color: #2980b9;
+}
 
-/* definir as cores de fundo para cada status  */
-
-
+/* Definir as cores de fundo para cada status */
 .bg-warning {
-    background-color: #edc894 !important; /* Cor laranja para pendente */
+    background-color: #edc894 !important;
     color: #030303;
 }
 
 .bg-warning:hover {
-    background-color: #ef9e2c !important; /* Cor laranja para pendente */
-   
+    background-color: #ef9e2c !important;
 }
 
-
-
 .bg-success {
-    background-color: #5cb85c !important; /* Cor verde para pago */
-    color:  #030303;
+    background-color: #5cb85c !important;
+    color: #030303;
 }
 
 .bg-danger {
-    background-color: #ee2d26 !important; /* Cor vermelha para atrasado */
-    color:  #030303;
+    background-color: #ee2d26 !important;
+    color: #030303;
 }
-
-
-tr {
-    transition: background-color 0.3s ease;
-}
-
-
 
 /* Estilo do formulário de filtro */
 .form-filtro {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    align-items: center;
+    align-items: flex-end;
     margin-bottom: 30px;
 }
 
 .form-group {
     flex: 1;
+    min-width: 180px;
 }
 
 .form-control {
@@ -120,19 +123,115 @@ tr {
     margin-top: 5px;
 }
 
-.btn-primary {
-    margin-top: 20px;
+/* Alinhamento dos botões do filtro: Filtrar e Limpar */
+.form-filtro .btn,
+.form-filtro button,
+.form-filtro a {
+    height: 36px;
+    min-width: 70px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    padding: 8px 14px;
+    border-radius: 4px;
+    text-decoration: none;
 }
-/* botao para atualizar status de pedente para atresado com data de vencimento inferior  a data atual*/
-.botao-status {
-    background-color:#36a5f0;
-    font-size: 18px;
-    color:whitesmoke;
 
+/* Botão para atualizar status de pendente para atrasado */
+.botao-status {
+    background-color: #36a5f0;
+    font-size: 18px;
+    color: whitesmoke;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .botao-status:hover {
-
     background-color: #e59c68;
 }
 
+/* Hover suave na tabela de contas a receber */
+.tabela-contas-receber tbody tr {
+    transition: background-color 0.25s ease;
+}
+
+.tabela-contas-receber tbody tr:hover {
+    background-color: #bfdefa !important;
+}
+
+/* Alinhamento dos botões Editar e Excluir */
+.btn-group-acoes {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-group-acoes form {
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-group-acoes .btn,
+.btn-group-acoes a,
+.btn-group-acoes button {
+    height: 36px;
+    min-width: 65px;
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    margin: 0;
+    font-size: 16px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+/* Parágrafos totalizadores */
+p {
+    text-align: center;
+    padding: 5px;
+}
+
+/* Responsividade básica */
+@media (max-width: 900px) {
+    .form-filtro {
+        align-items: stretch;
+    }
+
+    .form-group {
+        min-width: 100%;
+    }
+
+    .form-filtro .btn,
+    .form-filtro button,
+    .form-filtro a {
+        width: 100%;
+    }
+
+    table {
+        font-size: 15px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
+    .btn-group-acoes {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .btn-group-acoes .btn,
+    .btn-group-acoes a,
+    .btn-group-acoes button {
+        width: 100%;
+    }
+}

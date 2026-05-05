@@ -30,36 +30,42 @@
                 @endforeach
             </select>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="descricao">Descrição</label>
             <input type="text" name="descricao" class="form-control"
                    value="{{ $contaAReceber->descricao }}" required>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="valor">Valor</label>
             <input type="number" name="valor" class="form-control"
                    value="{{ $contaAReceber->valor }}" required step="0.01">
         </div>
+          <br>
 
         <div class="form-group">
             <label for="data_venda">Data de Venda</label>
             <input type="date" name="data_venda" class="form-control"
                    value="{{ old('data_venda', $contaAReceber->data_venda ?? now()->format('Y-m-d')) }}">
         </div>
+          <br>
 
         <div class="form-group">
             <label for="data_vencimento">Data de Vencimento</label>
             <input type="date" name="data_vencimento" class="form-control"
                    value="{{ $contaAReceber->data_vencimento }}" required>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="data_recebimento">Data de Recebimento</label>
             <input type="date" name="data_recebimento" class="form-control"
                    value="{{ $contaAReceber->data_recebimento }}">
         </div>
+          <br>
 
         <div class="form-group">
             <label for="forma_pagamento_id">Forma de Pagamento</label>
@@ -83,6 +89,7 @@
                 @endforeach
             </select>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="status">Status</label>
@@ -97,6 +104,7 @@
             <label for="observacao">Observação</label>
             <textarea name="observacao" class="form-control">{{ $contaAReceber->observacao }}</textarea>
         </div>
+          <br>
 
         <button type="submit" class="btn btn-success">Salvar Alterações</button>
 

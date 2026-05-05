@@ -32,7 +32,7 @@
 
         /* ── Layout ─────────────────────────────────────────────────── */
         body {
-         /*   background: linear-gradient(to right, #4b4747d9, #325679);*/
+            background: linear-gradient(to right, #4b4747d9, #325679);
             font-family: Arial, sans-serif;
             min-height: 100vh;
         }

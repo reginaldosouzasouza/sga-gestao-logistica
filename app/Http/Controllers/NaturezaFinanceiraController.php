@@ -22,7 +22,7 @@ class NaturezaFinanceiraController extends Controller
         public function store(Request $request)
     {
         $request->validate([
-            'nome' => 'required|string|max:100|unique:naturezas_financeiras,nome',
+            'nome' => 'required|string|max:250|unique:naturezas_financeiras,nome',
             'ativo' => 'nullable|boolean',
             'exibir_relatorio' => 'nullable|boolean',
             'considerar_total' => 'nullable|boolean',
@@ -52,7 +52,7 @@ class NaturezaFinanceiraController extends Controller
         $natureza = NaturezaFinanceira::findOrFail($id);
 
         $request->validate([
-            'nome' => 'required|string|max:100|unique:naturezas_financeiras,nome,' . $natureza->id,
+            'nome' => 'required|string|max:250|unique:naturezas_financeiras,nome,' . $natureza->id,
             'ativo' => 'nullable|boolean',
             'exibir_relatorio' => 'nullable|boolean',
             'considerar_total' => 'nullable|boolean',

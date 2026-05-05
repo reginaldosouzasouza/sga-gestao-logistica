@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+@extends('layouts.app')
 
-<head>
+@section('title', 'Relação de Contas a Pagar')
 
-    <meta charset="UTF-8">
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/contasapagar_relacao.css') }}">
+@endsection
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Relação de Contas a Pagar</title>
-
-    <link rel="stylesheet"
-          href="{{ asset('css/contasapagar_relacao.css') }}">
-
-</head>
-
-<body>
+@section('content')
 
 <div class="container">
 
@@ -296,5 +287,4 @@ R$ {{ number_format($contasAPagar->sum('valor'), 2, ',', '.') }}
 
 </div>
 
-</body>
-</html>
+@endsection

@@ -176,17 +176,45 @@ class MovimentacaoController extends Controller
         }
     }
 
-    public function index()
-    {
-        $movimentacoes = Movimentacao::orderBy('id', 'desc')->paginate(20);
-        return view('movimentacao.index', compact('movimentacoes'));
-    }
+   public function index(Request $request)
+{
+    $search = $request->input('search');
 
-    public function show($id)
-    {
-        $movimentacao = Movimentacao::with('itens.produto')->findOrFail($id);
-        return view('movimentacao.show', compact('movimentacao'));
-    }
+    $movimentacoes = Movimentacao::with(['formaPagamento'])
+        ->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nome', 'like', '%' . $search . '%')
+                  ->orWhere('cidade', 'like', '%' . $search . '%')
+                  ->orWhere('endereco', 'like', '%' . $search . '%')
+                  ->orWhere('id', 'like', '%' . $search . '%');
+            });
+        })
+        ->orderBy('id', 'desc')
+        ->paginate(20)
+        ->appends($request->query());
+
+    return view('movimentacao.index', compact('movimentacoes', 'search'));
+}
+
+   public function show($id)
+{
+    $movimentacao = Movimentacao::with('itens.produto')->findOrFail($id);
+
+    $historicoCliente = Movimentacao::with('itens.produto')
+        ->where(function ($query) use ($movimentacao) {
+            if (!empty($movimentacao->cliente_id)) {
+                $query->where('cliente_id', $movimentacao->cliente_id);
+            } else {
+                $query->where('nome', $movimentacao->nome);
+            }
+        })
+        ->orderBy('data_coleta', 'desc')
+        ->orderBy('id', 'desc')
+        ->get();
+
+    return view('movimentacao.show', compact('movimentacao', 'historicoCliente'));
+}
+    
 
     public function destroy($id)
     {

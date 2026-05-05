@@ -36,21 +36,25 @@
                 @endforeach
             </select>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="descricao">Descrição</label>
             <input type="text" name="descricao" class="form-control" value="{{ old('descricao', $contaAPagar->descricao) }}" required>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="valor">Valor</label>
             <input type="number" name="valor" class="form-control" value="{{ old('valor', $contaAPagar->valor) }}" required step="0.01">
         </div>
+          <br>
 
         <div class="form-group">
             <label for="data_vencimento">Data de Vencimento</label>
             <input type="date" name="data_vencimento" class="form-control" value="{{ old('data_vencimento', $contaAPagar->data_vencimento) }}" required>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="forma_pagamento_id">Forma de Pagamento</label>
@@ -62,6 +66,7 @@
                 @endforeach
             </select>
         </div>
+          <br>
 
         
         <div class="form-group">
@@ -72,11 +77,13 @@
                 <option value="atrasado" {{ $contaAPagar->status == 'atrasado' ? 'selected' : '' }}>Atrasado</option>
             </select>
         </div>
+          <br>
 
         <div class="form-group">
             <label for="data_pagamento">Data Pagamento</label>
             <input type="date" name="data_pagamento" class="form-control" value="{{ old('data_pagamento', $contaAPagar->data_pagamento) }}">
         </div>
+          <br>
 
         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
         <a href="{{ route('contas_a_pagar.index') }}" class="btn btn-secondary">Cancelar</a>

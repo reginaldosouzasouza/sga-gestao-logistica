@@ -36,13 +36,10 @@
                 @endforeach
                 </select>
             </div>
+              <br>
             
 
 
-        <!--    <div class="col-md-2">
-                <label>Data da Compra:</label>
-                <input type="date" name="data_emissao" class="form-control" value="{{ request('data_emissao') }}">
-            </div>-->
 
               <!-- Adicionando Filtro de Data da Compra (Inicial e Final) -->
             <div class="col-md-2">
@@ -54,6 +51,7 @@
                 <label>Data da Compra Final:</label>
                 <input type="date" name="data_compra_final" class="form-control" value="{{ request('data_compra_final') }}">
             </div>
+              <br>
 
             
             
@@ -64,7 +62,8 @@
 
                 <label>Final:</label>
                 <input type="date" name="data_vencimento_final" class="form-control"  value="{{ request('data_vencimento_final') }}">
-            </div>     
+            </div>  
+              <br>   
 
 
             <div class="col-md-2">
@@ -74,6 +73,7 @@
                 <label>Final:</label>
                 <input type="date" name="data_pagamento_final" class="form-control" value="{{ request('data_pagamento_final') }}">
             </div>
+              <br>
 
 
                         

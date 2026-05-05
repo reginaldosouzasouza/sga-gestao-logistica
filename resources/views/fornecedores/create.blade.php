@@ -65,11 +65,16 @@
         <div class="form-group">
             <label>Natureza Financeira</label>
             <select name="natureza_financeira" class="form-control" required>
-                <option value="estoque">Estoque (CMV)</option>
-                <option value="operacional">Operacional</option>
+
                 <option value="administrativa">Administrativa</option>
+                <option value="Alimentação">Alimentação</option>
+                <option value="DESP. NÃO CONTÁBIL">Despesas Não Contábeis</option>
+                <option value="estoque">Estoque (CMV)</option>
                 <option value="financeiro">Financeiro</option>
+                <option value="MERCADO">Mercado</option>
+                <option value="operacional">Operacional</option>             
                 <option value="pessoal">Pessoal / Retirada</option>
+                 
             </select>
         </div>
 
