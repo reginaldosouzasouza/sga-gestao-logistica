@@ -6,21 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
-{
-    Schema::table('ordens_servico', function (Blueprint $table) {
-        $table->integer('km')->nullable()->after('mecanico'); // ajusta a posição se necessário
-    });
-}
+    {
+        Schema::table('ordens_servico', function (Blueprint $table) {
+            $table->integer('km')->nullable();
+        });
+    }
 
-public function down()
-{
-    Schema::table('ordens_servico', function (Blueprint $table) {
-        $table->dropColumn('km');
-    });
-}
-
+    public function down()
+    {
+        Schema::table('ordens_servico', function (Blueprint $table) {
+            $table->dropColumn('km');
+        });
+    }
 };
