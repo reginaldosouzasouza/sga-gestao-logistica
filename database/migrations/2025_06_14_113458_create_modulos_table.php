@@ -6,22 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::create('modulos', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        // Migration ignorada - tabela modulos já criada anteriormente
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('modulos');
+        // nada
     }
 };
