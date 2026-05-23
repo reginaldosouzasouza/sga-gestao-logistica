@@ -25,7 +25,7 @@ class MovimentacaoController extends Controller
         $proximoId = Movimentacao::max('id') + 1;
 
         $formas_de_pagamento = FormaDePagamento::all();
-        $prazos = Prazo::all();
+        $prazos = Prazo:: orderBy('prazo', 'asc')->get();
         $produtos = Produto::orderBy('nome', 'asc')->get();
 
         return view('movimentacao.create', compact(

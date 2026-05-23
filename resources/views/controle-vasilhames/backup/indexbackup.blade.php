@@ -85,121 +85,6 @@
             resize: vertical;
         }
 
-
-        /* Card de conferência automática dos vasilhames */
-        .card-conferencia-live {
-            border: 2px solid #6f6f6f;
-            background: #efe6c7;
-            padding: 8px 10px;
-            text-align: center;
-            margin-top: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .card-conferencia-live .conf-titulo {
-            font-size: 17px;
-            font-weight: 800;
-            color: #222;
-        }
-
-        .card-conferencia-live .conf-formula {
-            font-size: 12px;
-            font-weight: 700;
-            color: #555;
-            margin-top: 2px;
-        }
-
-        .card-conferencia-live .conf-numero {
-            font-size: 34px;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-top: 4px;
-        }
-
-        .card-conferencia-live .conf-msg {
-            font-size: 13px;
-            font-weight: 700;
-            margin-top: 4px;
-        }
-
-        .conferencia-ok {
-            background: #dfead7;
-            border-color: #198754;
-        }
-
-        .conferencia-ok .conf-numero,
-        .conferencia-ok .conf-msg {
-            color: #198754;
-        }
-
-        .conferencia-alerta {
-            background: #fff3cd;
-            border-color: #ffc107;
-        }
-
-        .conferencia-alerta .conf-numero,
-        .conferencia-alerta .conf-msg {
-            color: #856404;
-        }
-
-        .conferencia-erro {
-            background: #efcaca;
-            border-color: #dc3545;
-        }
-
-        .conferencia-erro .conf-numero,
-        .conferencia-erro .conf-msg {
-            color: #dc3545;
-        }
-
-        .paginacao-historico {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 18px 0 8px;
-            padding: 10px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            position: static !important;
-            clear: both;
-        }
-
-        .paginacao-historico a,
-        .paginacao-historico span {
-            display: inline-block;
-            padding: 7px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .paginacao-historico a {
-            background: #214e7a;
-            color: #fff;
-        }
-
-        .paginacao-historico .desabilitado {
-            background: #e9ecef;
-            color: #777;
-        }
-
-        .paginacao-historico .pagina-atual {
-            background: #d9e3ef;
-            color: #214e7a;
-        }
-
-        .paginacao-historico .info-paginacao {
-            width: 100%;
-            text-align: center;
-            font-size: 13px;
-            color: #555;
-            font-weight: 600;
-        }
-
         .linha-campo {
             margin-bottom: 8px;
         }
@@ -541,41 +426,32 @@
 
                     <div class="linha-campo">
                         <label>Total de vasilhames</label>
-                        <input type="number" name="total_vasilhames" id="total_vasilhames" class="campo-planilha"
+                        <input type="number" name="total_vasilhames" class="campo-planilha"
                                value="{{ old('total_vasilhames') }}" min="0" required>
                     </div>
 
                     <div class="linha-campo">
                         <label>Cheios</label>
-                        <input type="number" name="cheios" id="cheios" class="campo-planilha"
+                        <input type="number" name="cheios" class="campo-planilha"
                                value="{{ old('cheios') }}" min="0" required>
                     </div>
 
                     <div class="linha-campo">
                         <label>Vazios</label>
-                        <input type="number" name="vazios" id="vazios" class="campo-planilha"
+                        <input type="number" name="vazios" class="campo-planilha"
                                value="{{ old('vazios') }}" min="0" required>
                     </div>
 
                     <div class="linha-campo">
                         <label>Emprestados</label>
-                        <input type="number" name="emprestados" id="emprestados" class="campo-planilha"
+                        <input type="number" name="emprestados" class="campo-planilha"
                                value="{{ old('emprestados') }}" min="0" required>
                     </div>
 
                     <div class="linha-campo">
                         <label>Vendidos no período</label>
-                        <input type="number" name="vendidos" id="vendidos" class="campo-planilha"
+                        <input type="number" name="vendidos" class="campo-planilha"
                                value="{{ old('vendidos') }}" min="0" required>
-                    </div>
-
-                    <div class="linha-campo">
-                        <div id="card-conferencia-vasilhames" class="card-conferencia-live conferencia-ok">
-                            <div class="conf-titulo">Total restante</div>
-                            <div class="conf-formula">Total - Cheios - Vazios - Emprestados - Vendidos</div>
-                            <div id="resultado-conferencia-vasilhames" class="conf-numero">0</div>
-                            <div id="mensagem-conferencia-vasilhames" class="conf-msg">Fechamento correto.</div>
-                        </div>
                     </div>
 
                     <div class="linha-campo">
@@ -881,27 +757,9 @@
             </table>
         </div>
 
-        @if($historico->hasPages())
-            <div class="paginacao-historico">
-                @if($historico->onFirstPage())
-                    <span class="desabilitado">Anterior</span>
-                @else
-                    <a href="{{ $historico->previousPageUrl() }}">Anterior</a>
-                @endif
-
-                <span class="pagina-atual">Página {{ $historico->currentPage() }} de {{ $historico->lastPage() }}</span>
-
-                @if($historico->hasMorePages())
-                    <a href="{{ $historico->nextPageUrl() }}">Próxima</a>
-                @else
-                    <span class="desabilitado">Próxima</span>
-                @endif
-
-                <div class="info-paginacao">
-                    Mostrando {{ $historico->firstItem() }} até {{ $historico->lastItem() }} de {{ $historico->total() }} registros
-                </div>
-            </div>
-        @endif
+        <div class="mt-3">
+            {{ $historico->links() }}
+        </div>
     </div>
 </div>
 
@@ -913,58 +771,6 @@
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    });
-
-
-    // Conferência automática: Total - Cheios - Vazios - Emprestados - Vendidos
-    function numeroCampoConferencia(id) {
-        const campo = document.getElementById(id);
-        if (!campo) return 0;
-
-        const valor = parseInt(campo.value, 10);
-        return isNaN(valor) ? 0 : valor;
-    }
-
-    function atualizarConferenciaVasilhames() {
-        const total       = numeroCampoConferencia('total_vasilhames');
-        const cheios      = numeroCampoConferencia('cheios');
-        const vazios      = numeroCampoConferencia('vazios');
-        const emprestados = numeroCampoConferencia('emprestados');
-        const vendidos    = numeroCampoConferencia('vendidos');
-
-        const resultado = total - cheios - vazios - emprestados - vendidos;
-
-        const card     = document.getElementById('card-conferencia-vasilhames');
-        const numero   = document.getElementById('resultado-conferencia-vasilhames');
-        const mensagem = document.getElementById('mensagem-conferencia-vasilhames');
-
-        if (!card || !numero || !mensagem) return;
-
-        numero.textContent = resultado;
-        card.classList.remove('conferencia-ok', 'conferencia-alerta', 'conferencia-erro');
-
-        if (resultado === 0) {
-            card.classList.add('conferencia-ok');
-            mensagem.textContent = 'Fechamento correto.';
-        } else if (resultado > 0) {
-            card.classList.add('conferencia-alerta');
-            mensagem.textContent = 'Ainda faltam vasilhames para fechar a conferência.';
-        } else {
-            card.classList.add('conferencia-erro');
-            mensagem.textContent = 'A quantidade informada passou do total de vasilhames.';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        ['total_vasilhames', 'cheios', 'vazios', 'emprestados', 'vendidos'].forEach(function (id) {
-            const campo = document.getElementById(id);
-            if (campo) {
-                campo.addEventListener('input', atualizarConferenciaVasilhames);
-                campo.addEventListener('change', atualizarConferenciaVasilhames);
-            }
-        });
-
-        atualizarConferenciaVasilhames();
     });
 
     // ── Tabela de emprestados — integrada ao banco via fetch ──

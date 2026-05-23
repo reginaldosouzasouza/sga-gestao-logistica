@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\DashboardFinanceiroService;
 
-class DashboardFinanceiroController extends Controller
+class DashboardFechamentoFinanceiroController extends Controller
 {
     public function __construct(
         private DashboardFinanceiroService $dashboardFinanceiroService
@@ -19,6 +19,6 @@ class DashboardFinanceiroController extends Controller
             $request->input('data_fim')
         );
 
-        return view('dashboard.financeiro', compact('dados'));
+        return view('dashboard.fechamento-financeiro', compact('dados'));
     }
 }

@@ -29,7 +29,6 @@ use App\Http\Controllers\Padoca\EncomendaController;
 use App\Http\Controllers\ModuleEntryController;
 use App\Http\Controllers\SGA\SeletorController;
 use App\Http\Controllers\OficinaEntryController;
-//use App\Http\Controllers\GasEntryController;
 use App\Http\Controllers\GerencialEntryController;
 use App\Http\Controllers\PadocaEntryController;
 use App\Http\Controllers\ModuloController;
@@ -57,6 +56,7 @@ use App\Http\Controllers\PerfilController;
  use App\Http\Controllers\VasilhameEmprestimoController;
  use App\Http\Controllers\RelatorioNaturezaFinanceiraController;
  use App\Http\Controllers\NaturezaFinanceiraController;
+ use App\Http\Controllers\DashboardFechamentoFinanceiroController;
 
 
  
@@ -746,6 +746,10 @@ Route::get('/dashboard/emissao/agua', [DashboardEmissaoInteligenteController::cl
 Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'index'])
     ->name('dashboard.financeiro');
 
+
+
+    
+
 // IMPORTACAO DE DESPESAS PELO EXCEL PARA O SISTEMA
 
 Route::middleware(['auth'])->prefix('financeiro/contas-a-pagar')->group(function () {
@@ -788,3 +792,8 @@ Route::get('/relatorios/natureza-financeira', [RelatorioNaturezaFinanceiraContro
 
 Route::resource('naturezas-financeiras', NaturezaFinanceiraController::class);
 
+
+// DASHBOARD FECHAMENTO FINANCEIRO
+
+Route::get('/dashboard/fechamento-financeiro', [DashboardFechamentoFinanceiroController::class, 'index'])
+    ->name('dashboard.fechamento-financeiro');

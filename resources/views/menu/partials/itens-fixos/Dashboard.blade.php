@@ -47,3 +47,20 @@
 </a>
 @endif
 
+{{-- Gerencial de Resultados por Natureza Financeira --}}
+@if($user->temPermissao('relatorio_gerencial'))
+<a href="{{ url('relatorios/natureza-financeira') }}" target="_blank" rel="noopener noreferrer">
+    GERENCIAL por NATUREZA FINANCEIRA
+    <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
+</a>
+@endif
+
+
+{{-- Gerencial de Resultados Financeiro --}}
+@if($user->temPermissao('relatorio_gerencial'))
+<a href="{{ url('dashboard-financeiro') }}" target="_blank" rel="noopener noreferrer">
+    GERENCIAL DASHBOARD FINANCEIRO
+    <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
+</a>
+@endif
+

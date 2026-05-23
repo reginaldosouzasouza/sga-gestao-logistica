@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\DashboardFinanceiroService;
 
 class DashboardFinanceiroController extends Controller
@@ -12,12 +11,9 @@ class DashboardFinanceiroController extends Controller
     ) {
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $dados = $this->dashboardFinanceiroService->getDashboardData(
-            $request->input('data_inicio'),
-            $request->input('data_fim')
-        );
+        $dados = $this->dashboardFinanceiroService->getDashboardData();
 
         return view('dashboard.financeiro', compact('dados'));
     }
