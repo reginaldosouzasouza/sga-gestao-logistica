@@ -6,127 +6,234 @@
     <title>SGA – Seletor de Módulos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f5f6fa;
-        }
+ <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f5f6fa;
+    }
 
+    header {
+        background: #2b3035;
+        color: #fff;
+        padding: 14px 20px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .header-left {
+        width: 35%;
+        text-align: left;
+    }
+
+    .header-center {
+        width: 30%;
+        text-align: center;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .header-right {
+        width: 35%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 30px;
+    }
+
+    #date-time {
+        display: flex;
+        gap: 16px;
+    }
+
+    #date, #time {
+        color: rgb(45,246,72);
+        font-size: .95em;
+        margin: 0;
+    }
+
+    .btn-sair {
+        background: brown;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    /* Grid dos módulos */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 22px;
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0,0,0,.08);
+        text-align: center;
+        padding: 26px 10px;
+        text-decoration: none;
+        color: #222;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: block;
+    }
+
+    .icon {
+        font-size: 58px;
+        line-height: 1.2;
+        margin-bottom: 10px;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+
+    h4 {
+        margin: 10px 0 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    @keyframes pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(0,0,0,.2); }
+        70%  { box-shadow: 0 0 20px 10px rgba(0,0,0,.05); }
+        100% { box-shadow: 0 0 0 0 rgba(0,0,0,.2); }
+    }
+
+    .card:hover .icon {
+        transform: scale(1.1) rotate(-3deg);
+    }
+
+    .card:hover {
+        transform: scale(1.04);
+        animation: pulse 1.6s infinite;
+    }
+
+    .card.oficina:hover   { background: rgba(28,28,28,.1); }
+    .card.gas:hover       { background: rgba(232,176,0,.1); }
+    .card.gerencial:hover { background: rgba(13,110,253,.1); }
+    .card.padoca:hover    { background: rgba(139,69,19,.1); }
+    .card.caixa:hover     { background: rgba(47,123,11,.1); }
+
+    /* RESPONSIVO - CELULAR */
+    @media (max-width: 768px) {
         header {
-            background: #2b3035;
-            color: #fff;
-            padding: 14px 20px;
-            font-weight: bold;
-            font-size: 18px;
+            padding: 12px 14px;
+            font-size: 16px;
         }
 
         .header-inner {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-areas:
+                "titulo sair"
+                "bemvindo bemvindo"
+                "datahora datahora";
+            gap: 8px 12px;
             align-items: center;
-            justify-content: space-between;
         }
 
         .header-left {
-            width: 35%;
+            grid-area: titulo;
+            width: auto;
             text-align: left;
+            font-size: 17px;
+            line-height: 1.2;
         }
 
         .header-center {
-            width: 30%;
-            text-align: center;
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .header-right {
-            width: 35%;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 30px;
-        }
-
-        #date-time {
-            display: flex;
-            gap: 16px;
-        }
-
-        #date, #time {
-            color: rgb(45,246,72);
-            font-size: .95em;
-            margin: 0;
-        }
-
-        .btn-sair {
-            background: brown;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
+            grid-area: bemvindo;
+            width: auto;
+            text-align: left;
             font-size: 15px;
-            cursor: pointer;
-        }
-
-        /* Grid dos módulos */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 22px;
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 6px 18px rgba(0,0,0,.08);
-            text-align: center;
-            padding: 26px 10px;
-            text-decoration: none;
-            color: #222;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: block;
-        }
-
-        .icon {
-            font-size: 58px;
-            line-height: 1.2;
-            margin-bottom: 10px;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        h4 {
-            margin: 10px 0 0;
-            font-size: 18px;
             font-weight: 600;
         }
 
-        @keyframes pulse {
-            0%   { box-shadow: 0 0 0 0 rgba(0,0,0,.2); }
-            70%  { box-shadow: 0 0 20px 10px rgba(0,0,0,.05); }
-            100% { box-shadow: 0 0 0 0 rgba(0,0,0,.2); }
+        .header-right {
+            grid-area: sair;
+            width: auto;
+            justify-content: flex-end;
+            gap: 0;
         }
 
-        .card:hover .icon {
-            transform: scale(1.1) rotate(-3deg);
+        .header-right form {
+            margin: 0;
         }
 
-        .card:hover {
-            transform: scale(1.04);
-            animation: pulse 1.6s infinite;
+        #date-time {
+            grid-area: datahora;
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            width: 100%;
         }
 
-        .card.oficina:hover   { background: rgba(28,28,28,.1); }
-        .card.gas:hover       { background: rgba(232,176,0,.1); }
-        .card.gerencial:hover { background: rgba(13,110,253,.1); }
-        .card.padoca:hover    { background: rgba(139,69,19,.1); }
-        .card.caixa:hover     { background: rgba(47,123,11,.1); }
-    </style>
+        #date,
+        #time {
+            font-size: 14px;
+        }
+
+        .btn-sair {
+            padding: 7px 14px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .grid {
+            grid-template-columns: 1fr;
+            gap: 18px;
+            margin: 24px auto;
+            padding: 0 16px 24px;
+        }
+
+        .card {
+            padding: 24px 10px;
+            border-radius: 12px;
+        }
+
+        .icon {
+            font-size: 52px;
+        }
+
+        h4 {
+            font-size: 17px;
+        }
+    }
+
+    /* CELULARES BEM ESTREITOS */
+    @media (max-width: 420px) {
+        .header-left {
+            font-size: 16px;
+        }
+
+        .header-center {
+            font-size: 14px;
+        }
+
+        #date-time {
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .btn-sair {
+            padding: 7px 12px;
+            font-size: 13px;
+        }
+    }
+</style>
+
 </head>
 <body>
 
