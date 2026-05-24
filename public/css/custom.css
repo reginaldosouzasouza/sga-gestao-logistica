@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f8ff; /* Fundo azul claro */
+    background-color: #f0f8ff;
     margin: 0;
     padding: 0;
 }
@@ -17,7 +17,7 @@ body {
 .title {
     text-align: center;
     color: #333;
-    margin-bottom: 20px;
+    margin: 0 0 20px;
     font-size: 24px;
 }
 
@@ -25,24 +25,53 @@ body {
     margin-bottom: 20px;
 }
 
-
 input[type="text"] {
     text-transform: uppercase;
 }
 
+#search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 0;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.total-clientes {
+    width: 80%;
+    margin: 0 auto 10px;
+    font-size: 18px;
+    color: #343a40;
+}
+
+.topo-listagem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.table-responsive-sga {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
 
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-    
 }
 
-table th, table td {
+table th, 
+table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-
+    vertical-align: middle;
 }
 
 table th {
@@ -52,11 +81,17 @@ table th {
 
 table tbody tr:hover {
     background-color: #a8a8a8;
-    cursor: pointer; /* Muda o cursor para o ícone de mão */
-    transition: background-color 0.3s ease; /* Adiciona uma transição suave */
-   
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
+.acoes {
+    white-space: nowrap;
+}
+
+.form-excluir {
+    display: inline;
+}
 
 .btn {
     padding: 5px 10px;
@@ -67,6 +102,8 @@ table tbody tr:hover {
     border-radius: 5px;
     color: white;
     font-weight: bold;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-salvar {
@@ -83,17 +120,17 @@ table tbody tr:hover {
 
 .btn-adicionar {
     background-color: green;
-    text-align: LEFT;
- /*   display: block;*/
     width: 150px;
-    margin: 20px auto 0;
+    margin: 0 auto 10px;
 }
 
 .btn-adicionar:hover {
     background-color: darkgreen;
 }
 
-.btn-salvar:hover, .btn-editar:hover, .btn-excluir:hover {
+.btn-salvar:hover, 
+.btn-editar:hover, 
+.btn-excluir:hover {
     opacity: 0.8;
 }
 
@@ -102,22 +139,138 @@ textarea {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    
 }
 
-#search {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    border: 1px solid #ced4da;
-    font-size: 16px;
-    text-align: center;
+/* =====================================================
+   RESPONSIVO GLOBAL PARA TELAS DE CADASTRO / TABELAS
+   ===================================================== */
+@media (max-width: 768px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .clientes-page {
+        width: 100%;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .container {
+        width: calc(100% - 24px);
+        margin: 14px auto;
+        padding: 14px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    .container-pesquisa {
+        margin-top: 14px;
+    }
+
+    .total-clientes {
+        width: calc(100% - 24px);
+        margin: 0 auto 10px;
+        font-size: 15px;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 22px;
+        margin-bottom: 16px;
+    }
+
+    #search {
+        font-size: 14px;
+        padding: 11px;
+        text-align: left;
+    }
+
+    .btn-adicionar {
+        width: 100%;
+        max-width: 180px;
+        padding: 10px;
+        font-size: 14px;
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .table-responsive-sga {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .table-responsive-sga::before {
+        content: "Arraste a tabela para o lado →";
+        display: block;
+        padding: 8px 10px;
+        background: #f7f7f7;
+        color: #555;
+        font-size: 13px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table {
+        min-width: 900px;
+        margin-bottom: 0;
+    }
+
+    table th,
+    table td {
+        padding: 9px 8px;
+        font-size: 14px;
+        white-space: normal;
+    }
+
+    table th {
+        white-space: nowrap;
+    }
+
+    .acoes {
+        min-width: 150px;
+        text-align: center;
+    }
+
+    .btn-editar,
+    .btn-excluir {
+        display: block;
+        width: 100%;
+        padding: 8px 6px;
+        font-size: 13px;
+        margin: 4px 0;
+        box-sizing: border-box;
+    }
+
+    .form-excluir {
+        display: block;
+    }
 }
 
-.total-clientes {
-    font-size: 18px;
-    color: #343a40;
+@media (max-width: 420px) {
+
+    .container {
+        width: calc(100% - 16px);
+        padding: 12px;
+    }
+
+    .total-clientes {
+        width: calc(100% - 16px);
+        font-size: 14px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    table {
+        min-width: 850px;
+    }
+
+    table th,
+    table td {
+        font-size: 13px;
+    }
 }
-
-
