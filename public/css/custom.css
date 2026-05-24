@@ -1,8 +1,18 @@
+/* =====================================================
+   ESTILO BASE - TELA DE CLIENTES
+   ===================================================== */
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f8ff;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+}
+
+.clientes-page {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .container {
@@ -12,6 +22,7 @@ body {
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .title {
@@ -19,6 +30,7 @@ body {
     color: #333;
     margin: 0 0 20px;
     font-size: 24px;
+    font-weight: bold;
 }
 
 .client-form {
@@ -66,7 +78,7 @@ table {
     margin-bottom: 20px;
 }
 
-table th, 
+table th,
 table td {
     border: 1px solid #ddd;
     padding: 8px;
@@ -104,6 +116,7 @@ table tbody tr:hover {
     font-weight: bold;
     border: none;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 .btn-salvar {
@@ -128,8 +141,8 @@ table tbody tr:hover {
     background-color: darkgreen;
 }
 
-.btn-salvar:hover, 
-.btn-editar:hover, 
+.btn-salvar:hover,
+.btn-editar:hover,
 .btn-excluir:hover {
     opacity: 0.8;
 }
@@ -139,16 +152,89 @@ textarea {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    box-sizing: border-box;
 }
 
+
 /* =====================================================
-   RESPONSIVO GLOBAL PARA TELAS DE CADASTRO / TABELAS
+   RESPONSIVO - MENU INTERNO COMPACTO NO CELULAR
+   Aplica nas telas internas como Clientes
    ===================================================== */
+
 @media (max-width: 768px) {
 
-    body {
-        overflow-x: hidden;
+    nav {
+        width: 100% !important;
+        background: #2f2f2f !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        white-space: nowrap !important;
+        padding: 0 !important;
     }
+
+    nav ul {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        width: max-content !important;
+        min-width: 100% !important;
+        margin: 0 !important;
+        padding: 8px 8px !important;
+        gap: 6px !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+
+    nav ul li {
+        display: inline-flex !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: 0 0 auto !important;
+    }
+
+    nav ul li a {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: auto !important;
+        min-width: auto !important;
+        padding: 10px 12px !important;
+        font-size: 15px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    nav ul li a:hover {
+        background: #444 !important;
+    }
+
+    .dropdown-submenu {
+        position: absolute !important;
+        min-width: 190px !important;
+        background-color: #252525 !important;
+        z-index: 9999 !important;
+    }
+
+    .dropdown-submenu a {
+        display: block !important;
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+        white-space: normal !important;
+    }
+
+    .gestao {
+        display: none !important;
+    }
+}
+
+
+/* =====================================================
+   RESPONSIVO - TELA CLIENTES
+   ===================================================== */
+
+@media (max-width: 768px) {
 
     .clientes-page {
         width: 100%;
@@ -156,28 +242,32 @@ textarea {
         box-sizing: border-box;
     }
 
-    .container {
-        width: calc(100% - 24px);
-        margin: 14px auto;
-        padding: 14px;
+    .clientes-page .container {
+        width: calc(100% - 16px) !important;
+        margin: 10px auto !important;
+        padding: 12px !important;
         border-radius: 10px;
         box-sizing: border-box;
     }
 
     .container-pesquisa {
-        margin-top: 14px;
+        margin-top: 12px !important;
+    }
+
+    .container-listagem {
+        margin-top: 10px !important;
     }
 
     .total-clientes {
-        width: calc(100% - 24px);
+        width: calc(100% - 16px);
         margin: 0 auto 10px;
         font-size: 15px;
         text-align: center;
     }
 
     .title {
-        font-size: 22px;
-        margin-bottom: 16px;
+        font-size: 20px !important;
+        margin-bottom: 14px !important;
     }
 
     #search {
@@ -187,24 +277,28 @@ textarea {
     }
 
     .btn-adicionar {
-        width: 100%;
-        max-width: 180px;
-        padding: 10px;
-        font-size: 14px;
+        width: 100% !important;
+        max-width: 190px !important;
+        padding: 10px !important;
+        font-size: 14px !important;
         text-align: center;
         margin-bottom: 12px;
     }
 
     .table-responsive-sga {
-        width: 100%;
-        overflow-x: auto;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
         border: 1px solid #ddd;
         border-radius: 8px;
         background: #fff;
+        box-sizing: border-box;
     }
 
     .table-responsive-sga::before {
-        content: "Arraste a tabela para o lado →";
+        content: "Arraste para o lado →";
         display: block;
         padding: 8px 10px;
         background: #f7f7f7;
@@ -213,9 +307,12 @@ textarea {
         border-bottom: 1px solid #ddd;
     }
 
-    table {
-        min-width: 900px;
-        margin-bottom: 0;
+    table,
+    .table,
+    .tabela-clientes {
+        min-width: 950px !important;
+        width: 950px !important;
+        margin-bottom: 0 !important;
     }
 
     table th,
@@ -249,28 +346,84 @@ textarea {
     }
 }
 
+
+/* =====================================================
+   CELULARES MENORES
+   ===================================================== */
+
 @media (max-width: 420px) {
 
-    .container {
-        width: calc(100% - 16px);
-        padding: 12px;
+    .clientes-page .container {
+        width: calc(100% - 12px) !important;
+        padding: 10px !important;
     }
 
     .total-clientes {
-        width: calc(100% - 16px);
+        width: calc(100% - 12px);
         font-size: 14px;
     }
 
     .title {
-        font-size: 20px;
+        font-size: 19px !important;
     }
 
-    table {
-        min-width: 850px;
+    table,
+    .table,
+    .tabela-clientes {
+        min-width: 900px !important;
+        width: 900px !important;
     }
 
     table th,
     table td {
         font-size: 13px;
+        padding: 8px 7px;
+    }
+
+    nav ul {
+        padding: 7px 6px !important;
+        gap: 4px !important;
+    }
+
+    nav ul li a {
+        font-size: 14px !important;
+        padding: 9px 10px !important;
+    }
+}
+
+
+/* =====================================================
+   SUPORTE INTELIGENTE - TENTATIVA DE AJUSTE MOBILE
+   Obs: só aplica se as classes do suporte tiverem esses nomes
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    .chatbot-button,
+    .chat-button,
+    .suporte-button,
+    .botao-chat,
+    .chat-toggle,
+    .floating-chat-button {
+        width: 54px !important;
+        height: 54px !important;
+        right: 12px !important;
+        bottom: 12px !important;
+        z-index: 9998 !important;
+    }
+
+    .chatbot-box,
+    .chat-box,
+    .suporte-chat,
+    .janela-chat,
+    .chat-window,
+    .floating-chat-window {
+        width: calc(100% - 24px) !important;
+        max-width: calc(100% - 24px) !important;
+        right: 12px !important;
+        left: 12px !important;
+        bottom: 78px !important;
+        max-height: 70vh !important;
+        z-index: 9999 !important;
     }
 }
