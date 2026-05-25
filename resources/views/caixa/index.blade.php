@@ -5,6 +5,21 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/caixa.css') }}">
 
+<style>
+    .link-origem-caixa {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .link-origem-caixa:hover {
+        color: #084298;
+        text-decoration: none;
+    }
+</style>
+
+
 <div class="caixa-container">
 
     <div style="text-align:center; margin-bottom:20px">
@@ -113,7 +128,33 @@
                             </td>
                             <td>R$ {{ number_format($mov->valor, 2, ',', '.') }}</td>
                             <td>{{ $mov->origem }}</td>
-                            <td>{{ $mov->descricao }}</td>
+                            <td>
+                                @php
+                                    $descricaoLower = strtolower($mov->descricao ?? '');
+                                @endphp
+
+                                @if(str_contains($descricaoLower, 'conta a receber') && !empty($mov->referencia_id))
+                                    <a href="{{ url('/contas-a-receber/' . $mov->referencia_id . '/edit') }}"
+                                       class="link-origem-caixa"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       title="Abrir conta a receber #{{ $mov->referencia_id }}">
+                                        {{ $mov->descricao }}
+                                    </a>
+
+                                @elseif(str_contains($descricaoLower, 'conta a pagar') && !empty($mov->referencia_id))
+                                    <a href="{{ url('/contas-a-pagar/' . $mov->referencia_id . '/edit') }}"
+                                       class="link-origem-caixa"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       title="Abrir conta a pagar #{{ $mov->referencia_id }}">
+                                        {{ $mov->descricao }}
+                                    </a>
+
+                                @else
+                                    {{ $mov->descricao }}
+                                @endif
+                            </td>
 
                             @if($caixaAbertoHoje)
                             <td>
@@ -175,7 +216,33 @@
                             </td>
                             <td>R$ {{ number_format($mov->valor, 2, ',', '.') }}</td>
                             <td>{{ $mov->origem }}</td>
-                            <td>{{ $mov->descricao }}</td>
+                            <td>
+                                @php
+                                    $descricaoLower = strtolower($mov->descricao ?? '');
+                                @endphp
+
+                                @if(str_contains($descricaoLower, 'conta a receber') && !empty($mov->referencia_id))
+                                    <a href="{{ url('/contas-a-receber/' . $mov->referencia_id . '/edit') }}"
+                                       class="link-origem-caixa"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       title="Abrir conta a receber #{{ $mov->referencia_id }}">
+                                        {{ $mov->descricao }}
+                                    </a>
+
+                                @elseif(str_contains($descricaoLower, 'conta a pagar') && !empty($mov->referencia_id))
+                                    <a href="{{ url('/contas-a-pagar/' . $mov->referencia_id . '/edit') }}"
+                                       class="link-origem-caixa"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       title="Abrir conta a pagar #{{ $mov->referencia_id }}">
+                                        {{ $mov->descricao }}
+                                    </a>
+
+                                @else
+                                    {{ $mov->descricao }}
+                                @endif
+                            </td>
 
                             @if($caixaAbertoHoje)
                             <td>

@@ -64,3 +64,12 @@
 </a>
 @endif
 
+
+{{-- Gerencial de Fechamento Financeiro --}}
+@if($user->temPermissao('relatorio_gerencial'))
+<a href="{{ url('dashboard/fechamento-financeiro') }}" target="_blank" rel="noopener noreferrer">
+    GERENCIAL DASHBOARD FECHAMENTO FINANCEIRO
+    <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
+</a>
+@endif
+

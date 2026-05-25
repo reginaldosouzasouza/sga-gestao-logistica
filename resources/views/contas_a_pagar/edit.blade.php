@@ -52,7 +52,9 @@
 
         <div class="form-group">
             <label for="data_vencimento">Data de Vencimento</label>
-            <input type="date" name="data_vencimento" class="form-control" value="{{ old('data_vencimento', $contaAPagar->data_vencimento) }}" required>
+            <input type="date" name="data_vencimento" class="form-control" 
+            value="{{ old('data_vencimento', $contaAPagar->data_vencimento ? \Carbon\Carbon::parse($contaAPagar->data_vencimento)->format('Y-m-d') : '') }}" 
+            required>
         </div>
           <br>
 
