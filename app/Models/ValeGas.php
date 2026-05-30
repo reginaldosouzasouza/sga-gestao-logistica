@@ -10,6 +10,7 @@ class ValeGas extends Model
     protected $table = 'vale_gas';
 
     protected $fillable = [
+        'empresa_id',
         'codigo',
         'cliente_id',
         'data_vale',

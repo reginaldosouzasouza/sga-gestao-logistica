@@ -8,6 +8,18 @@
 
 @section('content')
 
+@php
+    $user = auth()->user();
+
+    $isMaster = $user && strtoupper($user->tipo ?? '') === 'MASTER';
+
+    $podeCadastrarCliente = $isMaster || $user->temPermissao('cliente_cadastrar');
+    $podeEditarCliente    = $isMaster || $user->temPermissao('cliente_editar');
+    $podeExcluirCliente   = $isMaster || $user->temPermissao('cliente_excluir');
+    $podeVerHistorico     = $isMaster || $user->temPermissao('cliente_historico_visualizar');
+@endphp
+
+
 <div class="clientes-page">
 
     <div class="container container-pesquisa">
@@ -26,9 +38,11 @@
     <div class="container container-listagem">
 
         <div class="topo-listagem">
-            <a href="{{ route('clientes.create') }}" class="btn btn-adicionar">
-                Cadastrar Cliente
-            </a>
+           @if($podeCadastrarCliente)
+                <a href="{{ route('clientes.create') }}" class="btn btn-adicionar">
+                    Cadastrar Cliente
+                </a>
+            @endif
             
             <h1 class="title">CLIENTES</h1>
         </div>
@@ -59,22 +73,19 @@
                             <td>{{ $cliente->bairro }}</td>
                             <td>{{ $cliente->cidade }}</td>
                             <td class="acoes">
-                                @if(auth()->user()->temPermissao('cliente_editar'))
-                                    <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-editar">
+                                @if($podeEditarCliente)
+                                    <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-primary">
                                         Consultar/Alterar
                                     </a>
                                 @endif
 
-                                @if(auth()->user()->temPermissao('cliente_excluir'))
-                                    <form action="{{ route('clientes.destroy', $cliente->id) }}" method="POST" class="form-excluir">
+                                @if($podeExcluirCliente)
+                                    <form action="{{ route('clientes.destroy', $cliente->id) }}" method="POST" style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
 
-                                        <button 
-                                            type="submit" 
-                                            class="btn btn-excluir"
-                                            onclick="return confirm('Tem certeza que deseja excluir este cliente?')"
-                                        >
+                                        <button type="submit" class="btn btn-danger"
+                                            onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
                                             Excluir
                                         </button>
                                     </form>

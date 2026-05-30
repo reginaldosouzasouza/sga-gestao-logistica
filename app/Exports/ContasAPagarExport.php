@@ -38,56 +38,77 @@ class ContasAPagarExport
                 'Status',
             ], ';');
 
-            // Busca os dados com os filtros
+            $empresaId = $this->filtros['empresa_id'] ?? auth()->user()->empresa_id;
+
             ContasAPagar::with(['fornecedor', 'formaPagamento'])
-                ->when($this->filtros['fornecedor'] ?? null, fn($q, $v) =>
-                    $q->whereHas('fornecedor', fn($q2) =>
-                        $q2->where('nome', 'like', "%$v%")
-                    )
-                )
-                ->when($this->filtros['status'] ?? null, fn($q, $v) =>
-                    $q->where('status', $v)
-                )
-                ->when($this->filtros['forma_pagamento_id'] ?? null, fn($q, $v) =>
-                    $q->where('forma_pagamento_id', $v)
-                )
-                ->when($this->filtros['data_compra_inicial'] ?? null, fn($q, $v) =>
-                    $q->whereDate('data_compra', '>=', $v)
-                )
-                ->when($this->filtros['data_compra_final'] ?? null, fn($q, $v) =>
-                    $q->whereDate('data_compra', '<=', $v)
-                )
-                ->when($this->filtros['data_vencimento_inicial'] ?? null, fn($q, $v) =>
-                    $q->whereDate('data_vencimento', '>=', $v)
-                )
-                ->when($this->filtros['data_vencimento_final'] ?? null, fn($q, $v) =>
-                    $q->whereDate('data_vencimento', '<=', $v)
-                )
-                ->when($this->filtros['data_pagamento'] ?? null, fn($q, $v) =>
-                    $q->whereDate('data_pagamento', $v)
-                )
+                ->where('empresa_id', $empresaId)
+
+                ->when($this->filtros['fornecedor'] ?? null, function ($q, $v) use ($empresaId) {
+                    $q->whereHas('fornecedor', function ($q2) use ($v, $empresaId) {
+                        $q2->where('empresa_id', $empresaId)
+                           ->where('nome', 'like', "%{$v}%");
+                    });
+                })
+
+                ->when($this->filtros['status'] ?? null, function ($q, $v) {
+                    $q->where('status', $v);
+                })
+
+                ->when($this->filtros['forma_pagamento_id'] ?? null, function ($q, $v) {
+                    $q->where('forma_pagamento_id', $v);
+                })
+
+                ->when($this->filtros['data_compra_inicial'] ?? null, function ($q, $v) {
+                    $q->whereDate('data_compra', '>=', $v);
+                })
+
+                ->when($this->filtros['data_compra_final'] ?? null, function ($q, $v) {
+                    $q->whereDate('data_compra', '<=', $v);
+                })
+
+                ->when($this->filtros['data_vencimento_inicial'] ?? null, function ($q, $v) {
+                    $q->whereDate('data_vencimento', '>=', $v);
+                })
+
+                ->when($this->filtros['data_vencimento_final'] ?? null, function ($q, $v) {
+                    $q->whereDate('data_vencimento', '<=', $v);
+                })
+
+                ->when($this->filtros['data_pagamento'] ?? null, function ($q, $v) {
+                    $q->whereDate('data_pagamento', $v);
+                })
+
                 ->orderBy('data_vencimento')
                 ->chunk(500, function ($contas) use ($handle) {
                     foreach ($contas as $conta) {
-                        fputcsv($handle, [
-                            $conta->fornecedor->nome                ?? '-',
-                            $conta->formaPagamento->nome            ?? '-',
-                            $conta->descricao                       ?? '-',
-                            number_format((float) $conta->valor, 2, ',', '.'),
-                            $conta->data_compra
-                                ? \Carbon\Carbon::parse($conta->data_compra)->format('d/m/Y')
-                                : '-',
-                            $conta->data_vencimento
-                                ? \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y')
-                                : '-',
-                            $conta->data_pagamento
-                                ? \Carbon\Carbon::parse($conta->data_pagamento)->format('d/m/Y')
-                                : '-',
-                            $conta->parcela && $conta->{'total-parcelas'}
-                                ? $conta->parcela . '/' . $conta->{'total-parcelas'}
-                                : '-',
-                            ucfirst($conta->status ?? '-'),
-                        ], ';');
+                        $parcela = '-';
+
+                        if (!empty($conta->parcela) && !empty($conta->total_parcelas)) {
+                            $parcela = $conta->parcela . '/' . $conta->total_parcelas;
+                        }
+            fputcsv($handle, [
+                $conta->fornecedor->nome ?? '-',
+                $conta->formaPagamento->nome ?? '-',
+                $conta->descricao ?? '-',
+
+                number_format((float) $conta->valor, 2, ',', '.'),
+
+                $conta->data_compra
+                    ? \Carbon\Carbon::parse($conta->data_compra)->format('d/m/Y')
+                    : '-',
+
+                $conta->data_vencimento
+                    ? \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y')
+                    : '-',
+
+                $conta->data_pagamento
+                    ? \Carbon\Carbon::parse($conta->data_pagamento)->format('d/m/Y')
+                    : '-',
+
+                $parcela,
+                ucfirst($conta->status ?? '-'),
+            ], ';');
+                       
                     }
                 });
 

@@ -15,14 +15,28 @@ use App\Models\CaixaBanco;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class ComprasController extends Controller
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function create()
     {
-        $fornecedores = Fornecedor::orderBy('nome', 'asc')->get();
-        $produtos = Produto::orderBy('nome', 'asc')->get();
+        $empresaId = $this->empresaId();
+
+        $fornecedores = Fornecedor::where('empresa_id', $empresaId)
+            ->orderBy('nome', 'asc')
+            ->get();
+
+        $produtos = Produto::where('empresa_id', $empresaId)
+            ->orderBy('nome', 'asc')
+            ->get();
+
         $formas_pagamento = FormaDePagamento::orderBy('nome', 'asc')->get();
         $prazos = Prazo::orderBy('prazo', 'asc')->get();
 
@@ -36,31 +50,31 @@ class ComprasController extends Controller
 
     public function store(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | IMPORTAÇÃO DO XML
-        |--------------------------------------------------------------------------
-        | Se o usuário clicar no botão "Importar XML", o sistema não salva a compra.
-        | Ele apenas lê o XML e devolve os dados preenchidos na tela.
-        */
         if ($request->acao === 'importar_xml') {
             return $this->importarXmlCompra($request);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SALVAR COMPRA NORMAL
-        |--------------------------------------------------------------------------
-        */
+        $empresaId = $this->empresaId();
+
         $request->validate([
-            'fornecedor_id' => 'required|exists:fornecedores,id',
+            'fornecedor_id' => [
+                'required',
+                Rule::exists('fornecedores', 'id')->where(function ($query) use ($empresaId) {
+                    return $query->where('empresa_id', $empresaId);
+                }),
+            ],
             'nota_fiscal' => 'nullable|string',
             'data_compra' => 'required|date',
             'forma_pagamento_id' => 'required|exists:formas_de_pagamento,id',
             'prazo_id' => 'required|exists:prazos,id',
             'parcelas' => 'nullable|integer|min:1|max:12',
             'itens' => 'required|array',
-            'itens.*.produto_id' => 'required|exists:produtos,id',
+            'itens.*.produto_id' => [
+                'required',
+                Rule::exists('produtos', 'id')->where(function ($query) use ($empresaId) {
+                    return $query->where('empresa_id', $empresaId);
+                }),
+            ],
             'itens.*.quantidade' => 'required|numeric|min:0.001',
             'itens.*.valor_unitario' => 'required|numeric|min:0',
             'itens.*.valor_total' => 'nullable|numeric|min:0',
@@ -88,6 +102,7 @@ class ComprasController extends Controller
             $dataVencimento = $dataCompra->copy()->addDays($prazoDias);
 
             $compra = Compra::create([
+                'empresa_id' => $empresaId,
                 'fornecedor_id' => $request->fornecedor_id,
                 'nota_fiscal' => $request->nota_fiscal,
                 'data_compra' => $request->data_compra,
@@ -99,26 +114,24 @@ class ComprasController extends Controller
                 'total' => $valorTotalCompra,
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | ITENS DA COMPRA + ENTRADA NO ESTOQUE
-            |--------------------------------------------------------------------------
-            */
             foreach ($request->itens as $item) {
-                $produto = Produto::findOrFail($item['produto_id']);
+                $produto = Produto::where('empresa_id', $empresaId)
+                    ->where('id', $item['produto_id'])
+                    ->firstOrFail();
 
                 $quantidade = (float) $item['quantidade'];
                 $valorUnitario = (float) $item['valor_unitario'];
                 $valorTotalItem = $quantidade * $valorUnitario;
 
                 $itemCompra = $compra->itensDeCompras()->create([
-                    'produto_id' => $item['produto_id'],
+                    'produto_id' => $produto->id,
                     'quantidade' => $quantidade,
                     'valor_unitario' => $valorUnitario,
                     'valor_total' => $valorTotalItem,
                 ]);
 
                 Estoque::create([
+                    'empresa_id' => $empresaId,
                     'produto_id' => $itemCompra->produto_id,
                     'quantidade' => $itemCompra->quantidade,
                     'tipo_movimentacao' => 'entrada',
@@ -130,16 +143,9 @@ class ComprasController extends Controller
                 $produto->save();
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | FINANCEIRO
-            |--------------------------------------------------------------------------
-            | Dinheiro -> caixa
-            | PIX      -> caixa_banco
-            | Outros   -> contas_a_pagar
-            */
             if ($formaNome === 'dinheiro') {
                 Caixa::create([
+                    'empresa_id' => $empresaId,
                     'data_movimentacao' => $request->data_compra,
                     'tipo' => 'saida',
                     'valor' => $valorTotalCompra,
@@ -149,6 +155,7 @@ class ComprasController extends Controller
                 ]);
             } elseif ($formaNome === 'pix') {
                 CaixaBanco::create([
+                    'empresa_id' => $empresaId,
                     'data_movimentacao' => $request->data_compra,
                     'tipo' => 'saida',
                     'valor' => $valorTotalCompra,
@@ -170,6 +177,7 @@ class ComprasController extends Controller
                     $dataVencimentoParcela = $dataCompra->copy()->addDays($prazoDias * $i);
 
                     ContasAPagar::create([
+                        'empresa_id' => $empresaId,
                         'compra_id' => $compra->id,
                         'fornecedor_id' => $request->fornecedor_id,
                         'descricao' => 'Compra de produtos - Parcela ' . $i . '/' . $parcelas . ' - NF ' . ($request->nota_fiscal ?? ''),
@@ -210,6 +218,8 @@ class ComprasController extends Controller
 
     private function importarXmlCompra(Request $request)
     {
+        $empresaId = $this->empresaId();
+
         $request->validate([
             'xml_nfe' => 'required|file|mimes:xml,txt',
         ]);
@@ -240,28 +250,20 @@ class ComprasController extends Controller
                     ->with('error', 'XML inválido ou fora do padrão NF-e.');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | DADOS DO FORNECEDOR
-            |--------------------------------------------------------------------------
-            */
             $cnpjFornecedor = preg_replace('/\D/', '', (string) ($emit->CNPJ ?? ''));
             $nomeFornecedor = trim((string) ($emit->xNome ?? ''));
 
             $fornecedor = null;
 
             if (!empty($cnpjFornecedor)) {
-                $fornecedor = Fornecedor::whereRaw(
-                    "REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '/', ''), '-', '') = ?",
-                    [$cnpjFornecedor]
-                )->first();
+                $fornecedor = Fornecedor::where('empresa_id', $empresaId)
+                    ->whereRaw(
+                        "REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '/', ''), '-', '') = ?",
+                        [$cnpjFornecedor]
+                    )
+                    ->first();
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | DADOS DA NOTA
-            |--------------------------------------------------------------------------
-            */
             $notaFiscal = (string) ($ide->nNF ?? '');
 
             $dataCompra = date('Y-m-d');
@@ -272,11 +274,6 @@ class ComprasController extends Controller
                 $dataCompra = Carbon::parse((string) $ide->dEmi)->format('Y-m-d');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | ITENS DO XML
-            |--------------------------------------------------------------------------
-            */
             $itensXml = [];
 
             foreach ($detalhes as $det) {
@@ -291,17 +288,12 @@ class ComprasController extends Controller
                 $valorUnitario = (float) str_replace(',', '.', (string) ($prod->vUnCom ?? 0));
                 $valorTotal = (float) str_replace(',', '.', (string) ($prod->vProd ?? 0));
 
-                /*
-                |--------------------------------------------------------------------------
-                | BUSCA DO PRODUTO
-                |--------------------------------------------------------------------------
-                | Primeiro tenta buscar pelo nome aproximado.
-                | Depois, se tiver cProd no XML, tenta buscar pelo ID/código se fizer sentido.
-                */
                 $produtoSistema = null;
 
                 if (!empty($nomeProdutoXml)) {
-                    $produtoSistema = Produto::where('nome', 'LIKE', '%' . $nomeProdutoXml . '%')->first();
+                    $produtoSistema = Produto::where('empresa_id', $empresaId)
+                        ->where('nome', 'LIKE', '%' . $nomeProdutoXml . '%')
+                        ->first();
                 }
 
                 $itensXml[] = [
@@ -320,13 +312,14 @@ class ComprasController extends Controller
                     ->with('error', 'O XML foi lido, mas nenhum item de produto foi encontrado.');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | DADOS NECESSÁRIOS PARA REABRIR A TELA CREATE
-            |--------------------------------------------------------------------------
-            */
-            $fornecedores = Fornecedor::orderBy('nome', 'asc')->get();
-            $produtos = Produto::orderBy('nome', 'asc')->get();
+            $fornecedores = Fornecedor::where('empresa_id', $empresaId)
+                ->orderBy('nome', 'asc')
+                ->get();
+
+            $produtos = Produto::where('empresa_id', $empresaId)
+                ->orderBy('nome', 'asc')
+                ->get();
+
             $formas_pagamento = FormaDePagamento::orderBy('nome', 'asc')->get();
             $prazos = Prazo::orderBy('prazo', 'asc')->get();
 
@@ -361,7 +354,10 @@ class ComprasController extends Controller
 
     public function index()
     {
+        $empresaId = $this->empresaId();
+
         $compras = Compra::with(['fornecedor', 'itensDeCompras.produto', 'contasAPagar'])
+            ->where('empresa_id', $empresaId)
             ->orderBy('id', 'desc')
             ->get();
 
@@ -370,7 +366,13 @@ class ComprasController extends Controller
 
     public function destroy($id)
     {
-        Compra::findOrFail($id)->delete();
+        $empresaId = $this->empresaId();
+
+        $compra = Compra::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $compra->delete();
 
         return redirect()
             ->route('compras.index')
@@ -379,13 +381,19 @@ class ComprasController extends Controller
 
     public function edit($id)
     {
-        $compra = Compra::findOrFail($id);
+        $empresaId = $this->empresaId();
+
+        $compra = Compra::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
 
         return view('compras.edit', compact('compra'));
     }
 
     public function relatorioCompras(Request $request)
     {
+        $empresaId = $this->empresaId();
+
         $query = DB::table('compras as c')
             ->join('itens_de_compras as ic', 'c.id', '=', 'ic.compra_id')
             ->join('produtos as p', 'ic.produto_id', '=', 'p.id')
@@ -396,6 +404,7 @@ class ComprasController extends Controller
                 FROM contas_a_pagar
                 GROUP BY compra_id
             ) as cap'), 'cap.compra_id', '=', 'c.id')
+            ->where('c.empresa_id', $empresaId)
             ->select(
                 'c.id as compra_id',
                 'p.nome as produto',
@@ -453,18 +462,18 @@ class ComprasController extends Controller
             if ($request->status_pagamento === 'pago') {
                 $query->where(function ($q) {
                     $q->whereIn('fp.nome', ['Dinheiro', 'PIX'])
-                      ->orWhere('cap.status', 'pago');
+                        ->orWhere('cap.status', 'pago');
                 });
             }
 
             if ($request->status_pagamento === 'pendente') {
                 $query->whereNotIn('fp.nome', ['Dinheiro', 'PIX'])
-                      ->where('cap.status', 'pendente');
+                    ->where('cap.status', 'pendente');
             }
 
             if ($request->status_pagamento === 'atrasado') {
                 $query->whereNotIn('fp.nome', ['Dinheiro', 'PIX'])
-                      ->where('cap.status', 'atrasado');
+                    ->where('cap.status', 'atrasado');
             }
         }
 
@@ -475,7 +484,8 @@ class ComprasController extends Controller
         $baseComprasUnicas = DB::table('compras as c')
             ->leftJoin('fornecedores as f', 'c.fornecedor_id', '=', 'f.id')
             ->join('formas_de_pagamento as fp', 'c.forma_pagamento_id', '=', 'fp.id')
-            ->leftJoin('contas_a_pagar as cap', 'cap.compra_id', '=', 'c.id');
+            ->leftJoin('contas_a_pagar as cap', 'cap.compra_id', '=', 'c.id')
+            ->where('c.empresa_id', $empresaId);
 
         if ($request->filled('id')) {
             $baseComprasUnicas->where('c.id', $request->id);
@@ -506,7 +516,7 @@ class ComprasController extends Controller
         $totalPago = (clone $baseComprasUnicas)
             ->where(function ($q) {
                 $q->whereIn('fp.nome', ['Dinheiro', 'PIX'])
-                  ->orWhere('cap.status', 'pago');
+                    ->orWhere('cap.status', 'pago');
             })
             ->select('c.id', 'c.total')
             ->distinct()
@@ -543,11 +553,14 @@ class ComprasController extends Controller
 
     public function search(Request $request)
     {
+        $empresaId = $this->empresaId();
         $query = $request->get('query');
 
         $compras = Compra::with('fornecedor')
-            ->whereHas('fornecedor', function ($q) use ($query) {
-                $q->where('nome', 'like', "%{$query}%");
+            ->where('empresa_id', $empresaId)
+            ->whereHas('fornecedor', function ($q) use ($query, $empresaId) {
+                $q->where('empresa_id', $empresaId)
+                    ->where('nome', 'like', "%{$query}%");
             })
             ->orderBy('created_at', 'desc')
             ->get();

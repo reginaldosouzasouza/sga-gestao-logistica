@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Empresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -22,17 +23,37 @@ class UserController extends Controller
         });
     }
 
+    private function isMaster(): bool
+    {
+        return auth()->user()->tipo === 'MASTER';
+    }
+
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function index()
     {
-        $usuarios = User::leftJoin('perfis', 'perfis.id', '=', 'users.perfil_id')
+        $query = User::leftJoin('perfis', 'perfis.id', '=', 'users.perfil_id')
+            ->leftJoin('empresas', 'empresas.id', '=', 'users.empresa_id')
             ->select(
                 'users.id',
                 'users.usuario',
                 'users.nome_completo',
                 'users.email',
                 'users.tipo',
-                'perfis.nome as perfil'
-            )
+                'users.empresa_id',
+                'perfis.nome as perfil',
+                'empresas.nome_fantasia as empresa'
+            );
+
+        if (!$this->isMaster()) {
+            $query->where('users.empresa_id', $this->empresaId());
+        }
+
+        $usuarios = $query
+            ->orderBy('users.id', 'asc')
             ->get();
 
         return view('usuarios.index', compact('usuarios'));
@@ -40,14 +61,21 @@ class UserController extends Controller
 
     public function create()
     {
-        $perfis = DB::table('perfis')->get();
+        $perfis = DB::table('perfis')->orderBy('nome')->get();
 
-        return view('usuarios.create', compact('perfis'));
+        if ($this->isMaster()) {
+            $empresas = Empresa::orderBy('nome_fantasia')->get();
+        } else {
+            $empresas = Empresa::where('id', $this->empresaId())->get();
+        }
+
+        return view('usuarios.create', compact('perfis', 'empresas'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'empresa_id' => 'required|exists:empresas,id',
             'usuario' => 'required|string|max:255|unique:users,usuario',
             'nome_completo' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
@@ -56,7 +84,22 @@ class UserController extends Controller
             'perfil_id' => 'nullable|exists:perfis,id',
         ]);
 
+        if (!$this->isMaster() && (int) $request->empresa_id !== (int) $this->empresaId()) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Você não pode criar usuário para outra empresa.');
+        }
+
+        if (!$this->isMaster() && $request->tipo === 'MASTER') {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Somente o MASTER pode criar outro usuário MASTER.');
+        }
+
         User::create([
+            'empresa_id' => $request->empresa_id,
             'usuario' => $request->usuario,
             'nome_completo' => $request->nome_completo,
             'email' => $request->email,
@@ -65,12 +108,20 @@ class UserController extends Controller
             'perfil_id' => $request->perfil_id,
         ]);
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuário criado com sucesso!');
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuário criado com sucesso!');
     }
 
     public function edit($id)
     {
         $usuario = User::findOrFail($id);
+
+        if (!$this->isMaster() && (int) $usuario->empresa_id !== (int) $this->empresaId()) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Você não pode editar usuário de outra empresa.');
+        }
 
         if ($usuario->id == 1 && auth()->id() != 1) {
             return redirect()
@@ -78,13 +129,25 @@ class UserController extends Controller
                 ->with('error', 'O usuário MASTER é protegido e só pode ser alterado pelo próprio MASTER.');
         }
 
-        $perfis = DB::table('perfis')->get();
+        $perfis = DB::table('perfis')->orderBy('nome')->get();
 
-        return view('usuarios.edit', compact('usuario', 'perfis'));
+        if ($this->isMaster()) {
+            $empresas = Empresa::orderBy('nome_fantasia')->get();
+        } else {
+            $empresas = Empresa::where('id', $this->empresaId())->get();
+        }
+
+        return view('usuarios.edit', compact('usuario', 'perfis', 'empresas'));
     }
 
     public function update(Request $request, User $usuario)
     {
+        if (!$this->isMaster() && (int) $usuario->empresa_id !== (int) $this->empresaId()) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Você não pode alterar usuário de outra empresa.');
+        }
+
         if ($usuario->id == 1 && auth()->id() != 1) {
             return redirect()
                 ->route('usuarios.index')
@@ -92,6 +155,7 @@ class UserController extends Controller
         }
 
         $request->validate([
+            'empresa_id' => 'required|exists:empresas,id',
             'usuario' => 'required|string|max:255|unique:users,usuario,' . $usuario->id,
             'nome_completo' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $usuario->id,
@@ -100,7 +164,22 @@ class UserController extends Controller
             'perfil_id' => 'nullable|exists:perfis,id',
         ]);
 
+        if (!$this->isMaster() && (int) $request->empresa_id !== (int) $this->empresaId()) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Você não pode vincular usuário a outra empresa.');
+        }
+
+        if (!$this->isMaster() && $request->tipo === 'MASTER') {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Somente o MASTER pode definir usuário como MASTER.');
+        }
+
         $dados = [
+            'empresa_id' => $request->empresa_id,
             'usuario' => $request->usuario,
             'nome_completo' => $request->nome_completo,
             'email' => $request->email,
@@ -123,7 +202,13 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-      if ($user->id == 1 || $user->tipo === 'MASTER') {
+        if (!$this->isMaster() && (int) $user->empresa_id !== (int) $this->empresaId()) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Você não pode excluir usuário de outra empresa.');
+        }
+
+        if ($user->id == 1 || $user->tipo === 'MASTER') {
             return redirect()
                 ->route('usuarios.index')
                 ->with('error', 'O usuário MASTER não pode ser excluído.');

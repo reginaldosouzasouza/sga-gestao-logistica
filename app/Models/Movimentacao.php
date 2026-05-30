@@ -15,6 +15,7 @@ class Movimentacao extends Model
 
     // Lista de campos que podem ser preenchidos
     protected $fillable = [
+        'empresa_id',
         'cliente_id',
         'data_coleta',
         'cpf',

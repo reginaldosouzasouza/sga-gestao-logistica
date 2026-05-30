@@ -7,163 +7,158 @@ use App\Models\Produto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-
 class EstoqueController extends Controller
 {
-    
-    
-
-   // Método para listar as movimentações de estoque
-
+    /**
+     * Lista as movimentações de estoque somente da empresa logada.
+     */
     public function index(Request $request)
-{
-      // Verifica se os filtros estão chegando corretamente
-      //Log::info('Filtros recebidos:', $request->all());
+    {
+        $empresaId = auth()->user()->empresa_id;
 
-    $query = Estoque::with('produto');
+        $query = Estoque::with('produto')
+            ->where('empresa_id', $empresaId);
 
-    // Filtro por nome do produto
-    if ($request->filled('nome')) {
-        $query->whereHas('produto', function ($q) use ($request) {
-            $q->where('nome', 'like', '%' . $request->nome . '%');
-        });
-    }
+        // Filtro por nome do produto
+        if ($request->filled('nome')) {
+            $nomeProduto = $request->nome;
 
-    // Filtro por data inicial
-    if ($request->filled('data_inicial')) {
-        $query->whereDate('data_movimentacao', '>=', $request->data_inicial);
-    }
-
-    // Filtro por data final
-    if ($request->filled('data_final')) {
-        $query->whereDate('data_movimentacao', '<=', $request->data_final);
-    }
-
-    // Ordena do mais recente para o mais antigo
-    $movimentacoes = $query->orderByDesc('data_movimentacao')->get();
-
-     // Verifica os resultados
-     Log::info('Resultados da consulta:', $movimentacoes->toArray());
-
-    return view('estoques.index', compact('movimentacoes'));
-}
-
-
-
-   /* **************************************************************
-        public function index()
-        {
-            // Carregar todas as movimentações de estoque, ordenadas pela data de forma decrescente
-            $movimentacoes = Estoque::with('produto')
-                                    ->orderBy('data_movimentacao', 'desc')
-                                    ->get();
-
-            // Retornar a view de estoques com as movimentações
-            return view('estoques.index', compact('movimentacoes'));
+            $query->whereHas('produto', function ($q) use ($nomeProduto, $empresaId) {
+                $q->where('empresa_id', $empresaId)
+                  ->where('nome', 'like', '%' . $nomeProduto . '%');
+            });
         }
 
-   /*******************************************************************************************************/
-    // Método para armazenar uma nova movimentação de estoque (por exemplo, uma entrada de compra)
+        // Filtro por data inicial
+        if ($request->filled('data_inicial')) {
+            $query->whereDate('data_movimentacao', '>=', $request->data_inicial);
+        }
 
+        // Filtro por data final
+        if ($request->filled('data_final')) {
+            $query->whereDate('data_movimentacao', '<=', $request->data_final);
+        }
+
+        $movimentacoes = $query
+            ->orderByDesc('data_movimentacao')
+            ->get();
+
+        Log::info('Movimentações de estoque da empresa logada:', [
+            'empresa_id' => $empresaId,
+            'total' => $movimentacoes->count(),
+        ]);
+
+        return view('estoques.index', compact('movimentacoes'));
+    }
+
+    /**
+     * Armazena uma nova movimentação manual de estoque.
+     */
     public function store(Request $request)
     {
-        // Validação dos dados
+        $empresaId = auth()->user()->empresa_id;
+
         $validatedData = $request->validate([
             'produto_id' => 'required|exists:produtos,id',
             'quantidade' => 'required|numeric',
             'tipo_movimentacao' => 'required|in:entrada,saida',
-            // Outros campos...
+            'origem' => 'nullable|string|max:255',
+            'data_movimentacao' => 'nullable|date',
         ]);
 
-        // Salvar a movimentação no estoque
+        // Garante que o produto pertence à empresa logada
+        $produto = Produto::where('empresa_id', $empresaId)
+            ->findOrFail($request->produto_id);
+
+        $validatedData['empresa_id'] = $empresaId;
+        $validatedData['origem'] = $validatedData['origem'] ?? 'manual';
+        $validatedData['data_movimentacao'] = $validatedData['data_movimentacao'] ?? now();
+
         Estoque::create($validatedData);
 
-        // Atualizar o campo 'quantidade_estoque' no produto
-        $produto = Produto::find($request->produto_id);
-
-        \Log::info('Produto encontrado: ' . $produto->nome);
-        \Log::info('Quantidade atual no estoque: ' . $produto->quantidade_estoque);
+        Log::info('Produto encontrado para movimentação manual:', [
+            'empresa_id' => $empresaId,
+            'produto' => $produto->nome,
+            'quantidade_atual' => $produto->quantidade_estoque,
+        ]);
 
         if ($request->tipo_movimentacao === 'entrada') {
-            // Aumentar a quantidade no estoque do produto
             $produto->quantidade_estoque += $request->quantidade;
-            \Log::info('Nova quantidade após entrada: ' . $produto->quantidade_estoque);
-        } elseif ($request->tipo_movimentacao === 'saida') {
-            // Diminuir a quantidade no estoque do produto
-            $produto->quantidade_estoque -= $request->quantidade;
-            \Log::info('Nova quantidade após saída: ' . $produto->quantidade_estoque);
         }
 
-        // Salvar a nova quantidade de estoque no banco de dados
+        if ($request->tipo_movimentacao === 'saida') {
+            $produto->quantidade_estoque -= $request->quantidade;
+        }
+
         $produto->save();
 
-        // Temporariamente, em vez de redirecionar, retorne uma resposta simples
-        return response()->json(['message' => 'Compra salva e estoque atualizado com sucesso!']);
-
-
-
-        
+        return response()->json([
+            'message' => 'Movimentação de estoque salva e produto atualizado com sucesso!'
+        ]);
     }
 
-
+    /**
+     * Exibe uma movimentação de estoque somente se pertencer à empresa logada.
+     */
     public function show($id)
     {
-        $estoque = Estoque::findOrFail($id);
+        $empresaId = auth()->user()->empresa_id;
+
+        $estoque = Estoque::where('empresa_id', $empresaId)
+            ->findOrFail($id);
+
         return view('estoques.show', compact('estoque'));
     }
 
-   
     public function totalEstoque()
     {
-    return view('estoques.test');
+        return view('estoques.test');
     }
 
+    /**
+     * Consulta estoque de produtos somente da empresa logada.
+     */
     public function consultaEstoque(Request $request)
-{
-    // Se houver uma busca, filtrar os resultados
-    $search = $request->input('search');
-    
-    $query = Produto::query();
+    {
+        $empresaId = auth()->user()->empresa_id;
 
-    if ($search) {
-        $query->where('nome', 'like', '%' . $search . '%');
+        $search = $request->input('search');
+
+        $query = Produto::where('empresa_id', $empresaId);
+
+        if ($search) {
+            $query->where('nome', 'like', '%' . $search . '%');
+        }
+
+        $produtos = $query
+            ->select('nome', 'quantidade_estoque', 'updated_at')
+            ->orderBy('quantidade_estoque', 'desc')
+            ->get();
+
+        return view('estoques.consulta-estoque', compact('produtos'));
     }
 
-    // Executa a query
-    $produtos = $query->select('nome', 'quantidade_estoque', 'updated_at')
-                      ->orderBy('quantidade_estoque', 'desc')
-                      ->get();
+    /**
+     * Consulta produtos somente da empresa logada.
+     */
+    public function consulta(Request $request)
+    {
+        $empresaId = auth()->user()->empresa_id;
 
-    return view('estoques.consulta-estoque', compact('produtos'));
-}
+        $search = $request->input('search');
+        $sort = $request->input('sort', 'nome');
+        $direction = $request->input('direction', 'asc');
 
+        $produtos = Produto::where('empresa_id', $empresaId);
 
-public function consulta(Request $request)
-{
-    $search = $request->input('search');
-    $sort = $request->input('sort', 'nome'); // Ordenar por nome por padrão
-    $direction = $request->input('direction', 'asc'); // Ordenar em ordem ascendente por padrão
+        if ($search) {
+            $produtos->where('nome', 'like', '%' . $search . '%');
+        }
 
-    $produtos = Produto::query();
+        $produtos->orderBy($sort, $direction);
 
-    // Filtro de busca por nome
-    if ($search) {
-        $produtos->where('nome', 'like', '%' . $search . '%');
+        $produtos = $produtos->get();
+
+        return view('produtos.consulta', compact('produtos'));
     }
-
-    // Adiciona ordenação
-    $produtos->orderBy($sort, $direction);
-
-    $produtos = $produtos->get();
-
-    return view('produtos.consulta', compact('produtos'));
-}
-
-
-    
-
-    
-    
-
-    
 }

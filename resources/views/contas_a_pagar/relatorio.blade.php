@@ -9,7 +9,7 @@
 <div class="container">
     <h2>Relatório de Contas a Pagar</h2>
 
-    <form method="GET" action="{{ route('contas_a_pagar.relatorio') }}">
+    <form method="GET" action="{{ route('contas-a-pagar.relatorio') }}">
         <div class="row">
             <div class="col-md-3">
                 <label>Fornecedor:</label>

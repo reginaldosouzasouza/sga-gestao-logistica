@@ -9,6 +9,7 @@ class CaixaAberto extends Model
     protected $table = 'caixas_abertos';
 
     protected $fillable = [
+        'empresa_id',
         'data_caixa',
         'data_abertura',
         'usuario_id',
@@ -21,5 +22,10 @@ class CaixaAberto extends Model
         'data_caixa'    => 'date',
         'data_abertura' => 'datetime',
     ];
+
+        public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
 }
 

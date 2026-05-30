@@ -12,6 +12,7 @@ class ContasAPagar extends Model
     protected $table = 'contas_a_pagar';
 
     protected $fillable = [
+        'empresa_id',
         'compra_id',
         'fornecedor_id',
         'descricao',
@@ -48,4 +49,9 @@ class ContasAPagar extends Model
     {
         return $this->belongsTo(FormaDePagamento::class, 'forma_pagamento_id');
     }
+
+    public function empresa()
+{
+    return $this->belongsTo(Empresa::class);
+}
 }

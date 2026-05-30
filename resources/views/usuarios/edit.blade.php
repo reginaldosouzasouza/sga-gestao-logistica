@@ -120,6 +120,20 @@
 
             <div class="bloco-form">
                 <div class="row">
+
+                    <div class="form-group mb-3">
+                        <label for="empresa_id">Empresa</label>
+                        <select name="empresa_id" id="empresa_id" class="form-control" required>
+                            <option value="">Selecione a empresa</option>
+
+                            @foreach($empresas as $empresa)
+                                <option value="{{ $empresa->id }}"
+                                    {{ old('empresa_id', $usuario->empresa_id) == $empresa->id ? 'selected' : '' }}>
+                                    {{ $empresa->nome_fantasia }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label-custom">Usuário</label>
                         <input type="text"

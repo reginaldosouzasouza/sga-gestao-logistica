@@ -49,13 +49,13 @@ return [
         ],
     ],
 
-    // -------------------------------------------------------------------- GÁS
+   // -------------------------------------------------------------------- GÁS
     'gas' => [
     'label'  => 'Revenda de Gás',
     'cor'    => 'mod-gas',
     'accent' => '#e8b000',
     'menu'   => [
-        [
+      /*  [
             'label'  => 'Movimentação',
             'url'    => '#',
             'icone'  => '',
@@ -63,8 +63,32 @@ return [
                 ['label' => 'Consultar Coletas',  'url' => '/movimentacao'],
                 ['label' => 'Listagem de Coleta', 'url' => '/movimentacao'],
                 ['label' => 'Pedidos de Coleta',  'url' => '/movimentacao/create'],
+                ['label' => 'Vale Gás',           'url' => '/vale-gas'],
+                ['label' => 'Controle Vasilhames','url' => '/controle-vasilhames'],
+            ],
+        ],*/
+    
+      /*  [
+            'label'  => 'Dashboard',
+            'url'    => '#',
+            'icone'  => '',
+            'filhos' => [
+                ['label' => 'Dashboard Financeiro', 'url' => '/dashboard/financeiro'],
+                ['label' => 'Dashboard Gerencial',  'url' => '/dashboard'],
             ],
         ],
+
+        [
+            'label'  => 'Configurações',
+            'url'    => '#',
+            'icone'  => '',
+            'filhos' => [
+                ['label' => 'Usuários',              'url' => '/usuarios'],
+                ['label' => 'Perfis',                'url' => '/perfis'],
+                ['label' => 'Empresas',              'url' => '/empresas'],
+                ['label' => 'Formas de Pagamento',   'url' => '/formas-de-pagamento'],
+            ],
+        ],*/
     ],
 ],
 

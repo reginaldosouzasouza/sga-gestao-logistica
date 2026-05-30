@@ -22,7 +22,7 @@ class ContasAReceberExport
 
             $handle = fopen('php://output', 'w');
 
-            // BOM para Excel abrir UTF-8 corretamente
+            // BOM para Excel/LibreOffice abrir UTF-8 corretamente
             fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             // Cabeçalho das colunas
@@ -37,57 +37,78 @@ class ContasAReceberExport
                 'Status',
             ], ';');
 
-            // Busca os dados com os filtros (mesma lógica do relatorio() no Controller)
+            $empresaId = $this->filtros['empresa_id'] ?? auth()->user()->empresa_id;
+
             ContasAReceber::with(['cliente', 'formaPagamento'])
-                ->when($this->filtros['cliente'] ?? null, fn($q, $v) =>
-                    $q->whereHas('cliente', fn($q2) =>
-                        $q2->where('nome', 'like', "%$v%")
-                    )
-                )
-                ->when($this->filtros['status'] ?? null, fn($q, $v) =>
-                    $q->where('status', $v)
-                )
-                ->when($this->filtros['forma_pagamento_id'] ?? null, fn($q, $v) =>
-                    $q->where('forma_pagamento_id', $v)
-                )
+                ->where('empresa_id', $empresaId)
+
+                ->when($this->filtros['cliente'] ?? null, function ($q, $v) use ($empresaId) {
+                    $q->whereHas('cliente', function ($q2) use ($v, $empresaId) {
+                        $q2->where('empresa_id', $empresaId)
+                           ->where('nome', 'like', "%{$v}%");
+                    });
+                })
+
+                ->when($this->filtros['status'] ?? null, function ($q, $v) {
+                    $q->where('status', $v);
+                })
+
+                ->when($this->filtros['forma_pagamento_id'] ?? null, function ($q, $v) {
+                    $q->where('forma_pagamento_id', $v);
+                })
+
                 ->when(
                     ($this->filtros['data_venda_inicial'] ?? null) && ($this->filtros['data_venda_final'] ?? null),
-                    fn($q) => $q->whereBetween('data_venda', [
-                        $this->filtros['data_venda_inicial'],
-                        $this->filtros['data_venda_final'],
-                    ])
+                    function ($q) {
+                        $q->whereBetween('data_venda', [
+                            $this->filtros['data_venda_inicial'],
+                            $this->filtros['data_venda_final'],
+                        ]);
+                    }
                 )
+
                 ->when(
                     ($this->filtros['data_vencimento_inicial'] ?? null) && ($this->filtros['data_vencimento_final'] ?? null),
-                    fn($q) => $q->whereBetween('data_vencimento', [
-                        $this->filtros['data_vencimento_inicial'],
-                        $this->filtros['data_vencimento_final'],
-                    ])
+                    function ($q) {
+                        $q->whereBetween('data_vencimento', [
+                            $this->filtros['data_vencimento_inicial'],
+                            $this->filtros['data_vencimento_final'],
+                        ]);
+                    }
                 )
+
                 ->when(
                     ($this->filtros['data_recebimento_inicial'] ?? null) && ($this->filtros['data_recebimento_final'] ?? null),
-                    fn($q) => $q->whereBetween('data_recebimento', [
-                        $this->filtros['data_recebimento_inicial'],
-                        $this->filtros['data_recebimento_final'],
-                    ])
+                    function ($q) {
+                        $q->whereBetween('data_recebimento', [
+                            $this->filtros['data_recebimento_inicial'],
+                            $this->filtros['data_recebimento_final'],
+                        ]);
+                    }
                 )
+
                 ->orderBy('data_vencimento', 'asc')
                 ->chunk(500, function ($contas) use ($handle) {
                     foreach ($contas as $conta) {
                         fputcsv($handle, [
-                            $conta->cliente->nome              ?? '-',
-                            $conta->formaPagamento->nome       ?? '-',
-                            $conta->descricao                  ?? '-',
+                            $conta->cliente->nome ?? '-',
+                            $conta->formaPagamento->nome ?? '-',
+                            $conta->descricao ?? '-',
+
                             number_format((float) $conta->valor, 2, ',', '.'),
+
                             $conta->data_venda
                                 ? \Carbon\Carbon::parse($conta->data_venda)->format('d/m/Y')
                                 : '-',
+
                             $conta->data_vencimento
                                 ? \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y')
                                 : '-',
+
                             $conta->data_recebimento
                                 ? \Carbon\Carbon::parse($conta->data_recebimento)->format('d/m/Y')
                                 : '-',
+
                             ucfirst($conta->status ?? '-'),
                         ], ';');
                     }

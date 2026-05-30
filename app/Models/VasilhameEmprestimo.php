@@ -9,6 +9,7 @@ class VasilhameEmprestimo extends Model
     protected $table = 'vasilhame_emprestimos';
 
     protected $fillable = [
+        'empresa_id',
         'cliente',
         'produto',
         'quantidade',
@@ -36,4 +37,9 @@ class VasilhameEmprestimo extends Model
     {
         return $query->where('status', 'devolvido');
     }
+
+    public function empresa()
+{
+    return $this->belongsTo(Empresa::class);
+}
 }

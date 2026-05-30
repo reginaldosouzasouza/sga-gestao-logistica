@@ -14,6 +14,7 @@ class Caixa extends Model
     protected $table = 'caixa';
 
     protected $fillable = [
+        'empresa_id',
         'data_movimentacao',
         'tipo',
         'valor',

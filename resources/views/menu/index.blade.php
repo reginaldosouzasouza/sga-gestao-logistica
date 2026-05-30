@@ -469,6 +469,50 @@
     </style>
 </head>
 
+@php
+    $moduloAtual = session('modulo_atual', 'gas');
+
+    $modulosConfig = config('modulos');
+
+    if (!array_key_exists($moduloAtual, $modulosConfig)) {
+        $moduloAtual = 'gas';
+    }
+
+    $cfgModulo = config("modulos.$moduloAtual");
+
+    $modulo = $modulo ?? $moduloAtual;
+    $moduloNome = $moduloNome ?? ($cfgModulo['label'] ?? 'Revenda de Gás');
+    $moduloCor = $moduloCor ?? ($cfgModulo['cor'] ?? 'mod-gas');
+
+    /*
+     * Mantém itens dinâmicos do config/modulos.php,
+     * mas como a Movimentação foi movida para partial fixo,
+     * ela pode ficar comentada no config/modulos.php.
+     */
+    $menuExtra = $menuExtra ?? ($cfgModulo['menu'] ?? []);
+
+    $user = auth()->user();
+
+    $isMaster = $user && strtoupper(trim($user->tipo ?? '')) === 'MASTER';
+
+     $nomeEmpresaLogada = $nomeEmpresaLogada ?? ($user->empresa->nome ?? $moduloNome ?? 'Empresa não identificada');
+
+
+
+
+    /*
+     * Menu Movimentação / Coletas.
+     * MASTER vê sempre.
+     * Outros usuários só veem se tiverem permissão.
+     */
+    $podeVerMenuMovimentacao =
+        $isMaster ||        
+        ($user && $user->temPermissao('pedido_visualizar')) ||
+        ($user && $user->temPermissao('pedido_criar')) ||
+        ($user && $user->temPermissao('pedido_editar')) ||
+        ($user && $user->temPermissao('pedido_cancelar')) ||
+        ($user && $user->temPermissao('estoque_visualizar'));
+@endphp
 {{-- classe do módulo aplicada ao body ↓ --}}
 <body class="{{ $moduloCor }}">
 
@@ -494,6 +538,20 @@
                 @include('menu.partials.itens-fixos.cadastro')
             </div>
         </li>
+
+
+                {{-- Movimentação / Coletas --}}
+        @if($podeVerMenuMovimentacao)
+            <li class="dropdown">
+                <a href="#">
+                    Movimentação <i class="bi bi-caret-down-fill"></i>
+                </a>
+
+                <div class="dropdown-submenu">
+                    @include('menu.partials.itens-fixos.movimentacao')
+                </div>
+            </li>
+        @endif
 
         {{-- ════════════════════════════════════════════════════
              BLOCO 2 — ITENS DINÂMICOS DO MÓDULO ATIVO
@@ -582,10 +640,14 @@
         {{-- Barra do módulo com data/hora --}}
         <li class="gestao">
             <div class="box-gestao">
-                <div class="titulo-sistema">MARIGÁS</div>
+                <div class="titulo-sistema">
+                 Empresa: {{ $nomeEmpresaLogada ?? (Auth::user()->empresa->nome ?? $moduloNome ?? 'Empresa não identificada') }}
+                </div>
+
                 <div class="usuario-logado">
                     Usuário: {{ Auth::user()->nome_completo ?? Auth::user()->usuario ?? 'Usuário' }}
                 </div>
+
                 <div id="date-time">
                     <p id="date"></p>
                     <p id="time"></p>

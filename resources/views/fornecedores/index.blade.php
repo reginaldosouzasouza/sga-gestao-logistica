@@ -26,7 +26,7 @@
             </a>
 
             <div class="total-fornecedores">
-                <strong>Total de Fornecedor: {{ $totalfornecedores }}</strong>
+                <strong>Total de Fornecedor: {{ $totalFornecedores }}</strong>
             </div>
         </div>
     </div>

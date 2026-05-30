@@ -11,8 +11,15 @@ use Illuminate\Support\Facades\Schema;
 
 class RelatorioNaturezaFinanceiraController extends Controller
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function index(Request $request)
     {
+        $empresaId = $this->empresaId();
+
         $filtroTipo = $request->get('filtro_tipo', 'periodo');
 
         $mes = (int) $request->get('mes', Carbon::today()->month);
@@ -38,7 +45,8 @@ class RelatorioNaturezaFinanceiraController extends Controller
             $fim,
             $filtroNatureza,
             $filtroFornecedor,
-            'Dinheiro'
+            'Dinheiro',
+            $empresaId
         );
 
         $saidasBanco = $this->buscarSaidasComNaturezaFinanceira(
@@ -47,7 +55,8 @@ class RelatorioNaturezaFinanceiraController extends Controller
             $fim,
             $filtroNatureza,
             $filtroFornecedor,
-            'PIX/Banco'
+            'PIX/Banco',
+            $empresaId
         );
 
         $lancamentos = $saidasCaixa
@@ -71,17 +80,12 @@ class RelatorioNaturezaFinanceiraController extends Controller
                             'fornecedor' => $fornecedor,
                             'total' => $totalFornecedor,
                             'quantidade' => $itensFornecedor->count(),
-
-                            // Percentual do fornecedor dentro do total geral
                             'percentual_geral' => $totalGeral > 0
                                 ? ($totalFornecedor / $totalGeral) * 100
                                 : 0,
-
-                            // Percentual do fornecedor dentro da própria natureza
                             'percentual_natureza' => $totalNatureza > 0
                                 ? ($totalFornecedor / $totalNatureza) * 100
                                 : 0,
-
                             'lancamentos' => $itensFornecedor
                                 ->sortByDesc('data_sort')
                                 ->values(),
@@ -135,9 +139,6 @@ class RelatorioNaturezaFinanceiraController extends Controller
             ->take(10)
             ->values();
 
-        /*
-         * Agora as naturezas do filtro vêm da tabela nova.
-         */
         $naturezasDisponiveis = DB::table('naturezas_financeiras')
             ->where('ativo', 1)
             ->where('exibir_relatorio', 1)
@@ -146,6 +147,7 @@ class RelatorioNaturezaFinanceiraController extends Controller
             ->pluck('nome');
 
         $fornecedoresDisponiveis = DB::table('fornecedores')
+            ->where('empresa_id', $empresaId)
             ->select('id', 'nome')
             ->orderBy('nome')
             ->get();
@@ -176,15 +178,11 @@ class RelatorioNaturezaFinanceiraController extends Controller
         Carbon $fim,
         ?string $filtroNatureza,
         ?string $filtroFornecedor,
-        string $meio
+        string $meio,
+        int $empresaId
     ) {
         $temForma = Schema::hasColumn($tabela, 'forma');
 
-        /*
-         |--------------------------------------------------------------------------
-         | Data da compra na tabela compras
-         |--------------------------------------------------------------------------
-         */
         $colunaDataCompraCompras = null;
 
         if (Schema::hasColumn('compras', 'data_compra')) {
@@ -197,48 +195,37 @@ class RelatorioNaturezaFinanceiraController extends Controller
             $colunaDataCompraCompras = 'created_at';
         }
 
-        /*
-         |--------------------------------------------------------------------------
-         | Data da compra na tabela contas_a_pagar
-         |--------------------------------------------------------------------------
-         */
         $colunaDataCompraContas = 'data_compra';
 
-        /*
-         * Joins principais.
-         * nf_compra e nf_conta buscam a natureza nova.
-         */
-       $query = DB::table($tabela . ' as m')
-    ->leftJoin('compras as co', 'co.id', '=', 'm.referencia_id')
-    ->leftJoin('fornecedores as f_compra', 'f_compra.id', '=', 'co.fornecedor_id')
-    ->leftJoin('naturezas_financeiras as nf_compra', 'nf_compra.id', '=', 'f_compra.natureza_financeira_id')
+        $query = DB::table($tabela . ' as m')
+            ->leftJoin('compras as co', function ($join) use ($empresaId) {
+                $join->on('co.id', '=', 'm.referencia_id')
+                    ->where('co.empresa_id', '=', $empresaId);
+            })
+            ->leftJoin('fornecedores as f_compra', function ($join) use ($empresaId) {
+                $join->on('f_compra.id', '=', 'co.fornecedor_id')
+                    ->where('f_compra.empresa_id', '=', $empresaId);
+            })
+            ->leftJoin('naturezas_financeiras as nf_compra', 'nf_compra.id', '=', 'f_compra.natureza_financeira_id')
 
-    ->leftJoin('contas_a_pagar as cp', 'cp.id', '=', 'm.referencia_id')
-    ->leftJoin('fornecedores as f_conta', 'f_conta.id', '=', 'cp.fornecedor_id')
-    ->leftJoin('naturezas_financeiras as nf_conta', 'nf_conta.id', '=', 'f_conta.natureza_financeira_id')
+            ->leftJoin('contas_a_pagar as cp', function ($join) use ($empresaId) {
+                $join->on('cp.id', '=', 'm.referencia_id')
+                    ->where('cp.empresa_id', '=', $empresaId);
+            })
+            ->leftJoin('fornecedores as f_conta', function ($join) use ($empresaId) {
+                $join->on('f_conta.id', '=', 'cp.fornecedor_id')
+                    ->where('f_conta.empresa_id', '=', $empresaId);
+            })
+            ->leftJoin('naturezas_financeiras as nf_conta', 'nf_conta.id', '=', 'f_conta.natureza_financeira_id')
 
-    ->whereBetween('m.data_movimentacao', [$inicio, $fim])
-    ->where('m.tipo', 'saida')
-    ->where('m.origem', '<>', 'estorno')
-    ->whereRaw('COALESCE(f_compra.id, f_conta.id) IS NOT NULL')
+            ->where('m.empresa_id', $empresaId)
+            ->whereBetween('m.data_movimentacao', [$inicio, $fim])
+            ->where('m.tipo', 'saida')
+            ->where('m.origem', '<>', 'estorno')
+            ->whereRaw('COALESCE(f_compra.id, f_conta.id) IS NOT NULL')
+            ->whereRaw("COALESCE(nf_compra.exibir_relatorio, nf_conta.exibir_relatorio, 1) = 1")
+            ->whereRaw("COALESCE(nf_compra.considerar_total, nf_conta.considerar_total, 1) = 1");
 
-    /*
-     * Não exibe no relatório e não calcula no total
-     * naturezas marcadas como exibir_relatorio = 0
-     * ou considerar_total = 0.
-     */
-    ->whereRaw("
-        COALESCE(nf_compra.exibir_relatorio, nf_conta.exibir_relatorio, 1) = 1
-    ")
-    ->whereRaw("
-        COALESCE(nf_compra.considerar_total, nf_conta.considerar_total, 1) = 1
-    ");
-
-        /*
-         * Filtro por natureza.
-         * Primeiro tenta pela natureza nova.
-         * Depois mantém compatibilidade com o campo antigo.
-         */
         if ($filtroNatureza) {
             $filtroNaturezaNormalizada = trim($filtroNatureza);
 
@@ -279,11 +266,6 @@ class RelatorioNaturezaFinanceiraController extends Controller
             DB::raw('COALESCE(f_compra.id, f_conta.id) as fornecedor_id'),
             DB::raw('COALESCE(f_compra.nome, f_conta.nome) as fornecedor_nome'),
 
-            /*
-             * Principal mudança:
-             * usa primeiro a natureza nova da tabela naturezas_financeiras.
-             * se não tiver, usa o campo antigo.
-             */
             DB::raw("
                 COALESCE(
                     nf_compra.nome,
@@ -324,9 +306,11 @@ class RelatorioNaturezaFinanceiraController extends Controller
 
                 'fornecedor_id' => $m->fornecedor_id,
                 'fornecedor' => $m->fornecedor_nome,
-               'natureza_financeira' => $m->natureza_financeira
-                ? mb_convert_case(trim($m->natureza_financeira), MB_CASE_TITLE, 'UTF-8')
-                : 'Sem Natureza Financeira',
+
+                'natureza_financeira' => $m->natureza_financeira
+                    ? mb_convert_case(trim($m->natureza_financeira), MB_CASE_TITLE, 'UTF-8')
+                    : 'Sem Natureza Financeira',
+
                 'valor' => abs((float) $m->valor),
             ];
         });

@@ -126,7 +126,7 @@
             <div style="font-size:20px; font-weight:700; color:#1d4ed8;">R$ {{ number_format($totalDinheiro, 2, ',', '.') }}</div>
         </div>
         <div style="background:#f0fdf4; border-radius:10px; padding:16px; border-left:5px solid #22c55e;">
-            <div style="font-size:11px; color:#166534; font-weight:700; margin-bottom:6px;">💳 ENTRADAS PIX</div>
+            <div style="font-size:11px; color:#166534; font-weight:700; margin-bottom:6px;">💳 ENTRADAS BANCO</div>
             <div style="font-size:20px; font-weight:700; color:#15803d;">R$ {{ number_format($totalPix, 2, ',', '.') }}</div>
         </div>
         <div style="background:#fef2f2; border-radius:10px; padding:16px; border-left:5px solid #ef4444;">

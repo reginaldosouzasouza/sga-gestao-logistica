@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Perfil;
 use App\Models\PerfilPermissao;
-
-
-
-
+use App\Models\Empresa;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'empresa_id',
         'usuario',
         'nome_completo',
         'email',
@@ -29,63 +29,46 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function perfil()
+    {
+        return $this->belongsTo(Perfil::class, 'perfil_id');
+    }
 
-   public function perfil()
-{
-    return $this->belongsTo(Perfil::class, 'perfil_id');
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class, 'empresa_id');
+    }
+
+    public function isMaster(): bool
+    {
+        return strtoupper(trim($this->tipo ?? '')) === 'MASTER';
+    }
+
+    public function temPermissao($nomePermissao): bool
+    {
+        /*
+         * MASTER é o suporte/dono do sistema.
+         * Ele pode acessar tudo.
+         */
+        if ($this->isMaster()) {
+            return true;
+        }
+
+        /*
+         * Se o usuário não tiver perfil, não tem permissão.
+         */
+        if (!$this->perfil_id) {
+            return false;
+        }
+
+        /*
+         * Busca a permissão pelo nome na tabela permissoes.
+         * Assim não precisamos manter mapa fixo no código.
+         */
+        return DB::table('perfil_permissoes as pp')
+            ->join('permissoes as p', 'p.id', '=', 'pp.permissao_id')
+            ->where('pp.perfil_id', $this->perfil_id)
+            ->where('p.nome', $nomePermissao)
+            ->exists();
+    }
 }
-
-
-public function temPermissao($nomePermissao)
-{
-    if (strtoupper($this->tipo ?? '') === 'MASTER') {
-        return true;
-    }
-
-    if (!$this->perfil_id) {
-        return false;
-    }
-
-    $mapaPermissoes = [
-        'cliente_visualizar'           => 2,
-        'cliente_cadastrar'            => 3,
-        'cliente_editar'               => 4,
-        'cliente_excluir'              => 5,
-        'cliente_historico_visualizar' => 6,
-    ];
-
-    if (!isset($mapaPermissoes[$nomePermissao])) {
-        return false;
-    }
-
-    return PerfilPermissao::where('perfil_id', $this->perfil_id)
-        ->where('permissao_id', $mapaPermissoes[$nomePermissao])
-        ->exists();
-}
-
-
-
-
-
- /*public function temPermissao($permissao)
-{
-    $tipo = strtoupper(trim($this->tipo ?? ''));
-
-    if (in_array($tipo, ['ADMIN', 'MASTER'])) {
-        return true;
-    }
-
-    if (!method_exists($this, 'permissoes')) {
-        return false;
-    }
-
-    return $this->permissoes()
-        ->where('nome', $permissao)
-        ->exists();
-}*/
-
-
-
-}
-
-

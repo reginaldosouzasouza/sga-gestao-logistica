@@ -9,11 +9,22 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class RelatorioVendasEmissaoController extends Controller
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     private function getQuery(Request $request)
     {
+        $empresaId = $this->empresaId();
+
         $query = DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
-            ->join('produtos as p', 'p.id', '=', 'mi.produto_id')
+            ->join('produtos as p', function ($join) use ($empresaId) {
+                $join->on('p.id', '=', 'mi.produto_id')
+                    ->where('p.empresa_id', '=', $empresaId);
+            })
+            ->where('m.empresa_id', $empresaId)
             ->select(
                 DB::raw('DATE(m.data_coleta) as data'),
                 'p.id as produto_id',
@@ -25,13 +36,21 @@ class RelatorioVendasEmissaoController extends Controller
             ->orderBy('data')
             ->orderBy('p.nome');
 
-        if ($request->data_inicial) {
+        /*
+         * Se a tabela movimentacao_itens também tiver empresa_id,
+         * pode ativar esta linha abaixo. Se não tiver, deixe comentada.
+         */
+        // $query->where('mi.empresa_id', $empresaId);
+
+        if ($request->filled('data_inicial')) {
             $query->whereDate('m.data_coleta', '>=', $request->data_inicial);
         }
-        if ($request->data_final) {
+
+        if ($request->filled('data_final')) {
             $query->whereDate('m.data_coleta', '<=', $request->data_final);
         }
-        if ($request->produto_id) {
+
+        if ($request->filled('produto_id')) {
             $query->where('p.id', $request->produto_id);
         }
 
@@ -40,13 +59,23 @@ class RelatorioVendasEmissaoController extends Controller
 
     public function index(Request $request)
     {
-        $resultados       = $this->getQuery($request)->get();
-        $produtos         = DB::table('produtos')->orderBy('nome')->get();
+        $empresaId = $this->empresaId();
+
+        $resultados = $this->getQuery($request)->get();
+
+        $produtos = DB::table('produtos')
+            ->where('empresa_id', $empresaId)
+            ->orderBy('nome')
+            ->get();
+
         $total_quantidade = $resultados->sum('quantidade_total');
-        $total_valor      = $resultados->sum('valor_total');
+        $total_valor = $resultados->sum('valor_total');
 
         return view('relatorios.vendas_emissao', compact(
-            'resultados', 'produtos', 'total_quantidade', 'total_valor'
+            'resultados',
+            'produtos',
+            'total_quantidade',
+            'total_valor'
         ));
     }
 
@@ -59,16 +88,28 @@ class RelatorioVendasEmissaoController extends Controller
         $sheet->setTitle('Vendas por Emissão');
 
         // Cabeçalho
-        $sheet->fromArray(['Data', 'Produto', 'Quantidade Total', 'Valor Total (R$)'], null, 'A1');
+        $sheet->fromArray([
+            'Data',
+            'Produto',
+            'Quantidade Total',
+            'Valor Total (R$)'
+        ], null, 'A1');
 
         // Estilo cabeçalho
         $sheet->getStyle('A1:D1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '0d6efd']],
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => 'solid',
+                'startColor' => ['rgb' => '0d6efd'],
+            ],
         ]);
 
         // Dados
         $row = 2;
+
         foreach ($resultados as $r) {
             $sheet->fromArray([
                 date('d/m/Y', strtotime($r->data)),
@@ -76,6 +117,7 @@ class RelatorioVendasEmissaoController extends Controller
                 $r->quantidade_total,
                 number_format($r->valor_total, 2, ',', '.'),
             ], null, "A{$row}");
+
             $row++;
         }
 
@@ -90,12 +132,13 @@ class RelatorioVendasEmissaoController extends Controller
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        $writer   = new Xlsx($spreadsheet);
         $filename = 'vendas_emissao_' . now()->format('Ymd_His') . '.xlsx';
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"{$filename}\"");
-        $writer->save('php://output');
-        exit;
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

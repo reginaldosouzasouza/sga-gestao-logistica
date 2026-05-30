@@ -5,13 +5,25 @@ namespace App\Helpers;
 use App\Models\Caixa;
 use App\Models\CaixaBanco;
 use App\Models\CaixaAberto;
-use Illuminate\Support\Facades\DB;
 
 class FinanceiroHelper
 {
+    private static function empresaId()
+    {
+        return auth()->user()->empresa_id ?? null;
+    }
+
     public static function saldoCaixaAtual()
     {
-        $caixaAberto = CaixaAberto::where('status', 'aberto')->first();
+        $empresaId = self::empresaId();
+
+        if (!$empresaId) {
+            return 0;
+        }
+
+        $caixaAberto = CaixaAberto::where('empresa_id', $empresaId)
+            ->where('status', 'aberto')
+            ->first();
 
         if (!$caixaAberto) {
             return 0;
@@ -22,20 +34,24 @@ class FinanceiroHelper
         $saldoInicialCaixa = $caixaAberto->saldo_inicial_caixa ?? 0;
         $saldoInicialBanco = $caixaAberto->saldo_inicial_banco ?? 0;
 
-        $entradasCaixa = Caixa::whereDate('data_movimentacao', $data)
-            ->where('tipo','entrada')
+        $entradasCaixa = Caixa::where('empresa_id', $empresaId)
+            ->whereDate('data_movimentacao', $data)
+            ->where('tipo', 'entrada')
             ->sum('valor');
 
-        $saidasCaixa = Caixa::whereDate('data_movimentacao', $data)
-            ->where('tipo','saida')
+        $saidasCaixa = Caixa::where('empresa_id', $empresaId)
+            ->whereDate('data_movimentacao', $data)
+            ->where('tipo', 'saida')
             ->sum('valor');
 
-        $entradasBanco = CaixaBanco::whereDate('data_movimentacao', $data)
-            ->where('tipo','entrada')
+        $entradasBanco = CaixaBanco::where('empresa_id', $empresaId)
+            ->whereDate('data_movimentacao', $data)
+            ->where('tipo', 'entrada')
             ->sum('valor');
 
-        $saidasBanco = CaixaBanco::whereDate('data_movimentacao', $data)
-            ->where('tipo','saida')
+        $saidasBanco = CaixaBanco::where('empresa_id', $empresaId)
+            ->whereDate('data_movimentacao', $data)
+            ->where('tipo', 'saida')
             ->sum('valor');
 
         $saldoCaixa = $saldoInicialCaixa + $entradasCaixa - $saidasCaixa;

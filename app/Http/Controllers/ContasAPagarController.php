@@ -13,51 +13,57 @@ use App\Models\Compra;
 use App\Models\Caixa;
 use App\Models\CaixaBanco;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use App\Exports\ContasAPagarExport;
-
-
-
 
 class ContasAPagarController extends Controller
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function index(Request $request)
     {
+        $empresaId = $this->empresaId();
+
         // Data atual
         $hoje = Carbon::now()->format('Y-m-d');
-    
-        // Atualiza o status para 'ATRASADO' apenas quando a data de vencimento é menor que a data de hoje
-        ContasAPagar::where('data_vencimento', '<', $hoje)
+
+        // Atualiza o status para 'ATRASADO' somente da empresa logada
+        ContasAPagar::where('empresa_id', $empresaId)
+            ->where('data_vencimento', '<', $hoje)
             ->where('status', '!=', 'pago')
             ->update(['status' => 'atrasado']);
 
-        // Atualiza o status para 'PENDENTE' quando a data de vencimento é igual à data de hoje
-        ContasAPagar::where('data_vencimento', $hoje)
+        // Atualiza o status para 'PENDENTE' somente da empresa logada
+        ContasAPagar::where('empresa_id', $empresaId)
+            ->where('data_vencimento', $hoje)
             ->where('status', '!=', 'pago')
             ->update(['status' => 'pendente']);
-    
-        // Filtro por fornecedor, status e data de vencimento
-        $query = ContasAPagar::query();
-    
+
+        // Filtro por fornecedor, status e datas
+        $query = ContasAPagar::with(['fornecedor', 'formaPagamento'])
+            ->where('empresa_id', $empresaId);
+
         if ($request->filled('fornecedor')) {
-            $query->whereHas('fornecedor', function ($q) use ($request) {
-                $q->where('nome', 'like', '%' . $request->fornecedor . '%');
+            $query->whereHas('fornecedor', function ($q) use ($request, $empresaId) {
+                $q->where('empresa_id', $empresaId)
+                    ->where('nome', 'like', '%' . $request->fornecedor . '%');
             });
         }
-    
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        
-    
         if ($request->filled('data_vencimento')) {
             $query->where('data_vencimento', $request->data_vencimento);
         }
 
         if ($request->filled('forma_pagamento_id')) {
-        $query->where('forma_pagamento_id', $request->forma_pagamento_id);
-        }    
-
+            $query->where('forma_pagamento_id', $request->forma_pagamento_id);
+        }
 
         if ($request->filled('data_pagamento')) {
             $query->where('data_pagamento', $request->data_pagamento);
@@ -67,177 +73,228 @@ class ContasAPagarController extends Controller
             $query->whereDate('created_at', $request->created_at);
         }
 
-     /*   if ($request->filled('data_compra')) {
-            $query->where('data_compra', $request->data_compra);
-        }*/
-
         // Filtro por período da data de compra
         if ($request->filled('data_compra_inicial') && $request->filled('data_compra_final')) {
-            $query->whereBetween('data_compra', [$request->data_compra_inicial, $request->data_compra_final]);
+            $query->whereBetween('data_compra', [
+                $request->data_compra_inicial,
+                $request->data_compra_final
+            ]);
         }
 
-      
-         $contasAPagar = $query->orderByRaw("CASE 
-            WHEN status = 'atrasado' THEN 0 
-            WHEN status = 'pendente' THEN 1 
-            ELSE 2 END")
-            ->orderBy('data_vencimento', 'asc') 
+        $contasAPagar = $query->orderByRaw("CASE 
+                WHEN status = 'atrasado' THEN 0 
+                WHEN status = 'pendente' THEN 1 
+                ELSE 2 
+            END")
+            ->orderBy('data_vencimento', 'asc')
             ->get();
-      
-    //    Ordena os resultados pela data de vencimento em ordem decrescente
-       // $contasAPagar = $query->orderBy('data_vencimento', 'asc')->get();
 
-        // Calcula o total de registros
         $totalContas = $contasAPagar->count();
-
-        // Calcula o valor total das faturas
         $valorTotalFaturas = $contasAPagar->sum('valor');
 
-           // ✅ ESTA LINHA FALTAVA
-    $formasPagamento = FormaDePagamento::orderBy('nome')->get();
+        $formasPagamento = FormaDePagamento::orderBy('nome')->get();
 
-        // Retorna a view com os dados
-        return view('contas_a_pagar.index', compact('contasAPagar',
-        'totalContas', 
-        'valorTotalFaturas',
-        'formasPagamento'
+        return view('contas_a_pagar.index', compact(
+            'contasAPagar',
+            'totalContas',
+            'valorTotalFaturas',
+            'formasPagamento'
         ));
     }
 
     public function create()
     {
-        $fornecedores = Fornecedor::all();
-        $formasDePagamento = FormaDePagamento::all();
-        $prazos = Prazo::all(); // Carregar todos os prazos para o dropdown
+        $empresaId = $this->empresaId();
 
-        return view('contas_a_pagar.create', compact('fornecedores', 'formasDePagamento', 'prazos'));
+        $fornecedores = Fornecedor::where('empresa_id', $empresaId)
+            ->orderBy('nome')
+            ->get();
+
+        $formasDePagamento = FormaDePagamento::orderBy('nome')->get();
+
+        $prazos = Prazo::orderBy('prazo')->get();
+
+        return view('contas_a_pagar.create', compact(
+            'fornecedores',
+            'formasDePagamento',
+            'prazos'
+        ));
     }
 
-   public function store(Request $request)
-{
-    $request->validate([
-        'fornecedor_id' => 'required|exists:fornecedores,id',
-        'descricao' => 'required|string|max:255',
-        'valor' => 'required|numeric',
-        'data_compra' => 'required|date',
-        'forma_pagamento_id' => 'required|exists:formas_de_pagamento,id',
-        'prazo' => 'required|exists:prazos,id',
-    ]);
+    public function store(Request $request)
+    {
+        $empresaId = $this->empresaId();
 
-    $prazo = Prazo::find($request->prazo);
-    $prazoDias = (int) filter_var($prazo->prazo, FILTER_SANITIZE_NUMBER_INT);
+        $request->validate([
+            'fornecedor_id' => [
+                'required',
+                Rule::exists('fornecedores', 'id')->where(function ($query) use ($empresaId) {
+                    return $query->where('empresa_id', $empresaId);
+                }),
+            ],
+            'descricao' => 'required|string|max:255',
+            'valor' => 'required|numeric',
+            'data_compra' => 'required|date',
+            'forma_pagamento_id' => 'required|exists:formas_de_pagamento,id',
+            'prazo' => 'required|exists:prazos,id',
+        ]);
 
-    $dataVencimento = Carbon::parse($request->data_compra)->addDays($prazoDias);
+        $prazo = Prazo::findOrFail($request->prazo);
+        $prazoDias = (int) filter_var($prazo->prazo, FILTER_SANITIZE_NUMBER_INT);
 
-    ContasAPagar::create([
-        'fornecedor_id' => $request->fornecedor_id,
-        'descricao' => $request->descricao,
-        'valor' => $request->valor,
-        'data_compra' => $request->data_compra,
-        'data_vencimento' => $dataVencimento,
-        'data_pagamento' => null,
-        'status' => 'pendente',
-        'forma_pagamento_id' => $request->forma_pagamento_id,
-        'prazo' => $prazoDias,
-    ]);
+        $dataVencimento = Carbon::parse($request->data_compra)->addDays($prazoDias);
 
-    return redirect()
-        ->route('contas_a_pagar.index')
-        ->with('success', 'Conta a pagar criada com sucesso!');
-}
+        ContasAPagar::create([
+            'empresa_id' => $empresaId,
+            'fornecedor_id' => $request->fornecedor_id,
+            'descricao' => $request->descricao,
+            'valor' => $request->valor,
+            'data_compra' => $request->data_compra,
+            'data_vencimento' => $dataVencimento,
+            'data_pagamento' => null,
+            'status' => 'pendente',
+            'forma_pagamento_id' => $request->forma_pagamento_id,
+            'prazo' => $prazoDias,
+        ]);
 
-
-
-
-
-
+        return redirect()
+            ->route('contas_a_pagar.index')
+            ->with('success', 'Conta a pagar criada com sucesso!');
+    }
 
     public function edit($id)
     {
-        $contaAPagar = ContasAPagar::findOrFail($id);
-        $fornecedores = Fornecedor::orderBy('nome')->get();
+        $empresaId = $this->empresaId();
+
+        $contaAPagar = ContasAPagar::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $fornecedores = Fornecedor::where('empresa_id', $empresaId)
+            ->orderBy('nome')
+            ->get();
+
         $formas_pagamento = FormaDePagamento::orderBy('nome')->get();
-        return view('contas_a_pagar.edit', compact('contaAPagar', 'fornecedores', 'formas_pagamento'));
+
+        return view('contas_a_pagar.edit', compact(
+            'contaAPagar',
+            'fornecedores',
+            'formas_pagamento'
+        ));
     }
 
+    public function update(Request $request, $id)
+    {
+        $empresaId = $this->empresaId();
 
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'fornecedor_id' => 'required|exists:fornecedores,id',
-        'descricao' => 'required|string|max:255',
-        'valor' => 'required|numeric',
-        'data_vencimento' => 'required|date',
-        'data_pagamento' => 'nullable|date',
-        'forma_pagamento_id' => 'required|exists:formas_de_pagamento,id',
-        'status' => 'required'
-    ]);
+        $request->validate([
+            'fornecedor_id' => [
+                'required',
+                Rule::exists('fornecedores', 'id')->where(function ($query) use ($empresaId) {
+                    return $query->where('empresa_id', $empresaId);
+                }),
+            ],
+            'descricao' => 'required|string|max:255',
+            'valor' => 'required|numeric',
+            'data_vencimento' => 'required|date',
+            'data_pagamento' => 'nullable|date',
+            'forma_pagamento_id' => 'required|exists:formas_de_pagamento,id',
+            'status' => 'required'
+        ]);
 
-    DB::beginTransaction();
+        DB::beginTransaction();
 
-    try {
-        $contaAPagar = ContasAPagar::findOrFail($id);
-        $statusAnterior = $contaAPagar->status;
+        try {
+            $contaAPagar = ContasAPagar::where('empresa_id', $empresaId)
+                ->where('id', $id)
+                ->firstOrFail();
 
-        $contaAPagar->update($request->all());
+            $statusAnterior = $contaAPagar->status;
 
-        if ($statusAnterior !== 'pago' && $request->status === 'pago') {
+            $dadosAtualizacao = $request->only([
+                'fornecedor_id',
+                'descricao',
+                'valor',
+                'data_vencimento',
+                'data_pagamento',
+                'forma_pagamento_id',
+                'status',
+                'observacao',
+            ]);
 
-        $forma = FormaDePagamento::find($request->forma_pagamento_id);
-        $nomeForma = strtolower($forma->nome);
+            $dadosAtualizacao['empresa_id'] = $empresaId;
 
-        $dados = [
-            'data_movimentacao' => $request->data_pagamento ?? now()->toDateString(),
-            'tipo' => 'saida',
-            'valor' => $contaAPagar->valor,
-            'origem' => 'compra',
-            'descricao' => 'Pagamento conta a pagar #' . $contaAPagar->id,
-            'referencia_id' => $contaAPagar->id,
-        ];
+            $contaAPagar->update($dadosAtualizacao);
 
-        if ($nomeForma === 'dinheiro') {
-            Caixa::create($dados);
-        } else {
-            CaixaBanco::create(array_merge($dados, [
-                'forma' => $nomeForma
-            ]));
-}
+            if ($statusAnterior !== 'pago' && $request->status === 'pago') {
+                $forma = FormaDePagamento::findOrFail($request->forma_pagamento_id);
+                $nomeForma = strtolower(trim($forma->nome));
 
+                $dados = [
+                    'empresa_id' => $empresaId,
+                    'data_movimentacao' => $request->data_pagamento ?? now()->toDateString(),
+                    'tipo' => 'saida',
+                    'valor' => $contaAPagar->valor,
+                    'origem' => 'compra',
+                    'descricao' => 'Pagamento conta a pagar #' . $contaAPagar->id,
+                    'referencia_id' => $contaAPagar->id,
+                ];
 
-  
+                if ($nomeForma === 'dinheiro') {
+                    Caixa::create($dados);
+                } else {
+                    CaixaBanco::create(array_merge($dados, [
+                        'forma' => $nomeForma
+                    ]));
+                }
+            }
+
+            DB::commit();
+
+            return redirect($request->return_url ?? route('contas_a_pagar.index'))
+                ->with('success', 'Conta a pagar atualizada com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao atualizar conta a pagar', [
+                'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Erro ao atualizar conta a pagar: ' . $e->getMessage());
         }
-
-        DB::commit();
-
-      return redirect($request->return_url)
-            ->with('success', 'Conta a pagar atualizada com sucesso!');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        throw $e;
     }
-}
-
-   
-
 
     public function destroy(Request $request, $id)
     {
-        $contaAPagar = ContasAPagar::findOrFail($id);
+        $empresaId = $this->empresaId();
+
+        $contaAPagar = ContasAPagar::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
         $contaAPagar->delete();
 
-        return redirect($request->return_url ?? route('contas-a-pagar.index'))
-        ->with('success', 'Conta a pagar excluída com sucesso!');
+        return redirect($request->return_url ?? route('contas_a_pagar.index'))
+            ->with('success', 'Conta a pagar excluída com sucesso!');
     }
-
 
     public function relatorioContasAPagar(Request $request)
     {
-        $query = ContasAPagar::with(['fornecedor', 'formaPagamento']); 
+        $empresaId = $this->empresaId();
 
-        // Aplicar filtros caso sejam informados
+        $query = ContasAPagar::with(['fornecedor', 'formaPagamento'])
+            ->where('empresa_id', $empresaId);
+
         if ($request->filled('fornecedor')) {
-            $query->whereHas('fornecedor', function ($q) use ($request) {
-                $q->where('nome', 'like', '%' . $request->fornecedor . '%');
+            $query->whereHas('fornecedor', function ($q) use ($request, $empresaId) {
+                $q->where('empresa_id', $empresaId)
+                    ->where('nome', 'like', '%' . $request->fornecedor . '%');
             });
         }
 
@@ -248,27 +305,27 @@ public function update(Request $request, $id)
         if ($request->data_pagamento_inicial) {
             $query->whereDate('data_pagamento', '>=', $request->data_pagamento_inicial);
         }
+
         if ($request->data_pagamento_final) {
             $query->whereDate('data_pagamento', '<=', $request->data_pagamento_final);
         }
 
-       
-        
-        // Filtro por período da data de compra
         if ($request->filled('data_compra_inicial') && $request->filled('data_compra_final')) {
-            $query->whereBetween('data_compra', [$request->data_compra_inicial, $request->data_compra_final]);
+            $query->whereBetween('data_compra', [
+                $request->data_compra_inicial,
+                $request->data_compra_final
+            ]);
         }
-   
+
         if ($request->filled('data_emissao')) {
             $query->whereDate('data_compra', $request->data_emissao);
         }
 
         if ($request->filled('data_vencimento_inicial') && $request->filled('data_vencimento_final')) {
-    $query->whereBetween('data_vencimento', [
-        $request->data_vencimento_inicial,
-        $request->data_vencimento_final
-    ]);
-
+            $query->whereBetween('data_vencimento', [
+                $request->data_vencimento_inicial,
+                $request->data_vencimento_final
+            ]);
         }
 
         if ($request->filled('data_pagamento')) {
@@ -276,28 +333,33 @@ public function update(Request $request, $id)
         }
 
         $contas = $query->orderBy('data_vencimento', 'asc')->get();
-        $total_faturas = $contas->sum('valor');
-        $formasDePagamento = FormaDePagamento::all();
 
-        return view('contas_a_pagar.relatorio', compact('contas', 'total_faturas', 'formasDePagamento'));
+        $total_faturas = $contas->sum('valor');
+
+        $formasDePagamento = FormaDePagamento::orderBy('nome')->get();
+
+        return view('contas_a_pagar.relatorio', compact(
+            'contas',
+            'total_faturas',
+            'formasDePagamento'
+        ));
     }
 
+    public function exportarExcel(Request $request)
+    {
+        $filtros = $request->only([
+            'fornecedor',
+            'status',
+            'forma_pagamento_id',
+            'data_compra_inicial',
+            'data_compra_final',
+            'data_vencimento_inicial',
+            'data_vencimento_final',
+            'data_pagamento',
+        ]);
 
+        $filtros['empresa_id'] = $this->empresaId();
 
-
-public function exportarExcel(Request $request)
-{
-    $filtros = $request->only([
-        'fornecedor', 'status', 'forma_pagamento_id',
-        'data_compra_inicial', 'data_compra_final',
-        'data_vencimento_inicial', 'data_vencimento_final',
-        'data_pagamento',
-    ]);
-
-    return (new ContasAPagarExport($filtros))->download();
+        return (new ContasAPagarExport($filtros))->download();
+    }
 }
-
-
-
-}
-

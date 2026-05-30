@@ -4,53 +4,53 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use Illuminate\Http\Request;
-use App\Models\PedidoDeColeta;
 use Illuminate\Support\Facades\Log;
-
-
 
 class ClienteController extends Controller
 {
+    /**
+     * Retorna o ID da empresa do usuário logado.
+     */
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        // Obtém todos os clientes do banco de dados
-        // Busca os clientes ordenando pelo campo 'created_at' de forma decrescente (mais recentes primeiro)
-        $clientes = Cliente::orderBy('created_at', 'desc')->get();
-        
-        $totalClientes = Cliente::count(); //conta o numero de total de clientes
+        $empresaId = $this->empresaId();
 
-       
+        $clientes = Cliente::where('empresa_id', $empresaId)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        
-        // Retorna a view 'clientes.index' com os dados dos clientes
+        $totalClientes = Cliente::where('empresa_id', $empresaId)->count();
+
         return view('clientes.index', compact('clientes', 'totalClientes'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-
-     public function create(Request $request)
+    public function create(Request $request)
     {
-        $from = $request->input('from'); // Pegando o valor do parâmetro 'from'
-        return view('clientes.create', compact('from')); // Passando o valor para a view
-    }
+        $from = $request->input('from');
 
+        return view('clientes.create', compact('from'));
+    }
 
     /**
      * Store a newly created resource in storage.
      */
-
-     public function store(Request $request)
+    public function store(Request $request)
     {
-         // Log para verificar o valor do parâmetro 'from'
         Log::info('Parâmetro from recebido: ', ['from' => $request->input('from')]);
 
+        $empresaId = $this->empresaId();
 
-        // Validação dos campos do cliente
         $request->validate([
             'nome' => 'required',
             'telefone' => 'required',
@@ -59,10 +59,8 @@ class ClienteController extends Controller
             'cidade' => 'required',
         ]);
 
-       
-
-        // Criação do novo cliente
         $cliente = Cliente::create([
+            'empresa_id' => $empresaId,
             'nome' => $request->nome,
             'telefone' => $request->telefone,
             'endereco' => $request->endereco,
@@ -74,11 +72,8 @@ class ClienteController extends Controller
             'nascimento' => $request->nascimento,
             'observacao' => $request->observacao,
         ]);
-     
 
-        // Verificar se o usuário veio da tela de movimentação
         if ($request->input('from') == 'movimentacao') {
-            // Redirecionar de volta para a tela de movimentação com os dados do cliente
             return redirect()->route('movimentacao.create')->with([
                 'cliente_id' => $cliente->id,
                 'nome' => $cliente->nome,
@@ -86,40 +81,26 @@ class ClienteController extends Controller
                 'endereco' => $cliente->endereco,
                 'numero' => $cliente->numero,
                 'bairro' => $cliente->bairro,
-                'cidade' => $cliente->cidade
+                'cidade' => $cliente->cidade,
             ]);
         }
 
-                // Verificar se o cadastro foi feito a partir da tela de pedidos de coleta
-            /*   if ($request->input('from') == 'pedido_coleta') {
-               Log::info('Redirecionando para a página de pedidos de coleta...');
-
-
-                // Redirecionar de volta para a página de pedidos de coleta                
-                return redirect()->route('pedido_coleta.create')->with([
-                'cliente_id' => $cliente->id,
-                'nome' => $cliente->nome,
-                'telefone' => $cliente->telefone,
-                'endereco' => $cliente->endereco,
-                'numero' => $cliente->numero,
-                'bairro' => $cliente->bairro,
-                'cidade' => $cliente->cidade,
-            ]);with('success', 'Cliente cadastrado com sucesso!');
-        }*/
-
-        // Se o cadastro veio de outra tela, redirecionar normalmente
-        return redirect()->route('clientes.index')->with('success', 'Cliente cadastrado com sucesso!');
-        }
+        return redirect()
+            ->route('clientes.index')
+            ->with('success', 'Cliente cadastrado com sucesso!');
+    }
 
     /**
      * Display the specified resource.
      */
     public function show($id)
     {
-        // Encontra o cliente pelo ID
-        $cliente = Cliente::findOrFail($id);
-        
-        // Retorna a view para mostrar o cliente
+        $empresaId = $this->empresaId();
+
+        $cliente = Cliente::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
         return view('clientes.show', compact('cliente'));
     }
 
@@ -128,125 +109,156 @@ class ClienteController extends Controller
      */
     public function edit($id)
     {
-        // Encontra o cliente pelo ID
-        $cliente = Cliente::findOrFail($id);
-        
-        // Retorna a view para editar o cliente
+        $empresaId = $this->empresaId();
+
+        $cliente = Cliente::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
         return view('clientes.edit', compact('cliente'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    
-     public function update(Request $request, $id)
-     {
-         // Valida os dados do formulário
-         $validatedData = $request->validate([
-             'telefone' => 'required',
-             'cpf' => 'nullable|string',
-             'nome' => 'required|max:255',
-             'endereco' => 'required',
-             'numero' => 'required|string|max:255',
-             'bairro' => 'required',
-             'cidade' => 'required',
-             'email' => 'nullable|email',
-             'nascimento' => 'nullable|date',
-             'observacao' => 'nullable|string',
-         ]);
-     
-         // Encontra o cliente pelo ID
-         $cliente = Cliente::find($id);
-     
-         // Verifica se o cliente foi encontrado
-         if (!$cliente) {
-             return redirect()->route('clientes.index')->with('error', 'Cliente não encontrado!');
-         }
-     
-         // Atualiza o cliente com os dados validados
-         $cliente->update($validatedData);
-     
-         return redirect()->route('clientes.index')->with('success', 'Cliente atualizado com sucesso!');
-     }
-     
+    public function update(Request $request, $id)
+    {
+        $empresaId = $this->empresaId();
+
+        $validatedData = $request->validate([
+            'telefone' => 'required',
+            'cpf' => 'nullable|string',
+            'nome' => 'required|max:255',
+            'endereco' => 'required',
+            'numero' => 'required|string|max:255',
+            'bairro' => 'required',
+            'cidade' => 'required',
+            'email' => 'nullable|email',
+            'nascimento' => 'nullable|date',
+            'observacao' => 'nullable|string',
+        ]);
+
+        $cliente = Cliente::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->first();
+
+        if (!$cliente) {
+            return redirect()
+                ->route('clientes.index')
+                ->with('error', 'Cliente não encontrado!');
+        }
+
+        $cliente->update($validatedData);
+
+        return redirect()
+            ->route('clientes.index')
+            ->with('success', 'Cliente atualizado com sucesso!');
+    }
+
     /**
      * Remove the specified resource from storage.
      */
-   public function destroy($id)
-{
-    if (!auth()->user()->temPermissao('cliente_excluir')) {
-        abort(403, 'Você não tem permissão para excluir clientes.');
+    public function destroy($id)
+    {
+        if (!auth()->user()->temPermissao('cliente_excluir')) {
+            abort(403, 'Você não tem permissão para excluir clientes.');
+        }
+
+        $empresaId = $this->empresaId();
+
+        $cliente = Cliente::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $cliente->delete();
+
+        return redirect()
+            ->route('clientes.index')
+            ->with('success', 'Cliente excluído com sucesso.');
     }
 
-    $cliente = Cliente::findOrFail($id);
-    $cliente->delete();
-
-    return redirect()->route('clientes.index')
-        ->with('success', 'Cliente excluído com sucesso.');
-}
-
+    /**
+     * Pesquisa clientes por nome ou telefone.
+     */
     public function search(Request $request)
     {
+        $empresaId = $this->empresaId();
         $query = $request->input('query');
-    
-        // Procura clientes pelo nome ou telefone
-        $clientes = Cliente::where('nome', 'LIKE', "%{$query}%")
-                    ->orWhere('telefone', 'LIKE', "%{$query}%")
-                    ->get();
-    
-        // Se não encontrar, retorna status 'not_found'
+
+        $clientes = Cliente::where('empresa_id', $empresaId)
+            ->where(function ($q) use ($query) {
+                $q->where('nome', 'LIKE', "%{$query}%")
+                  ->orWhere('telefone', 'LIKE', "%{$query}%");
+            })
+            ->get();
+
         if ($clientes->isEmpty()) {
             return response()->json(['status' => 'not_found']);
         }
-    
-        // Caso contrário, retorna os clientes encontrados
+
         return response()->json($clientes);
     }
-    
+
+    /**
+     * Retorna detalhes de um cliente.
+     */
     public function detalhes($id)
     {
-        // Procura o cliente pelo ID e retorna os dados
-        $cliente = Cliente::find($id);
-    
+        $empresaId = $this->empresaId();
+
+        $cliente = Cliente::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->first();
+
         if ($cliente) {
             return response()->json($cliente);
         }
-    
+
         return response()->json(['status' => 'not_found']);
     }
 
-
+    /**
+     * Pesquisa usada por autocomplete.
+     */
     public function pesquisar(Request $request)
-{
-    // Capturar o termo pesquisado
-    $termo = $request->input('query');
+    {
+        $empresaId = $this->empresaId();
+        $termo = $request->input('query');
 
-    // Buscar clientes cujo nome ou telefone contenham o termo pesquisado
-    $clientes = Cliente::where('nome', 'LIKE', "%{$termo}%")
-                        ->orWhere('telefone', 'LIKE', "%{$termo}%")
-                        ->get(['id', 'nome', 'telefone', 'endereco', 'cpf', 'numero', 'bairro', 'cidade']); // Incluindo os novos campos
+        $clientes = Cliente::where('empresa_id', $empresaId)
+            ->where(function ($q) use ($termo) {
+                $q->where('nome', 'LIKE', "%{$termo}%")
+                  ->orWhere('telefone', 'LIKE', "%{$termo}%");
+            })
+            ->get([
+                'id',
+                'nome',
+                'telefone',
+                'endereco',
+                'cpf',
+                'numero',
+                'bairro',
+                'cidade',
+            ]);
 
-    // Retornar os dados em formato JSON
-    return response()->json($clientes);
-}
+        return response()->json($clientes);
+    }
 
-    
-    
-public function buscar(Request $request)
-{
-    $termo = $request->input('termo');
+    /**
+     * Busca clientes por nome ou telefone.
+     */
+    public function buscar(Request $request)
+    {
+        $empresaId = $this->empresaId();
+        $termo = $request->input('termo');
 
-    // Buscar clientes pelo nome ou telefone
-    $clientes = Cliente::where('nome', 'like', "%{$termo}%")
-        ->orWhere('telefone', 'like', "%{$termo}%")
-        ->get();
+        $clientes = Cliente::where('empresa_id', $empresaId)
+            ->where(function ($q) use ($termo) {
+                $q->where('nome', 'LIKE', "%{$termo}%")
+                  ->orWhere('telefone', 'LIKE', "%{$termo}%");
+            })
+            ->get();
 
-    return response()->json($clientes);
-}  
-
-    
-
-
-
-
+        return response()->json($clientes);
+    }
 }

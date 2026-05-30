@@ -11,6 +11,7 @@ class Cliente extends Model
 
     // Definindo quais campos podem ser preenchidos
     protected $fillable = [
+        'empresa_id',
         'telefone',
         'cpf',
         'nome',
@@ -24,9 +25,12 @@ class Cliente extends Model
     ];
 
     public function movimentacoes()
-{
-    return $this->hasMany(Movimentacao::class, 'cliente_id');
-}
+    {
+        return $this->hasMany(Movimentacao::class, 'cliente_id');
+    }
 
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
 }
-

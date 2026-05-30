@@ -8,11 +8,17 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardEmissaoInteligenteController extends Controller
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function gas()
     {
         return $this->montarDashboard(
             filtroProduto: function (Builder $query) {
                 $query->where('p.nome', 'like', '%GAS%')
+                    ->orWhere('p.nome', 'like', '%GÁS%')
                     ->orWhere('p.nome', 'like', '%P13%')
                     ->orWhere('p.nome', 'like', '%P-13%')
                     ->orWhere('p.nome', 'like', '%P45%')
@@ -47,6 +53,8 @@ class DashboardEmissaoInteligenteController extends Controller
         string $subtipo,
         string $viewPath
     ) {
+        $empresaId = $this->empresaId();
+
         $hoje = Carbon::today();
         $ontem = Carbon::yesterday();
         $inicioMes = Carbon::now()->startOfMonth();
@@ -55,6 +63,9 @@ class DashboardEmissaoInteligenteController extends Controller
         $base = DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
             ->join('produtos as p', 'p.id', '=', 'mi.produto_id')
+            ->where('m.empresa_id', $empresaId)
+            ->where('mi.empresa_id', $empresaId)
+            ->where('p.empresa_id', $empresaId)
             ->where(function (Builder $query) use ($filtroProduto) {
                 $filtroProduto($query);
             });

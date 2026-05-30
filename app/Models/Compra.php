@@ -16,6 +16,7 @@ class Compra extends Model
     protected $table = 'compras'; // Certifique-se de que o nome da tabela está correto
     
     protected $fillable = [
+        'empresa_id',
         'fornecedor_id',
         'quantidade',
         'preco_unitario',

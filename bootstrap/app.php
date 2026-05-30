@@ -11,9 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
+    ->withMiddleware(function (Middleware $middleware) {  
         $middleware->alias([
             'module' => CheckModule::class,
+            'nocache' => \App\Http\Middleware\NoCache::class,
+            'permissao' => \App\Http\Middleware\CheckPermissao::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

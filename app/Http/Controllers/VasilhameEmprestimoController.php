@@ -7,9 +7,18 @@ use Illuminate\Http\Request;
 
 class VasilhameEmprestimoController extends Controller
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function index(Request $request)
     {
-        $emprestimos = VasilhameEmprestimo::orderBy('data_saida', 'desc')->get();
+        $empresaId = $this->empresaId();
+
+        $emprestimos = VasilhameEmprestimo::where('empresa_id', $empresaId)
+            ->orderBy('data_saida', 'desc')
+            ->get();
 
         if ($request->expectsJson() || $request->wantsJson()) {
             return response()->json($emprestimos);
@@ -20,6 +29,8 @@ class VasilhameEmprestimoController extends Controller
 
     public function store(Request $request)
     {
+        $empresaId = $this->empresaId();
+
         $request->validate([
             'cliente'                 => 'required|string|max:255',
             'produto'                 => 'nullable|string|max:255',
@@ -29,6 +40,7 @@ class VasilhameEmprestimoController extends Controller
         ]);
 
         $emprestimo = VasilhameEmprestimo::create([
+            'empresa_id'              => $empresaId,
             'cliente'                 => $request->cliente,
             'produto'                 => $request->produto,
             'quantidade'              => $request->quantidade,
@@ -44,11 +56,16 @@ class VasilhameEmprestimoController extends Controller
 
     public function registrarDevolucao(Request $request, $id)
     {
+        $empresaId = $this->empresaId();
+
         $request->validate([
             'data_devolucao' => 'required|date',
         ]);
 
-        $emprestimo = VasilhameEmprestimo::findOrFail($id);
+        $emprestimo = VasilhameEmprestimo::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
         $emprestimo->update([
             'data_devolucao' => $request->data_devolucao,
             'status'         => 'devolvido',
@@ -59,7 +76,12 @@ class VasilhameEmprestimoController extends Controller
 
     public function destroy($id)
     {
-        $emprestimo = VasilhameEmprestimo::findOrFail($id);
+        $empresaId = $this->empresaId();
+
+        $emprestimo = VasilhameEmprestimo::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
         $emprestimo->delete();
 
         return response()->json(['ok' => true]);

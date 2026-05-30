@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Estoque extends Model
 {
     protected $fillable = [
+        'empresa_id',
         'produto_id',
         'quantidade',
         'tipo_movimentacao',

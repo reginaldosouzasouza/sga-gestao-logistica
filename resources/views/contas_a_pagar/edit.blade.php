@@ -16,7 +16,7 @@
     @endif
 
     <!-- Formulário para editar a conta a pagar -->
-    <form action="{{ route('contas_a_pagar.update', $contaAPagar->id) }}" method="POST">
+    <form action="{{ route('contas-a-pagar.update', $contaAPagar->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -88,7 +88,7 @@
           <br>
 
         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-        <a href="{{ route('contas_a_pagar.index') }}" class="btn btn-secondary">Cancelar</a>
+        <a href="{{ route('contas-a-pagar.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
 @endsection

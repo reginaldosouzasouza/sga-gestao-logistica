@@ -43,23 +43,40 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("codigo_usuario").addEventListener("input", function() {
-            let userId = this.value;
-            
-            if (userId) {
-                fetch(`/buscar-usuario/${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("usuario").value = data.usuario || 'Usuário não encontrado';
-                })
-                .catch(error => console.log("Erro ao buscar usuário:", error));
-            } else {
-                document.getElementById("usuario").value = "";
+  <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const codigoInput = document.getElementById("codigo_usuario");
+            const usuarioInput = document.getElementById("usuario");
+
+            if (!codigoInput || !usuarioInput) {
+                return;
             }
+
+            codigoInput.addEventListener("input", function () {
+                let userId = this.value.trim();
+
+                if (!userId) {
+                    usuarioInput.value = "";
+                    return;
+                }
+
+                fetch(`/buscar-usuario/${userId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Erro HTTP: " + response.status);
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        usuarioInput.value = data.usuario || "";
+                    })
+                    .catch(error => {
+                        console.log("Erro ao buscar usuário:", error);
+                        usuarioInput.value = "";
+                    });
+            });
         });
-    });
 </script>
 
  

@@ -1157,6 +1157,7 @@
                 e.preventDefault();
                 adicionarEmprestado();
             }
+            
         });
     });
 </script>

@@ -12,6 +12,7 @@ class ControleVasilhame extends Model
     protected $table = 'controle_vasilhames';
 
     protected $fillable = [
+        'empresa_id',
         'data_referencia',
         'total_vasilhames',
         'cheios',
@@ -49,5 +50,10 @@ class ControleVasilhame extends Model
     public function getStatusConferenciaAttribute(): string
     {
         return $this->diferenca === 0 ? 'ESTOQUE COMPLETO' : 'DIVERGENTE';
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
     }
 }

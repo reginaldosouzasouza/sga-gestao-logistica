@@ -14,8 +14,10 @@ class MovimentacaoItem extends Model
 
     // Definir os campos que podem ser preenchidos via mass assignment
     protected $fillable = [
+        'empresa_id',
         'movimentacao_id', 
-        'produto_id', 'quantidade', 
+        'produto_id',
+        'quantidade', 
         'valor_unitario', 
         'valor_total'
     ];
@@ -30,5 +32,10 @@ class MovimentacaoItem extends Model
     public function produto()
     {
         return $this->belongsTo(Produto::class, 'produto_id');
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
     }
 }

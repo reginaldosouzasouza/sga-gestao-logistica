@@ -11,6 +11,7 @@ class Produto extends Model
 
     // Definir os campos que podem ser preenchidos em massa
     protected $fillable = [
+        'empresa_id',
         'nome',
         'descricao',
         'preco_compra',
@@ -20,8 +21,8 @@ class Produto extends Model
         'estoque_minimo',
         'codigo_barras',
         'modulo_id',
-        'margem_percentual', // ← ADICIONADO
-        'margem_valor',      // ← ADICIONADO
+        'margem_percentual',
+        'margem_valor',
     ];
 
     /**
@@ -33,7 +34,7 @@ class Produto extends Model
     }
 
     /**
-     * Relacionamento com a tabela 'movimentacoes_itens'
+     * Relacionamento com a tabela 'movimentacao_itens'
      */
     public function movimentacoesItens()
     {
@@ -43,5 +44,10 @@ class Produto extends Model
     public function modulo()
     {
         return $this->belongsTo(Modulo::class, 'modulo_id');
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
     }
 }

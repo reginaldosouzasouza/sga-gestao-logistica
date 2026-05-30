@@ -12,6 +12,7 @@ class ContasAReceber extends Model
     protected $table = 'contas_a_receber';
 
     protected $fillable = [
+        'empresa_id',
         'cliente_id',
         'descricao',
         'valor',

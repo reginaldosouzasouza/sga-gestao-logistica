@@ -14,6 +14,7 @@ class CaixaBanco extends Model
     protected $table = 'caixa_banco';
 
     protected $fillable = [
+        'empresa_id',
         'data_movimentacao',
         'tipo',
         'valor',

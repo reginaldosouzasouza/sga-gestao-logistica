@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardFinanceiroService
 {
+    private function empresaId()
+    {
+        return auth()->user()->empresa_id;
+    }
+
     public function getDashboardData(?string $dataInicio = null, ?string $dataFim = null): array
     {
         $hoje = Carbon::today();
         $ontem = $hoje->copy()->subDay();
 
-        // Período padrão: mês atual.
-        // Quando o usuário filtrar pela tela, o dashboard passa a usar as datas informadas.
         $inicioPeriodo = $dataInicio
             ? Carbon::parse($dataInicio)->startOfDay()
             : $hoje->copy()->startOfMonth();
@@ -22,8 +25,6 @@ class DashboardFinanceiroService
             ? Carbon::parse($dataFim)->startOfDay()
             : $hoje->copy()->endOfMonth()->startOfDay();
 
-        // Segurança: se o usuário informar a data inicial maior que a final,
-        // o sistema inverte automaticamente para não quebrar os cálculos.
         if ($inicioPeriodo->greaterThan($fimPeriodo)) {
             [$inicioPeriodo, $fimPeriodo] = [$fimPeriodo, $inicioPeriodo];
         }
@@ -35,16 +36,11 @@ class DashboardFinanceiroService
         $vendidoOntem = $this->getVendidoOntem($ontemString);
         $acumuladoMes = $this->getAcumuladoMes($inicioMes, $fimMes);
 
-        // RECEBIDO FICA SOMENTE ATÉ ONTEM.
-        // Se o período escolhido terminar antes de ontem, usa a data final escolhida.
-        // Se terminar hoje ou depois, limita em ontem para não considerar dia aberto.
         $fimRecebido = $fimPeriodo->lessThan($ontem)
             ? $fimPeriodo->toDateString()
             : $ontemString;
 
         $recebidoAteOntem = $this->getRecebidoMes($inicioMes, $fimRecebido);
-
-        // CONTAS A RECEBER PENDENTES + ATRASADAS NO PERÍODO
         $contasReceberPendentesMes = $this->getContasReceberPendentesMes($inicioMes, $fimMes);
 
         $comparativoSemanal = $this->getComparativoSemanal();
@@ -55,11 +51,8 @@ class DashboardFinanceiroService
         $pagoPixMes = $this->getPagoPixMes($inicioMes, $fimMes);
         $contasPagarAberto = $this->getContasPagarAbertoMes($inicioMes, $fimMes);
 
-        // Despesas já existentes: o que foi pago em compra + contas a pagar abertas.
         $projecaoDespesasMes = $comprasPagasMes + $contasPagarAberto;
 
-        // Carbon pode retornar diferença quebrada quando existe diferença de horário.
-        // Por isso as datas são comparadas em startOfDay() e os dias são forçados como inteiros.
         $inicioPeriodo = $inicioPeriodo->copy()->startOfDay();
         $fimPeriodo = $fimPeriodo->copy()->startOfDay();
         $ontem = $ontem->copy()->startOfDay();
@@ -67,8 +60,9 @@ class DashboardFinanceiroService
 
         $diasNoPeriodo = (int) max(floor($inicioPeriodo->diffInDays($fimPeriodo)) + 1, 1);
 
-        // Dias completos = dias fechados dentro do período selecionado.
-        $fimDiasCompletos = $fimPeriodo->lessThan($ontem) ? $fimPeriodo->copy() : $ontem->copy();
+        $fimDiasCompletos = $fimPeriodo->lessThan($ontem)
+            ? $fimPeriodo->copy()
+            : $ontem->copy();
 
         $diasCompletos = $fimDiasCompletos->greaterThanOrEqualTo($inicioPeriodo)
             ? (int) floor($inicioPeriodo->diffInDays($fimDiasCompletos)) + 1
@@ -76,8 +70,6 @@ class DashboardFinanceiroService
 
         $diasCompletos = min($diasCompletos, $diasNoPeriodo);
 
-        // Dias restantes = total de dias do período menos os dias já fechados.
-        // Assim evitamos resultados como 21.999999999998.
         $diasRestantes = (int) max($diasNoPeriodo - $diasCompletos, 0);
 
         $mediaDiariaRecebimento = $diasCompletos > 0
@@ -86,8 +78,6 @@ class DashboardFinanceiroService
 
         $projecaoRecebimentoMes = round($mediaDiariaRecebimento * $diasNoPeriodo, 2);
 
-        // Previsão de compra futura baseada nas emissões já realizadas até ontem.
-        // Esta lógica não busca compra lançada, porque a compra ainda não existe.
         $projecaoReposicao = $this->getProjecaoReposicaoProdutos(
             $inicioMes,
             $fimRecebido,
@@ -95,14 +85,8 @@ class DashboardFinanceiroService
             $diasRestantes
         );
 
-        // NOVA FUNCIONALIDADE:
-        // Mostra quanto ainda precisaria comprar de gás e água,
-        // considerando a previsão de saída para os dias restantes menos o estoque atual.
         $saldoReposicaoAComprar = $this->getSaldoReposicaoAComprar($projecaoReposicao);
 
-        // ANÁLISE COM BASE NO MÊS ANTERIOR:
-        // Mostra o fechamento real do mês anterior e projeta o mês atual
-        // caso o comportamento de entradas e saídas se repita.
         $analiseMesAnterior = $this->getAnaliseMesAnterior(
             $inicioPeriodo,
             $diasNoPeriodo,
@@ -110,15 +94,10 @@ class DashboardFinanceiroService
             (float) ($saldoReposicaoAComprar['total']['custo_estimado'] ?? 0)
         );
 
-        // Custo real estimado de reposição considerando o estoque atual.
-        // Este é o valor que realmente ainda precisa comprar.
         $custoEstimadoReposicao = (float) ($saldoReposicaoAComprar['total']['custo_estimado'] ?? 0);
         $despesasTotaisComReposicao = round($projecaoDespesasMes + $custoEstimadoReposicao, 2);
 
-        // Resultado sem considerar a compra futura estimada.
         $resultadoProjetadoMes = round($projecaoRecebimentoMes - $projecaoDespesasMes, 2);
-
-        // Resultado mais realista: entrada projetada - despesas existentes - custo estimado de reposição.
         $resultadoProjetadoComReposicao = round($projecaoRecebimentoMes - $despesasTotaisComReposicao, 2);
 
         $faltaReceberParaCobrirMes = max($despesasTotaisComReposicao - $recebidoAteOntem, 0);
@@ -131,17 +110,13 @@ class DashboardFinanceiroService
             ? round($faltaReceberParaCobrirMes / $diasRestantes, 2)
             : 0;
 
-        // PREVISÃO REAL DE FECHAMENTO COM REPOSIÇÃO:
-        // Compara a média diária de recebimento até ontem com o custo médio diário futuro.
-        // O custo futuro considera somente o que ainda falta pagar + reposição estimada.
         $totalCustosFuturos = round($contasPagarAberto + $custoEstimadoReposicao, 2);
-        
+
         $custoMedioDiarioFuturo = $diasRestantes > 0
             ? round($totalCustosFuturos / $diasRestantes, 2)
             : 0;
 
         $sobraMediaDiariaProjetada = round($mediaDiariaRecebimento - $custoMedioDiarioFuturo, 2);
-
         $previsaoRealFechamento = round($sobraMediaDiariaProjetada * $diasRestantes, 2);
 
         $saldoPotencialMes = $contasReceberPendentesMes - $contasPagarAberto;
@@ -166,11 +141,7 @@ class DashboardFinanceiroService
             'cards' => [
                 'vendido_ontem' => $vendidoOntem,
                 'acumulado_mes' => $acumuladoMes,
-
-                // SOMENTE ATÉ ONTEM OU ATÉ A DATA FINAL ESCOLHIDA, SE FOR PERÍODO PASSADO
                 'recebido_ate_ontem' => $recebidoAteOntem,
-
-                // CONSIDERA STATUS PENDENTE + ATRASADO
                 'contas_receber_pendentes_mes' => $contasReceberPendentesMes,
 
                 'compras_pagas_mes' => $comprasPagasMes,
@@ -182,7 +153,6 @@ class DashboardFinanceiroService
                 'projecao_recebimento_mes' => $projecaoRecebimentoMes,
                 'resultado_projetado_mes' => $resultadoProjetadoMes,
 
-                // CARDS DE REPOSIÇÃO / COMPRA FUTURA ESTIMADA
                 'projecao_reposicao' => $projecaoReposicao,
                 'saldo_reposicao_a_comprar' => $saldoReposicaoAComprar,
                 'analise_mes_anterior' => $analiseMesAnterior,
@@ -195,7 +165,6 @@ class DashboardFinanceiroService
                 'meta_diaria_cobrir_aberto' => $metaDiariaCobrirAberto,
                 'meta_diaria_fechar_mes' => $metaDiariaFecharMes,
 
-                // NOVO CARD: PREVISÃO REAL DE FECHAMENTO COM REPOSIÇÃO
                 'total_custos_futuros' => $totalCustosFuturos,
                 'custo_medio_diario_futuro' => $custoMedioDiarioFuturo,
                 'sobra_media_diaria_projetada' => $sobraMediaDiariaProjetada,
@@ -213,11 +182,20 @@ class DashboardFinanceiroService
 
     private function getVendidoOntem(string $data): array
     {
+        $empresaId = $this->empresaId();
+
         $row = DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
             ->join('produtos as p', 'p.id', '=', 'mi.produto_id')
+            ->where('m.empresa_id', $empresaId)
+            ->where('mi.empresa_id', $empresaId)
+            ->where('p.empresa_id', $empresaId)
             ->whereDate('m.data_coleta', $data)
-            ->selectRaw("\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.valor_total ELSE 0 END), 0) as gas,\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.valor_total ELSE 0 END), 0) as agua,\n                COALESCE(SUM(mi.valor_total), 0) as total\n            ")
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.valor_total ELSE 0 END), 0) as gas,
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.valor_total ELSE 0 END), 0) as agua,
+                COALESCE(SUM(mi.valor_total), 0) as total
+            ")
             ->first();
 
         return [
@@ -229,11 +207,20 @@ class DashboardFinanceiroService
 
     private function getAcumuladoMes(string $inicioMes, string $fimMes): array
     {
+        $empresaId = $this->empresaId();
+
         $row = DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
             ->join('produtos as p', 'p.id', '=', 'mi.produto_id')
+            ->where('m.empresa_id', $empresaId)
+            ->where('mi.empresa_id', $empresaId)
+            ->where('p.empresa_id', $empresaId)
             ->whereBetween('m.data_coleta', [$inicioMes, $fimMes])
-            ->selectRaw("\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.valor_total ELSE 0 END), 0) as gas,\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.valor_total ELSE 0 END), 0) as agua,\n                COALESCE(SUM(mi.valor_total), 0) as total\n            ")
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.valor_total ELSE 0 END), 0) as gas,
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.valor_total ELSE 0 END), 0) as agua,
+                COALESCE(SUM(mi.valor_total), 0) as total
+            ")
             ->first();
 
         return [
@@ -245,16 +232,20 @@ class DashboardFinanceiroService
 
     private function getRecebidoMes(string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         if ($inicioMes > $fimMes) {
             return 0;
         }
 
         $caixa = (float) DB::table('caixa')
+            ->where('empresa_id', $empresaId)
             ->where('tipo', 'entrada')
             ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
             ->sum('valor');
 
         $caixaBanco = (float) DB::table('caixa_banco')
+            ->where('empresa_id', $empresaId)
             ->where('tipo', 'entrada')
             ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
             ->sum('valor');
@@ -264,7 +255,10 @@ class DashboardFinanceiroService
 
     private function getContasReceberPendentesMes(string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         return (float) DB::table('contas_a_receber')
+            ->where('empresa_id', $empresaId)
             ->whereIn('status', ['pendente', 'atrasado'])
             ->whereBetween('data_vencimento', [$inicioMes, $fimMes])
             ->sum('valor');
@@ -272,6 +266,8 @@ class DashboardFinanceiroService
 
     private function getComparativoSemanal(): array
     {
+        $empresaId = $this->empresaId();
+
         $hoje = Carbon::today();
         $ontem = $hoje->copy()->subDay();
 
@@ -285,6 +281,7 @@ class DashboardFinanceiroService
         }
 
         $inicioSemanaAnterior = $inicioSemanaAtual->copy()->subWeek();
+
         $fimSemanaAnteriorComparada = $diasComparacao > 0
             ? $inicioSemanaAnterior->copy()->addDays($diasComparacao - 1)
             : $inicioSemanaAnterior->copy()->subDay();
@@ -292,6 +289,8 @@ class DashboardFinanceiroService
         $semanaAtual = $diasComparacao > 0
             ? (float) DB::table('movimentacao as m')
                 ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
+                ->where('m.empresa_id', $empresaId)
+                ->where('mi.empresa_id', $empresaId)
                 ->whereBetween('m.data_coleta', [
                     $inicioSemanaAtual->toDateString(),
                     $fimComparacaoAtual->toDateString(),
@@ -302,6 +301,8 @@ class DashboardFinanceiroService
         $semanaAnterior = $diasComparacao > 0
             ? (float) DB::table('movimentacao as m')
                 ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
+                ->where('m.empresa_id', $empresaId)
+                ->where('mi.empresa_id', $empresaId)
                 ->whereBetween('m.data_coleta', [
                     $inicioSemanaAnterior->toDateString(),
                     $fimSemanaAnteriorComparada->toDateString(),
@@ -323,8 +324,12 @@ class DashboardFinanceiroService
 
     private function getVendasDiariasMes(string $inicioMes, string $fimMes): array
     {
+        $empresaId = $this->empresaId();
+
         return DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
+            ->where('m.empresa_id', $empresaId)
+            ->where('mi.empresa_id', $empresaId)
             ->whereBetween('m.data_coleta', [$inicioMes, $fimMes])
             ->groupBy('m.data_coleta')
             ->orderBy('m.data_coleta')
@@ -339,24 +344,18 @@ class DashboardFinanceiroService
 
     private function getComprasPagasMes(string $inicioMes, string $fimMes): float
     {
-        $caixa = (float) DB::table('caixa')
-            ->where('tipo', 'saida')
-            ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
-            ->whereRaw("UPPER(TRIM(origem)) = 'COMPRA'")
-            ->sum('valor');
-
-        $caixaBanco = (float) DB::table('caixa_banco')
-            ->where('tipo', 'saida')
-            ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
-            ->whereRaw("UPPER(TRIM(origem)) = 'COMPRA'")
-            ->sum('valor');
+        $caixa = $this->getPagoDinheiroMes($inicioMes, $fimMes);
+        $caixaBanco = $this->getPagoPixMes($inicioMes, $fimMes);
 
         return $caixa + $caixaBanco;
     }
 
     private function getPagoDinheiroMes(string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         return (float) DB::table('caixa')
+            ->where('empresa_id', $empresaId)
             ->where('tipo', 'saida')
             ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
             ->whereRaw("UPPER(TRIM(origem)) = 'COMPRA'")
@@ -365,7 +364,10 @@ class DashboardFinanceiroService
 
     private function getPagoPixMes(string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         return (float) DB::table('caixa_banco')
+            ->where('empresa_id', $empresaId)
             ->where('tipo', 'saida')
             ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
             ->whereRaw("UPPER(TRIM(origem)) = 'COMPRA'")
@@ -374,8 +376,11 @@ class DashboardFinanceiroService
 
     private function getContasPagarAbertoMes(string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         return (float) DB::table('contas_a_pagar')
-            ->where('status', 'pendente')
+            ->where('empresa_id', $empresaId)
+            ->whereIn('status', ['pendente', 'atrasado'])
             ->whereBetween('data_vencimento', [$inicioMes, $fimMes])
             ->sum('valor');
     }
@@ -386,6 +391,8 @@ class DashboardFinanceiroService
         int $diasCompletos,
         int $diasRestantes
     ): array {
+        $empresaId = $this->empresaId();
+
         $resultadoPadrao = [
             'gas' => [
                 'quantidade_emitida' => 0,
@@ -415,8 +422,16 @@ class DashboardFinanceiroService
         $row = DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
             ->join('produtos as p', 'p.id', '=', 'mi.produto_id')
+            ->where('m.empresa_id', $empresaId)
+            ->where('mi.empresa_id', $empresaId)
+            ->where('p.empresa_id', $empresaId)
             ->whereBetween('m.data_coleta', [$inicioMes, $fimBase])
-            ->selectRaw("\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.quantidade ELSE 0 END), 0) as qtd_gas,\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.quantidade ELSE 0 END), 0) as qtd_agua,\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as custo_base_gas,\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as custo_base_agua\n            ")
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.quantidade ELSE 0 END), 0) as qtd_gas,
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.quantidade ELSE 0 END), 0) as qtd_agua,
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as custo_base_gas,
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as custo_base_agua
+            ")
             ->first();
 
         $quantidadeGas = (float) ($row->qtd_gas ?? 0);
@@ -465,7 +480,6 @@ class DashboardFinanceiroService
         ];
     }
 
-
     private function getAnaliseMesAnterior(
         Carbon $inicioPeriodoAtual,
         int $diasPeriodoAtual,
@@ -477,6 +491,7 @@ class DashboardFinanceiroService
 
         $inicioAnterior = $inicioMesAnterior->toDateString();
         $fimAnterior = $fimMesAnterior->toDateString();
+
         $diasMesAnterior = (int) max(floor($inicioMesAnterior->diffInDays($fimMesAnterior)) + 1, 1);
 
         $entradasDinheiro = $this->getEntradasPorTabelaMes('caixa', $inicioAnterior, $fimAnterior);
@@ -489,12 +504,7 @@ class DashboardFinanceiroService
 
         $saldoCaixa = round($entradasTotal - $saidasTotal, 2);
 
-        // Contas que ainda estão pendentes com vencimento dentro do mês anterior.
-        // Isso ajuda a identificar quando o caixa fechou positivo, mas ainda ficou compromisso aberto.
         $contasAbertasMesAnterior = $this->getContasPagarAbertoMes($inicioAnterior, $fimAnterior);
-
-        // Custo estimado dos produtos emitidos/vendidos no mês anterior.
-        // É uma leitura gerencial para mostrar se o saldo de caixa cobriria a necessidade de recompor estoque.
         $custoProdutosEmitidos = $this->getCustoProdutosEmitidosMes($inicioAnterior, $fimAnterior);
 
         $resultadoAposContas = round($saldoCaixa - $contasAbertasMesAnterior, 2);
@@ -505,9 +515,12 @@ class DashboardFinanceiroService
 
         $projecaoEntradasBaseAnterior = round($mediaDiariaEntradas * $diasPeriodoAtual, 2);
         $projecaoSaidasBaseAnterior = round($mediaDiariaSaidas * $diasPeriodoAtual, 2);
-        $saldoCaixaProjetadoBaseAnterior = round($projecaoEntradasBaseAnterior - $projecaoSaidasBaseAnterior, 2);
 
-        // Leitura do mês atual usando a base do mês anterior, mas descontando os compromissos atuais.
+        $saldoCaixaProjetadoBaseAnterior = round(
+            $projecaoEntradasBaseAnterior - $projecaoSaidasBaseAnterior,
+            2
+        );
+
         $resultadoGerencialProjetadoBaseAnterior = round(
             $saldoCaixaProjetadoBaseAnterior - $contasPagarAbertoAtual - $saldoReposicaoAComprarAtual,
             2
@@ -547,7 +560,10 @@ class DashboardFinanceiroService
 
     private function getEntradasPorTabelaMes(string $tabela, string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         return (float) DB::table($tabela)
+            ->where('empresa_id', $empresaId)
             ->where('tipo', 'entrada')
             ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
             ->where(function ($query) {
@@ -559,7 +575,10 @@ class DashboardFinanceiroService
 
     private function getSaidasPorTabelaMes(string $tabela, string $inicioMes, string $fimMes): float
     {
+        $empresaId = $this->empresaId();
+
         return (float) DB::table($tabela)
+            ->where('empresa_id', $empresaId)
             ->where('tipo', 'saida')
             ->whereBetween('data_movimentacao', [$inicioMes, $fimMes])
             ->where(function ($query) {
@@ -571,11 +590,20 @@ class DashboardFinanceiroService
 
     private function getCustoProdutosEmitidosMes(string $inicioMes, string $fimMes): array
     {
+        $empresaId = $this->empresaId();
+
         $row = DB::table('movimentacao as m')
             ->join('movimentacao_itens as mi', 'mi.movimentacao_id', '=', 'm.id')
             ->join('produtos as p', 'p.id', '=', 'mi.produto_id')
+            ->where('m.empresa_id', $empresaId)
+            ->where('mi.empresa_id', $empresaId)
+            ->where('p.empresa_id', $empresaId)
             ->whereBetween('m.data_coleta', [$inicioMes, $fimMes])
-            ->selectRaw("\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as gas,\n                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as agua,\n                COALESCE(SUM(mi.quantidade * COALESCE(p.preco_compra, 0)), 0) as total\n            ")
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%GAS%' OR UPPER(p.nome) LIKE '%GÁS%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as gas,
+                COALESCE(SUM(CASE WHEN (UPPER(p.nome) LIKE '%AGUA%' OR UPPER(p.nome) LIKE '%ÁGUA%') THEN mi.quantidade * COALESCE(p.preco_compra, 0) ELSE 0 END), 0) as agua,
+                COALESCE(SUM(mi.quantidade * COALESCE(p.preco_compra, 0)), 0) as total
+            ")
             ->first();
 
         return [
@@ -626,7 +654,10 @@ class DashboardFinanceiroService
 
     private function getEstoqueAtualProduto(string $tipo): int
     {
+        $empresaId = $this->empresaId();
+
         $query = DB::table('produtos')
+            ->where('empresa_id', $empresaId)
             ->whereNotNull('quantidade_estoque');
 
         if ($tipo === 'gas') {
@@ -648,7 +679,10 @@ class DashboardFinanceiroService
 
     private function getPrecoCompraMedioProduto(string $tipo): float
     {
+        $empresaId = $this->empresaId();
+
         $query = DB::table('produtos')
+            ->where('empresa_id', $empresaId)
             ->whereNotNull('preco_compra')
             ->where('preco_compra', '>', 0);
 

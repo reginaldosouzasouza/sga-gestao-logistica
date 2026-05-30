@@ -1,3 +1,38 @@
+@php
+    $moduloAtual = session('modulo_atual', 'gas');
+
+    $modulosConfig = config('modulos');
+
+    if (!array_key_exists($moduloAtual, $modulosConfig)) {
+        $moduloAtual = 'gas';
+    }
+
+    $cfgModulo = config("modulos.$moduloAtual");
+
+    $modulo = $modulo ?? $moduloAtual;
+    $moduloNome = $moduloNome ?? ($cfgModulo['label'] ?? 'Revenda de Gás');
+    $moduloCor = $moduloCor ?? ($cfgModulo['cor'] ?? 'mod-gas');
+
+    $user = auth()->user();
+
+    /*
+     * MASTER vê tudo.
+     * Usei trim + strtoupper para evitar erro com espaço ou minúsculo.
+     */
+    $isMaster = $user && strtoupper(trim($user->tipo ?? '')) === 'MASTER';
+
+    /*
+     * Controle do menu Movimentação / Coletas.
+     */
+    $podeVerMenuMovimentacao =
+        $isMaster ||
+        ($user && $user->temPermissao('pedido_visualizar')) ||
+        ($user && $user->temPermissao('pedido_criar')) ||
+        ($user && $user->temPermissao('pedido_editar')) ||
+        ($user && $user->temPermissao('pedido_cancelar')) ||
+        ($user && $user->temPermissao('estoque_visualizar'));
+@endphp
+
 <nav>
     <ul>
 
@@ -9,34 +44,26 @@
             </div>
         </li>
 
-        {{-- Itens dinâmicos do módulo ativo --}}
-        @foreach(($menuExtra ?? []) as $grupo)
-            @if(!empty($grupo['filhos']))
-                <li class="dropdown">
-                    <a href="{{ $grupo['url'] ?? '#' }}">
-                        {{ $grupo['label'] ?? 'Menu' }} <i class="bi bi-caret-down-fill"></i>
-                    </a>
 
-                    <div class="dropdown-submenu">
-                        @foreach($grupo['filhos'] as $filho)
-                            <a href="{{ $filho['url'] ?? '#' }}">
-                                {{ $filho['label'] ?? 'Item' }}
+       
 
-                                @if(!empty($filho['icone']))
-                                    <img src="{{ asset($filho['icone']) }}" class="imagem">
-                                @endif
-                            </a>
-                        @endforeach
-                    </div>
-                </li>
-            @else
-                <li>
-                    <a href="{{ $grupo['url'] ?? '#' }}">
-                        {{ $grupo['label'] ?? 'Menu' }}
-                    </a>
-                </li>
-            @endif
-        @endforeach
+    <div class="dropdown-submenu">
+        <a href="/movimentacao" target="_blank">Teste Coletas</a>
+    </div>
+</li>
+
+        {{-- Movimentação / Coletas --}}
+        @if($podeVerMenuMovimentacao)
+            <li class="dropdown">
+                <a href="#">
+                    Movimentação <i class="bi bi-caret-down-fill"></i>
+                </a>
+
+                <div class="dropdown-submenu">
+                    @include('menu.partials.itens-fixos.movimentacao')
+                </div>
+            </li>
+        @endif
 
         {{-- Financeiro --}}
         <li class="dropdown">
