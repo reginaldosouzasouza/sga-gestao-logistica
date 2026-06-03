@@ -18,18 +18,20 @@
                 @csrf
                 <div class="mb-3">
                     <label>Cód. Usuário:</label>
-                    <input type="text" id="codigo_usuario" name="codigo_usuario" class="form-control" required>
-                </div>
-
+                    <input type="text" id="codigo_usuario" name="codigo_usuario" class="form-control" required>              
+                 </div>  
+                 <br> 
                 <div class="mb-3">
                     <label>Usuário:</label>
                     <input type="text" id="usuario" name="usuario" class="form-control" readonly>
                 </div>
+                <br> 
 
                 <div class="mb-3">
                     <label>Senha:</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
+                <br> 
 
                 <button type="submit" class="btn btn-primary">Entrar</button>    
                 
