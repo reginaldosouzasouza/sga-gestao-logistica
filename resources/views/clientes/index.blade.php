@@ -74,7 +74,7 @@
                             <td>{{ $cliente->cidade }}</td>
                             <td class="acoes">
                                 @if($podeEditarCliente)
-                                    <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-primary">
+                                    <a href="{{ route('clientes.edit', $cliente->id) }}" class="btn btn-editar">
                                         Consultar/Alterar
                                     </a>
                                 @endif
@@ -84,7 +84,7 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit" class="btn btn-danger"
+                                        <button type="submit" class="btn btn-excluir"
                                             onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
                                             Excluir
                                         </button>
