@@ -117,6 +117,16 @@
     </a>
 @endif
 
+{{-- Importação de Clientes - Somente MASTER --}}
+@if($isMaster)
+    <a href="{{ route('clientes.importar') }}" target="_blank" rel="noopener noreferrer">
+        Importação de Clientes
+    </a>
+@endif
+
+
+
+
 
 {{-- Importação de Despesas --}}
 @if($podeVerImportacaoDespesas)

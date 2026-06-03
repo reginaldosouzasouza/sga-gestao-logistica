@@ -46,6 +46,9 @@ use App\Http\Controllers\RelatorioNaturezaFinanceiraController;
 use App\Http\Controllers\NaturezaFinanceiraController;
 use App\Http\Controllers\DashboardFechamentoFinanceiroController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\ImportacaoClientesController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +58,18 @@ use App\Http\Controllers\EmpresaController;
 | formulário de login ficam fora do grupo auth.
 |--------------------------------------------------------------------------
 */
+
+Route::get('/abrir-sistema', function (\Illuminate\Http\Request $request) {
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/login')->with('status', 'Sessão anterior encerrada. Faça login novamente.');
+})->name('abrir.sistema');
+
+
+
 
 Route::get('/login-clean', [LoginController::class, 'showLoginForm'])->name('login.clean');
 
@@ -109,8 +124,7 @@ Route::middleware(['auth', 'nocache'])->group(function () {
         ->name('menu');
 
 
-
-   /*
+/*
 |--------------------------------------------------------------------------
 | CLIENTES - ROTAS COM PERMISSÃO
 |--------------------------------------------------------------------------
@@ -123,6 +137,17 @@ Route::get('/clientes', [ClienteController::class, 'index'])
 Route::get('/clientes/create', [ClienteController::class, 'create'])
     ->middleware('permissao:cliente_cadastrar')
     ->name('clientes.create');
+
+/* ROTAS IMPORTAÇÃO DE CLIENTES */
+Route::get('/clientes/importar', [ImportacaoClientesController::class, 'index'])
+    ->middleware('auth')
+    ->name('clientes.importar');
+
+Route::post('/clientes/importar', [ImportacaoClientesController::class, 'importar'])
+    ->middleware('auth')
+    ->name('clientes.importar.processar');
+/*  -------------------------------------------------------   */
+
 
 Route::post('/clientes', [ClienteController::class, 'store'])
     ->middleware('permissao:cliente_cadastrar')
@@ -155,7 +180,6 @@ Route::get('/clientes-pesquisar', [ClienteController::class, 'pesquisar'])
 Route::get('/buscar-cliente', [ClienteController::class, 'buscar'])
     ->middleware('permissao:cliente_visualizar')
     ->name('buscar.cliente');
-
 
    /*
 |--------------------------------------------------------------------------
@@ -614,20 +638,23 @@ Route::prefix('api')->group(function () {
         ->middleware('permissao:relatorio_financeiro');
 });
     
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARDS — PROTEGIDOS
-    |--------------------------------------------------------------------------
-    | Este bloco substitui todas as rotas antigas/duplicadas de dashboard.
-    | Não deixe outras rotas /dashboard fora deste grupo.
-    |--------------------------------------------------------------------------
-    */
+   /*
+|--------------------------------------------------------------------------
+| DASHBOARDS — PROTEGIDOS
+|--------------------------------------------------------------------------
+| Este bloco substitui todas as rotas antigas/duplicadas de dashboard.
+| Não deixe outras rotas /dashboard fora deste grupo.
+|--------------------------------------------------------------------------
+*/
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('auth')
-        ->name('dashboard.index');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'nocache', 'permissao:dashboard_visualizar'])
+    ->name('dashboard.index');
 
-    Route::prefix('dashboard')->middleware('auth')->group(function () {
+Route::prefix('dashboard')
+    ->middleware(['auth', 'nocache', 'permissao:dashboard_visualizar'])
+    ->group(function () {
+
         Route::get('/resumo', [DashboardController::class, 'resumo'])
             ->name('dashboard.resumo');
 
@@ -673,6 +700,14 @@ Route::prefix('api')->group(function () {
         Route::get('/fechamento-financeiro', [DashboardFechamentoFinanceiroController::class, 'index'])
             ->name('dashboard.fechamento-financeiro');
     });
+
+Route::get('/dashboard-gerencial-emissao', [DashboardEmissaoController::class, 'index'])
+    ->middleware(['auth', 'nocache', 'permissao:dashboard_visualizar'])
+    ->name('dashboard.emissao');
+
+Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'index'])
+    ->middleware(['auth', 'nocache', 'permissao:dashboard_visualizar'])
+    ->name('dashboard.financeiro');
 
     Route::get('/dashboard-gerencial-emissao', [DashboardEmissaoController::class, 'index'])
         ->middleware('auth')
