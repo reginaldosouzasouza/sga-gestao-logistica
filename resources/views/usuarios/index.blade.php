@@ -170,6 +170,9 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        @if(auth()->user() && strtoupper(auth()->user()->tipo ?? '') === 'MASTER')
+                            <th>Empresa</th>
+                        @endif
                         <th>Usuário</th>
                         <th>Nome</th>
                         <th>Email</th>
@@ -196,6 +199,17 @@
 
                         <tr>
                             <td class="col-id">{{ $usuario->id }}</td>
+
+                            @if(auth()->user() && strtoupper(auth()->user()->tipo ?? '') === 'MASTER')
+                                <td>
+                                    @if($usuario->empresa_id)
+                                        {{ $usuario->empresa_id }} - {{ $usuario->empresa ?? 'Empresa não encontrada' }}
+                                    @else
+                                        Sem empresa
+                                    @endif
+                                </td>
+                            @endif
+
                             <td class="usuario-login">{{ $usuario->usuario }}</td>
                             <td class="usuario-nome">{{ $usuario->nome_completo }}</td>
                             <td>{{ $usuario->email }}</td>
@@ -222,7 +236,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="sem-registros">
+                            <td colspan="{{ auth()->user() && strtoupper(auth()->user()->tipo ?? '') === 'MASTER' ? 7 : 6 }}" class="sem-registros">
                                 Nenhum usuário cadastrado.
                             </td>
                         </tr>
