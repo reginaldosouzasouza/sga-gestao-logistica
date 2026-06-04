@@ -11,41 +11,118 @@
         <h1 class="system-title">
             Sistema de Gestão Aplicada - <span class="highlight">SGA</span>
         </h1>
+
         <div class="login-box">
             <div class="login-form">
                 <h2>Bem-vindo ao Sistema</h2>
+
+                {{-- MENSAGENS DO SISTEMA --}}
+                @if(session('error'))
+                    <div style="
+                        background: #f8d7da;
+                        color: #842029;
+                        border: 1px solid #f5c2c7;
+                        padding: 12px 15px;
+                        border-radius: 8px;
+                        margin-bottom: 15px;
+                        font-weight: bold;
+                        text-align: center;
+                    ">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div style="
+                        background: #d1e7dd;
+                        color: #0f5132;
+                        border: 1px solid #badbcc;
+                        padding: 12px 15px;
+                        border-radius: 8px;
+                        margin-bottom: 15px;
+                        font-weight: bold;
+                        text-align: center;
+                    ">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('status'))
+                    <div style="
+                        background: #cff4fc;
+                        color: #055160;
+                        border: 1px solid #b6effb;
+                        padding: 12px 15px;
+                        border-radius: 8px;
+                        margin-bottom: 15px;
+                        font-weight: bold;
+                        text-align: center;
+                    ">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                {{-- ERROS DE VALIDAÇÃO --}}
+                @if($errors->any())
+                    <div style="
+                        background: #f8d7da;
+                        color: #842029;
+                        border: 1px solid #f5c2c7;
+                        padding: 12px 15px;
+                        border-radius: 8px;
+                        margin-bottom: 15px;
+                        font-weight: bold;
+                        text-align: center;
+                    ">
+                        @foreach($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="mb-3">
-                    <label>Cód. Usuário:</label>
-                    <input type="text" id="codigo_usuario" name="codigo_usuario" class="form-control" required>              
-                 </div>  
-                 <br> 
-                <div class="mb-3">
-                    <label>Usuário:</label>
-                    <input type="text" id="usuario" name="usuario" class="form-control" readonly>
-                </div>
-                <br> 
+                    @csrf
 
-                <div class="mb-3">
-                    <label>Senha:</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-                <br> 
+                    <div class="mb-3">
+                        <label>Cód. Usuário:</label>
+                        <input type="text" id="codigo_usuario" name="codigo_usuario" class="form-control" required>              
+                    </div>  
 
-                <button type="submit" class="btn btn-primary">Entrar</button>    
-                
+                    <br> 
+
+                    <div class="mb-3">
+                        <label>Usuário:</label>
+                        <input type="text" id="usuario" name="usuario" class="form-control" readonly>
+                    </div>
+
+                    <br> 
+
+                    <div class="mb-3">
+                        <label>Senha:</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+
+                    <br> 
+
+                    <button type="submit" class="btn btn-primary">Entrar</button>    
                 </form>
             </div>
+
             <p class="developer">
-                SISTEMA DESENVOLVIDO POR: <p><span class="dev-highlight">REGINALDO SOUZA</span></p>
-                <span class='contato'>(44) 9 9999-5767</span>
-                
+                SISTEMA DESENVOLVIDO POR:
+            </p>
+
+            <p>
+                <span class="dev-highlight">REGINALDO SOUZA</span>
+            </p>
+
+            <p>
+                <span class="contato">(44) 9 9999-5767</span>
             </p>
         </div>
     </div>
 
-  <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
             const codigoInput = document.getElementById("codigo_usuario");
             const usuarioInput = document.getElementById("usuario");
@@ -79,9 +156,6 @@
                     });
             });
         });
-</script>
-
- 
+    </script>
 </body>
 </html>
-

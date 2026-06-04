@@ -2,61 +2,91 @@
 
 @section('title', 'Empresas')
 
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/empresas.css') }}">
+@endsection
+
 @section('content')
 
-<div class="container mt-4">
+<div class="empresas-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Cadastro de Empresas</h2>
+    <div class="empresas-header">
+        <div>
+            <h2>Cadastro de Empresas</h2>
+            <p>Gerencie as empresas cadastradas no S.G.A SaaS.</p>
+        </div>
 
-        <a href="{{ route('empresas.create') }}" class="btn btn-primary">
+        <a href="{{ route('empresas.create') }}" class="btn-nova-empresa">
             + Nova Empresa
         </a>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success">
+        <div class="alerta sucesso">
             {{ session('success') }}
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger">
+        <div class="alerta erro">
             {{ session('error') }}
         </div>
     @endif
 
-    <div class="card">
-        <div class="card-body">
+    <div class="resumo-empresas">
+        <div class="card-resumo">
+            <span>Total</span>
+            <strong>{{ $empresas->total() }}</strong>
+        </div>
 
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
+        <div class="card-resumo ativo">
+            <span>Ativas</span>
+            <strong>{{ $empresas->where('status', 'ativo')->count() }}</strong>
+        </div>
+
+        <div class="card-resumo teste">
+            <span>Em Teste</span>
+            <strong>{{ $empresas->where('status', 'teste')->count() }}</strong>
+        </div>
+
+        <div class="card-resumo bloqueado">
+            <span>Bloqueadas</span>
+            <strong>{{ $empresas->where('status', 'bloqueado')->count() }}</strong>
+        </div>
+    </div>
+
+    <div class="empresas-card">
+
+        <div class="table-responsive">
+            <table class="empresas-table">
+                <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nome Fantasia</th>
+                        <th>Empresa</th>
                         <th>CNPJ</th>
-                        <th>Cidade</th>
+                        <th>Cidade/UF</th>
                         <th>Status</th>
                         <th>Plano</th>
                         <th>Vencimento</th>
-                        <th style="width: 220px;">Ações</th>
+                        <th class="acoes-coluna">Ações</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @forelse($empresas as $empresa)
                         <tr>
-                            <td>{{ $empresa->id }}</td>
-
-                            <td>
-                                <strong>{{ $empresa->nome_fantasia }}</strong>
-                                <br>
-                                <small class="text-muted">
-                                    {{ $empresa->razao_social }}
-                                </small>
+                            <td class="empresa-id">
+                                {{ $empresa->id }}
                             </td>
 
-                            <td>{{ $empresa->cnpj ?? '-' }}</td>
+                            <td class="empresa-nome">
+                                <strong>{{ $empresa->nome_fantasia }}</strong>
+                                <small>{{ $empresa->razao_social ?? 'Sem razão social informada' }}</small>
+                            </td>
+
+                            <td>
+                                {{ $empresa->cnpj ?? '-' }}
+                            </td>
 
                             <td>
                                 {{ $empresa->cidade ?? '-' }}
@@ -67,40 +97,44 @@
 
                             <td>
                                 @if($empresa->status === 'ativo')
-                                    <span class="badge bg-success">Ativo</span>
+                                    <span class="badge-status badge-ativo">Ativo</span>
                                 @elseif($empresa->status === 'teste')
-                                    <span class="badge bg-info text-dark">Teste</span>
+                                    <span class="badge-status badge-teste">Teste</span>
                                 @elseif($empresa->status === 'bloqueado')
-                                    <span class="badge bg-danger">Bloqueado</span>
+                                    <span class="badge-status badge-bloqueado">Bloqueado</span>
                                 @else
-                                    <span class="badge bg-secondary">Inativo</span>
+                                    <span class="badge-status badge-inativo">Inativo</span>
                                 @endif
                             </td>
 
-                            <td>{{ $empresa->plano ?? '-' }}</td>
+                            <td>
+                                <span class="badge-plano">
+                                    {{ $empresa->plano ?? '-' }}
+                                </span>
+                            </td>
 
                             <td>
                                 {{ $empresa->data_vencimento ? \Carbon\Carbon::parse($empresa->data_vencimento)->format('d/m/Y') : '-' }}
                             </td>
 
-                            <td>
-                                <a href="{{ route('empresas.show', $empresa->id) }}" class="btn btn-sm btn-info">
+                            <td class="acoes">
+                                <a href="{{ route('empresas.show', $empresa->id) }}" class="btn-acao btn-ver">
                                     Ver
                                 </a>
 
-                                <a href="{{ route('empresas.edit', $empresa->id) }}" class="btn btn-sm btn-warning">
+                                <a href="{{ route('empresas.edit', $empresa->id) }}" class="btn-acao btn-editar">
                                     Editar
                                 </a>
 
                                 @if($empresa->id != 1)
                                     <form action="{{ route('empresas.destroy', $empresa->id) }}"
                                           method="POST"
-                                          style="display:inline-block;"
+                                          class="form-excluir"
                                           onsubmit="return confirm('Deseja realmente excluir esta empresa?');">
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn-acao btn-excluir">
                                             Excluir
                                         </button>
                                     </form>
@@ -109,19 +143,19 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center">
+                            <td colspan="8" class="sem-registros">
                                 Nenhuma empresa cadastrada.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-
-            <div class="mt-3">
-                {{ $empresas->links() }}
-            </div>
-
         </div>
+
+        <div class="paginacao">
+            {{ $empresas->links() }}
+        </div>
+
     </div>
 
 </div>

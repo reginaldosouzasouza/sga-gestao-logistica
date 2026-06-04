@@ -98,7 +98,7 @@ Route::redirect('/', '/login');
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'nocache'])->group(function () {
+Route::middleware(['auth', 'nocache', 'empresa.ativa'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------

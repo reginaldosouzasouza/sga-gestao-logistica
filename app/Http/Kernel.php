@@ -47,6 +47,12 @@ class Kernel extends HttpKernel
         'funcionario' => \App\Http\Middleware\CheckFuncionario::class,
         'permissao' => \App\Http\Middleware\CheckPermissao::class,
 
+
+        // Bloqueia acesso de empresas inativas/bloqueadas
+        'empresa.ativa' => \App\Http\Middleware\VerificaEmpresaAtiva::class,
+
+
+
         // ✅ apenas ESTE alias 'module'
         'module' => \App\Http\Middleware\CheckModule::class,
     ];
