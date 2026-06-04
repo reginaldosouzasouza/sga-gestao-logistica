@@ -204,6 +204,16 @@
         .card.padoca:hover    { background: rgba(139,69,19,.1); }
         .card.caixa:hover     { background: rgba(47,123,11,.1); }
 
+
+    
+
+    .card.bloqueado:hover {
+    outline: 2px solid #dc3545;
+    box-shadow: 0 6px 18px rgba(220,53,69,.25);
+}
+
+
+
         /* RESPONSIVO - CELULAR */
         @media (max-width: 900px) {
             .header-inner {
@@ -336,7 +346,16 @@
     };
 
     $modoAcesso = strtoupper($usuario?->tipo ?? 'USUÁRIO');
+
+    $isMaster = $usuario && strtoupper(trim($usuario->tipo ?? '')) === 'MASTER';
+
+
 @endphp
+
+
+
+
+
 
 <header>
     <div class="header-inner">
@@ -386,35 +405,68 @@
 <main>
     <div class="grid">
 
-        <a href="{{ url('/menu/oficina') }}" class="card oficina">
-            <span class="icon">🧰</span>
-            <h4>Oficina</h4>
-        </a>
+        @if($isMaster)
+            <a href="{{ url('/menu/oficina') }}" class="card oficina">
+                <span class="icon">🧰</span>
+                <h4>Oficina</h4>
+            </a>
+        @else
+            <a href="#" class="card oficina bloqueado" onclick="return moduloNaoAutorizado();">
+                <span class="icon">🧰</span>
+                <h4>Oficina</h4>
+            </a>
+        @endif
 
         <a href="{{ url('/menu/gas') }}" class="card gas" target="_blank" rel="noopener noreferrer">
             <span class="icon">🧯</span>
             <h4>Revenda de Gás</h4>
         </a>
 
-        <a href="{{ url('/menu/gerencial') }}" class="card gerencial">
-            <span class="icon">📊</span>
-            <h4>Gerencial</h4>
-        </a>
+        @if($isMaster)
+            <a href="{{ url('/menu/gerencial') }}" class="card gerencial">
+                <span class="icon">📊</span>
+                <h4>Gerencial</h4>
+            </a>
+        @else
+            <a href="#" class="card gerencial bloqueado" onclick="return moduloNaoAutorizado();">
+                <span class="icon">📊</span>
+                <h4>Gerencial</h4>
+            </a>
+        @endif
 
-        <a href="{{ url('/menu/padoca') }}" class="card padoca">
-            <span class="icon">🥐</span>
-            <h4>Padoca</h4>
-        </a>
+        @if($isMaster)
+            <a href="{{ url('/menu/padoca') }}" class="card padoca">
+                <span class="icon">🥐</span>
+                <h4>Padoca</h4>
+            </a>
+        @else
+            <a href="#" class="card padoca bloqueado" onclick="return moduloNaoAutorizado();">
+                <span class="icon">🥐</span>
+                <h4>Padoca</h4>
+            </a>
+        @endif
 
-        <a href="{{ url('/menu/caixa') }}" class="card caixa">
-            <span class="icon">🎰</span>
-            <h4>Financeiro</h4>
-        </a>
+        @if($isMaster)
+            <a href="{{ url('/menu/caixa') }}" class="card caixa">
+                <span class="icon">🎰</span>
+                <h4>Financeiro</h4>
+            </a>
+        @else
+            <a href="#" class="card caixa bloqueado" onclick="return moduloNaoAutorizado();">
+                <span class="icon">🎰</span>
+                <h4>Financeiro</h4>
+            </a>
+        @endif
 
     </div>
 </main>
 
 <script>
+
+    function moduloNaoAutorizado() {
+        alert('ACESSO NÃO AUTORIZADO, contate o suporte.');
+    }
+
     function updateDateTime() {
         const now = new Date();
 
@@ -442,6 +494,7 @@
         }
     }
 
+        
     updateDateTime();
     setInterval(updateDateTime, 1000);
 </script>

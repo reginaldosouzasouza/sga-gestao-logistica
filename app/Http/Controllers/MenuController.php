@@ -16,6 +16,19 @@ class MenuController extends Controller
     public function index(string $modulo)
     {
         // Valida módulos permitidos
+
+        
+        $user = auth()->user();
+
+        $isMaster = $user && strtoupper(trim($user->tipo ?? '')) === 'MASTER';
+
+        $modulosPermitidosParaCliente = ['gas'];
+
+        if (!$isMaster && !in_array($modulo, $modulosPermitidosParaCliente)) {
+            return redirect('/sga')
+                ->with('error', 'ACESSO NÃO AUTORIZADO, contate o suporte.');
+        }
+
         $permitidos = array_keys(config('modulos'));
 
         if (!in_array($modulo, $permitidos)) {
