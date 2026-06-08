@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Fechamento Financeiro</title>
+@extends('layouts.app')
+
+@section('title', 'Dashboard Financeiro')
+
+@section('styles')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -379,10 +378,11 @@
                 font-size: 34px;
             }
         }
-    </style>
-</head>
+        </style>
+@endsection
 
-<body>
+@section('content')
+
 @php
     $cards = $dados['cards'];
     $periodo = $dados['periodo'];
@@ -994,5 +994,4 @@
     });
 </script>
 
-</body>
-</html>
+@endsection

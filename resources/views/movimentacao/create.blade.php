@@ -18,6 +18,7 @@
             </ul>
         </div>
     @endif
+
     <form action="{{ route('movimentacao.store') }}" method="POST">
     @csrf
 
@@ -32,13 +33,15 @@
             <a href="{{ route('clientes.create', ['from' => 'pedido_coleta']) }}" class="btn btn-primary">Cadastrar Cliente</a>
             <button type="button" id="limpar-busca" class="btn btn-secondary mt-2">Limpar Busca</button>
         </div>
+
         <div class="form-group">
             <label for="data_coleta">Data da Coleta</label>
             <input type="date" name="data_coleta" id="data_coleta" class="form-control" value="{{ old('data_coleta', \Carbon\Carbon::now()->format('Y-m-d')) }}">
         </div>
+
         <div class="short-input">
             <label for="controle_de_coleta">Controle de Coleta</label>
-            <input type="text" class="form-control" name='id' value="{{ old('id', $proximoId ?? '') }}" readonly>
+            <input type="text" class="form-control" name="id" value="{{ old('id', $proximoId ?? '') }}" readonly>
         </div>
     </div>
 
@@ -48,10 +51,12 @@
             <label for="cpf">CPF (opcional)</label>
             <input type="text" class="form-control" id="cpf" name="cpf">
         </div>
+
         <div class="medium-input">
             <label for="nome">Nome</label>
             <input type="text" class="form-control" id="nome" name="nome" required>
         </div>
+
         <div class="short-input">
             <label for="telefone">Telefone</label>
             <input type="text" class="form-control" id="telefone" name="telefone">
@@ -64,14 +69,17 @@
             <label for="endereco">Endereço</label>
             <input type="text" class="form-control" id="endereco" name="endereco" required>
         </div>
+
         <div class="short-input">
             <label for="numero">Número</label>
             <input type="text" class="form-control" id="numero" name="numero" required>
         </div>
+
         <div class="short-input">
             <label for="bairro">Bairro</label>
             <input type="text" class="form-control" id="bairro" name="bairro" required>
         </div>
+
         <div class="short-input">
             <label for="cidade">Cidade</label>
             <input type="text" class="form-control" id="cidade" name="cidade" required>
@@ -81,7 +89,38 @@
     <!-- Observação -->
     <div class="form-group">
         <label for="observacao">Observação</label>
-        <textarea class="form-control" id="observacao" name="observacao" rows="3"></textarea>
+        <textarea class="form-control" id="observacao" name="observacao" rows="3">{{ old('observacao') }}</textarea>
+    </div>
+
+    <!-- Veículo / Entregador -->
+    <div class="form-row">
+        <div class="medium-input">
+            <label for="veiculo_id">Veículo / Entregador</label>
+            <select name="veiculo_id" id="veiculo_id" class="form-control">
+                <option value="">Selecione o veículo</option>
+
+                @foreach(($veiculos ?? []) as $veiculo)
+                    <option
+                        value="{{ $veiculo->id }}"
+                        data-motorista="{{ $veiculo->motorista->nome ?? 'Sem motorista vinculado' }}"
+                        {{ old('veiculo_id') == $veiculo->id ? 'selected' : '' }}
+                    >
+                        {{ $veiculo->descricao }}
+                        @if($veiculo->placa)
+                            - {{ $veiculo->placa }}
+                        @endif
+                        @if($veiculo->motorista)
+                            - {{ $veiculo->motorista->nome }}
+                        @endif
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="short-input">
+            <label for="motorista_info">Motorista Vinculado</label>
+            <input type="text" id="motorista_info" class="form-control" readonly>
+        </div>
     </div>
 
     <!-- Itens do Pedido -->
@@ -98,27 +137,33 @@
                     @endforeach
                 </select>
             </div>
+
             <div class="col-md-2">
                 <label for="quantidade">Quantidade</label>
                 <input type="number" name="produtos[0][quantidade]" class="form-control quantidade" value="1" required>
             </div>
+
             <div class="col-md-2">
                 <label for="valor_unitario">Valor Unitário</label>
                 <input type="number" step="0.01" name="produtos[0][valor_unitario]" class="form-control valor-unitario" readonly>
             </div>
+
             <div class="col-md-2">
                 <label for="valor_total">Total do Item</label>
                 <input type="number" step="0.01" name="produtos[0][valor_total]" class="form-control valor-total" oninput>
             </div>
+
             <div class="col-md-2 d-flex align-items-end">
                 <button type="button" class="btn btn-danger remove-item">Remover</button>
             </div>
         </div>
     </div>
+
     <button type="button" id="add-item" class="btn btn-primary mt-2">Adicionar Produto</button>
 
     <!-- Pagamentos -->
     <h1>PAGAMENTOS</h1>
+
     <aside>
         <div class="pagamentos">
             <label for="forma_pagamento">Forma de Pagamento</label>
@@ -129,6 +174,7 @@
                 @endforeach
             </select>
         </div>
+
         <div class="pagamentos">
             <label for="prazo">Prazo</label>
             <select name="prazo" id="prazo" class="form-control">
@@ -141,22 +187,37 @@
     </aside>
 
     <p>Valor Total do Pedido: <span id="total-pedido">0.00</span></p>
+
     <button type="submit" class="btn btn-primary">Salvar Coleta</button>
 </form>
-    
+
 </div>
 @endsection
 </section>
-
-
-
-
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 $(document).ready(function() {
     let itemIndex = 0;
+
+    // =======================
+    // 🚚 VEÍCULO / MOTORISTA
+    // =======================
+    function atualizarDadosVeiculo() {
+        let option = $('#veiculo_id option:selected');
+
+        if (!option.val()) {
+            $('#motorista_info').val('');
+            return;
+        }
+
+        let motorista = option.data('motorista') || 'Sem motorista vinculado';
+        $('#motorista_info').val(motorista);
+    }
+
+    $('#veiculo_id').on('change', atualizarDadosVeiculo);
+    atualizarDadosVeiculo();
 
     // =======================
     // 🔍 PESQUISA DE CLIENTES
@@ -300,12 +361,3 @@ $(document).ready(function() {
 
 });
 </script>
-
-
-
-
-
-
-
-
-

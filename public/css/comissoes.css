@@ -1,0 +1,191 @@
+.relatorio-comissoes-page {
+    width: 95%;
+    margin: 35px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.12);
+}
+
+.relatorio-comissoes-page h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+    color: #111;
+}
+
+.filtros-comissoes {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.campo-filtro {
+    display: flex;
+    flex-direction: column;
+    min-width: 190px;
+}
+
+.campo-filtro label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #222;
+}
+
+.campo-filtro input,
+.campo-filtro select {
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.acoes-filtro {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-filtrar {
+    background: #007bff;
+    color: #ffffff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-limpar {
+    background: #6c757d;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.cards-resumo {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.card-resumo {
+    flex: 1;
+    min-width: 220px;
+    background: #f1f1f1;
+    padding: 18px;
+    border-radius: 8px;
+    border-left: 5px solid #6c757d;
+}
+
+.card-resumo span {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.card-resumo strong {
+    font-size: 24px;
+    color: #111;
+}
+
+.card-resumo.destaque {
+    background: #e8f5e9;
+    border-left-color: #28a745;
+}
+
+.tabela-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabela-comissoes {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabela-comissoes th {
+    background: #2f2f2f;
+    color: #ffffff;
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tabela-comissoes td {
+    padding: 9px;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+.tabela-comissoes tr:hover {
+    background: #f5f5f5;
+}
+
+.tabela-comissoes tfoot td {
+    background: #e9ecef;
+    font-weight: bold;
+}
+
+.sem-registros {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+}
+
+@media (max-width: 768px) {
+    .relatorio-comissoes-page {
+        width: 98%;
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .filtros-comissoes {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+   .campo-filtro,
+    .acoes-filtro,
+    .btn-filtrar,
+    .btn-limpar,
+    .btn-pdf {
+        width: 100%;
+    }
+
+    .acoes-filtro {
+        flex-direction: column;
+    }
+
+    .btn-limpar {
+        text-align: center;
+    }
+
+    .card-resumo {
+        min-width: 100%;
+    }
+
+    .tabela-comissoes {
+        font-size: 13px;
+    }
+}
+
+
+.btn-pdf {
+    background: #dc3545;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+}

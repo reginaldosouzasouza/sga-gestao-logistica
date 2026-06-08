@@ -280,7 +280,7 @@ class ContasAPagarController extends Controller
 
         $contaAPagar->delete();
 
-        return redirect($request->return_url ?? route('contas_a_pagar.index'))
+        return redirect($request->return_url ?? route('contas-a-pagar.index'))
             ->with('success', 'Conta a pagar excluída com sucesso!');
     }
 

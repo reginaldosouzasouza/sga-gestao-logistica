@@ -47,6 +47,9 @@ use App\Http\Controllers\NaturezaFinanceiraController;
 use App\Http\Controllers\DashboardFechamentoFinanceiroController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ImportacaoClientesController;
+use App\Http\Controllers\MotoristaController;
+use App\Http\Controllers\RelatorioComissaoController;
+
 
 
 
@@ -844,11 +847,20 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
         ->name('backups.restaurar');
 
 
+
+
+
+
+        // rotas veiculo da revenda de gas
+        Route::middleware(['auth'])->group(function () {
+    Route::resource('motoristas', MotoristaController::class);
+    Route::resource('veiculos', VeiculoController::class);
+});
     /*
     |--------------------------------------------------------------------------
     | OFICINA
     |--------------------------------------------------------------------------
-    */
+    
 
     Route::resource('ordens-servico', OrdemServicoController::class)->except(['show']);
 
@@ -878,7 +890,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
     Route::resource('mecanicos', MecanicoController::class);
     Route::resource('modulos', ModuloController::class);
     Route::resource('ordem_servico_itens', OrdemServicoItemController::class);
-
+    /
 
     /*
     |--------------------------------------------------------------------------
@@ -925,3 +937,20 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
         return view('manual.index');
     })->name('manual.index');
 });
+
+// ROTA MOTORISTA
+Route::middleware(['auth'])->group(function () {
+    Route::resource('motoristas', MotoristaController::class);
+});
+// comissao motorista
+Route::middleware(['auth'])->group(function () {
+    Route::get('/relatorios/comissoes', [RelatorioComissaoController::class, 'index'])
+        ->name('relatorios.comissoes.index');
+
+       
+Route::get('/relatorios/comissoes/pdf', [RelatorioComissaoController::class, 'pdf'])
+    ->name('relatorios.comissoes.pdf');
+});
+
+
+

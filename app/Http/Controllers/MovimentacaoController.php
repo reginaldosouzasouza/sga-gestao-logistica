@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use App\Models\Veiculo;
 
 class MovimentacaoController extends Controller
 {
@@ -42,12 +43,19 @@ class MovimentacaoController extends Controller
             ->orderBy('nome', 'asc')
             ->get();
 
+        $veiculos = Veiculo::with('motorista')
+            ->where('empresa_id', $empresaId)
+            ->where('ativo', 1)
+            ->orderBy('descricao')
+            ->get();
+
         return view('movimentacao.create', compact(
             'formas_de_pagamento',
             'prazos',
             'proximoId',
             'produtos',
-            'cliente_id'
+            'cliente_id',
+            'veiculos'
         ));
     }
 
@@ -83,6 +91,14 @@ class MovimentacaoController extends Controller
 
             'forma_pagamento' => 'required|exists:formas_de_pagamento,id',
             'prazo' => 'required|exists:prazos,id',
+
+            'veiculo_id' => [
+                'nullable',
+                Rule::exists('veiculos', 'id')->where(function ($query) use ($empresaId) {
+                    return $query->where('empresa_id', $empresaId)
+                        ->where('ativo', 1);
+                }),
+            ],
         ]);
 
         DB::beginTransaction();
@@ -98,6 +114,32 @@ class MovimentacaoController extends Controller
             $quantidadeTotalMovimentacao = array_sum(
                 array_column($request->produtos, 'quantidade')
             );
+
+            $veiculo = null;
+            $motoristaId = null;
+            $comissaoTipo = null;
+            $comissaoValor = 0;
+            $valorComissao = 0;
+
+            if ($request->filled('veiculo_id')) {
+                $veiculo = Veiculo::with('motorista')
+                    ->where('empresa_id', $empresaId)
+                    ->where('ativo', 1)
+                    ->find($request->veiculo_id);
+
+                if ($veiculo) {
+                    $motoristaId = $veiculo->motorista_id;
+                    $comissaoTipo = $veiculo->comissao_tipo;
+                    $comissaoValor = $veiculo->comissao_valor ?? 0;
+
+                    if ($comissaoTipo === 'percentual') {
+                        $valorComissao = ($valorTotalMovimentacao * $comissaoValor) / 100;
+                    } elseif ($comissaoTipo === 'fixa') {
+                        $valorComissao = $comissaoValor;
+                    }
+                }
+            }
+
 
             $movimentacao = Movimentacao::create([
                 'empresa_id' => $empresaId,
@@ -118,6 +160,11 @@ class MovimentacaoController extends Controller
                 'gerar_financeiro' => $request->has('gerar_financeiro')
                     ? (bool) $request->gerar_financeiro
                     : true,
+                'veiculo_id' => $request->veiculo_id,
+                'motorista_id' => $motoristaId,
+                'comissao_tipo' => $comissaoTipo,
+                'comissao_valor' => $comissaoValor,
+                'valor_comissao' => $valorComissao,
             ]);
 
             foreach ($request->produtos as $item) {
@@ -231,7 +278,7 @@ class MovimentacaoController extends Controller
 
         $search = $request->input('search');
 
-        $movimentacoes = Movimentacao::with(['formaPagamento'])
+        $movimentacoes = Movimentacao::with(['formaPagamento', 'veiculo.motorista', 'motorista'])
             ->where('empresa_id', $empresaId)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -252,12 +299,12 @@ class MovimentacaoController extends Controller
     {
         $empresaId = $this->empresaId();
 
-        $movimentacao = Movimentacao::with('itens.produto')
+        $movimentacao = Movimentacao::with(['itens.produto', 'veiculo.motorista', 'motorista'])
             ->where('empresa_id', $empresaId)
             ->where('id', $id)
             ->firstOrFail();
 
-        $historicoCliente = Movimentacao::with('itens.produto')
+        $historicoCliente = Movimentacao::with(['itens.produto', 'veiculo.motorista', 'motorista'])
             ->where('empresa_id', $empresaId)
             ->where(function ($query) use ($movimentacao) {
                 if (!empty($movimentacao->cliente_id)) {

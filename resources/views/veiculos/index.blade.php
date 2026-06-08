@@ -2,52 +2,145 @@
 
 @section('title', 'Cadastro de Veículos')
 
-@section('content')
-<link rel="stylesheet" href="{{ asset('css/veiculos-index.css') }}">
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/veiculos.css') }}">
+@endsection
 
-<div class="container-os">
-    <h2>Lista de Veículos</h2>
+@section('content')
+
+<div class="veiculos-page">
+
+    <h2>Cadastro de Veículos</h2>
 
     @if(session('success'))
-        <div style="background-color: #d4edda; padding: 10px; border-radius: 5px; margin-bottom: 15px; color: #155724;">
+        <div class="veiculos-alert-success">
             {{ session('success') }}
         </div>
     @endif
 
-    <a href="{{ route('veiculos.create') }}" class="btn-os" style="margin-bottom: 15px;">Novo Veículo</a>
+    <form method="GET" action="{{ route('veiculos.index') }}" class="veiculos-search">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Pesquisar por descrição, placa, marca ou modelo"
+            value="{{ request('search') }}"
+        >
 
-    <table class="tabela-veiculos">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>Placa</th>
-                <th>Combustível</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($veiculos as $veiculo)
-            <tr>
-                <td>{{ $veiculo->id }}</td>
-                <td>{{ $veiculo->cliente }}</td>
-                <td>{{ $veiculo->marca }}</td>
-                <td>{{ $veiculo->veiculo }}</td>
-                <td>{{ $veiculo->placa }}</td>
-                <td>{{ $veiculo->combustivel }}</td>
-                <td>
-                    <a href="{{ route('veiculos.edit', $veiculo->id) }}" class="btn-editar">Editar</a>
-                    <form action="{{ route('veiculos.destroy', $veiculo->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" onclick="return confirm('Tem certeza que deseja excluir?')" class="btn-excluir">Excluir</button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+        <button type="submit" class="btn-pesquisar">
+            Pesquisar
+        </button>
+
+        <a href="{{ route('veiculos.index') }}" class="btn-limpar">
+            Limpar
+        </a>
+    </form>
+
+    <div class="total-veiculos">
+        <strong>Total de Veículos: {{ $totalVeiculos }}</strong>
+    </div>
+
+    <a href="{{ route('veiculos.create') }}" class="btn-novo">
+        + Novo Veículo
+    </a>
+
+    <div class="veiculos-table-wrapper">
+        <table class="veiculos-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descrição</th>
+                    <th>Placa</th>
+                    <th>Motorista</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Ano</th>
+                    <th>Tipo</th>
+                    <th>Comissão</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @forelse($veiculos as $veiculo)
+                    <tr>
+                        <td>{{ $veiculo->id }}</td>
+
+                        <td>{{ $veiculo->descricao }}</td>
+
+                        <td>{{ $veiculo->placa ?? '-' }}</td>
+
+                        <td>
+                            {{ $veiculo->motorista->nome ?? 'Sem motorista' }}
+                        </td>
+
+                        <td>{{ $veiculo->marca ?? '-' }}</td>
+
+                        <td>{{ $veiculo->modelo ?? '-' }}</td>
+
+                        <td>{{ $veiculo->ano ?? '-' }}</td>
+
+                        <td>{{ $veiculo->tipo ?? '-' }}</td>
+
+                        <td>
+                            @if($veiculo->comissao_tipo === 'percentual')
+                                <span class="comissao-badge">
+                                    {{ number_format($veiculo->comissao_valor, 2, ',', '.') }}%
+                                </span>
+                            @elseif($veiculo->comissao_tipo === 'fixa')
+                                <span class="comissao-badge">
+                                    R$ {{ number_format($veiculo->comissao_valor, 2, ',', '.') }}
+                                </span>
+                            @else
+                                <span class="comissao-badge">
+                                    Sem comissão
+                                </span>
+                            @endif
+                        </td>
+
+                        <td>
+                            @if($veiculo->ativo)
+                                <span class="status-ativo">Ativo</span>
+                            @else
+                                <span class="status-inativo">Inativo</span>
+                            @endif
+                        </td>
+
+                        <td>
+                            <a href="{{ route('veiculos.edit', $veiculo->id) }}" class="btn-editar">
+                                Editar
+                            </a>
+
+                            <form 
+                                action="{{ route('veiculos.destroy', $veiculo->id) }}" 
+                                method="POST" 
+                                class="form-excluir"
+                                onsubmit="return confirm('Deseja realmente excluir este veículo?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit" class="btn-excluir">
+                                    Excluir
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="11" style="text-align: center;">
+                            Nenhum veículo cadastrado.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="veiculos-paginacao">
+        {{ $veiculos->links() }}
+    </div>
+
 </div>
+
 @endsection

@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class ImportacaoDespesaExcelService
 {
-    public function importar(string $caminhoArquivo): array
+    public function importar(string $caminhoArquivo, int $empresaId): array
     {
         $spreadsheet = IOFactory::load($caminhoArquivo);
         $sheet = $spreadsheet->getActiveSheet();
@@ -67,17 +67,21 @@ class ImportacaoDespesaExcelService
                         $descricao = 'SEM DESCRICAO';
                     }
 
-                    $nomeFornecedor = trim((string) ($item['fornecedor'] ?? ''));
-                    $fornecedorId = $this->buscarFornecedorId($nomeFornecedor);
+                    // Limpa aspas, espaços extras e caracteres estranhos antes de buscar o fornecedor.
+                    $nomeFornecedor = $this->limparTextoImportado($item['fornecedor'] ?? '');
+                    $fornecedorId = $this->buscarFornecedorId($nomeFornecedor, $empresaId);
 
                     $hash = $this->gerarHash(
+                        $empresaId,
                         $dataVencimento->format('Y-m-d'),
                         (string) $fornecedorId,
                         $descricao,
                         $valor
                     );
 
-                    $existe = ContasAPagar::where('hash_importacao', $hash)->exists();
+                    $existe = ContasAPagar::where('empresa_id', $empresaId)
+                        ->where('hash_importacao', $hash)
+                        ->exists();
 
                     if ($existe) {
                         $resultado['duplicadas']++;
@@ -85,6 +89,7 @@ class ImportacaoDespesaExcelService
                     }
 
                     ContasAPagar::create([
+                        'empresa_id'          => $empresaId,
                         'fornecedor_id'       => $fornecedorId,
                         'descricao'           => $descricao,
                         'valor'               => $valor,
@@ -180,7 +185,7 @@ class ImportacaoDespesaExcelService
             return false;
         }
 
-        $descricao = trim((string) ($item['descricao'] ?? ''));
+        $descricao = $this->limparTextoImportado($item['descricao'] ?? '');
 
         if ($descricao === '') {
             return false;
@@ -191,23 +196,38 @@ class ImportacaoDespesaExcelService
         return $valor > 0;
     }
 
-    private function buscarFornecedorId(string $nomeFornecedor): int
+    private function buscarFornecedorId(string $nomeFornecedor, int $empresaId): ?int
     {
-        $nomeFornecedor = trim($nomeFornecedor);
+        $nomeFornecedor = $this->limparTextoImportado($nomeFornecedor);
 
         if ($nomeFornecedor === '') {
-            return 13;
+            return $this->buscarFornecedorDiversos($empresaId);
         }
 
         $fornecedor = Fornecedor::query()
+            ->where('empresa_id', $empresaId)
             ->whereRaw('UPPER(nome) = ?', [mb_strtoupper($nomeFornecedor)])
             ->first();
 
         if (!$fornecedor) {
-            return 13;
+            return $this->buscarFornecedorDiversos($empresaId);
         }
 
         return $fornecedor->id;
+    }
+
+    private function buscarFornecedorDiversos(int $empresaId): ?int
+    {
+        $fornecedor = Fornecedor::query()
+            ->where('empresa_id', $empresaId)
+            ->whereRaw('UPPER(nome) = ?', ['FORNECEDOR DIVERSOS'])
+            ->first();
+
+        if ($fornecedor) {
+            return $fornecedor->id;
+        }
+
+        return null;
     }
 
     private function converterData($valor): Carbon
@@ -220,7 +240,7 @@ class ImportacaoDespesaExcelService
             return Carbon::instance(ExcelDate::excelToDateTimeObject($valor));
         }
 
-        $texto = trim((string) $valor);
+        $texto = $this->limparTextoImportado($valor);
 
         if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $texto)) {
             return Carbon::createFromFormat('d/m/Y', $texto);
@@ -235,7 +255,7 @@ class ImportacaoDespesaExcelService
 
     private function converterValor($valor): float
     {
-        $texto = trim((string) $valor);
+        $texto = $this->limparTextoImportado($valor);
 
         if ($texto === '') {
             throw new \RuntimeException('Valor inválido.');
@@ -257,9 +277,21 @@ class ImportacaoDespesaExcelService
 
     private function normalizarTexto(string $texto): string
     {
-        $texto = trim($texto);
-        $texto = preg_replace('/\s+/', ' ', $texto);
+        $texto = $this->limparTextoImportado($texto);
         return mb_strtoupper($texto);
+    }
+
+    private function limparTextoImportado($texto): string
+    {
+        $texto = trim((string) $texto);
+
+        // Remove aspas simples, aspas duplas e aspas curvas que podem vir do Excel/CSV.
+        $texto = str_replace(['"', "'", '“', '”', '‘', '’'], '', $texto);
+
+        // Remove espaços duplicados, tabulações e quebras de linha.
+        $texto = preg_replace('/\s+/', ' ', $texto);
+
+        return trim($texto);
     }
 
     private function removerAcentos(string $texto): string
@@ -280,9 +312,10 @@ class ImportacaoDespesaExcelService
         ]);
     }
 
-    private function gerarHash(string $dataVencimento, string $fornecedorId, string $descricao, float $valor): string
+    private function gerarHash(int $empresaId, string $dataVencimento, string $fornecedorId, string $descricao, float $valor): string
     {
         return hash('sha256', implode('|', [
+            $empresaId,
             $dataVencimento,
             $fornecedorId,
             $descricao,

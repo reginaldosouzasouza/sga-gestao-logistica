@@ -31,7 +31,12 @@ class Movimentacao extends Model
         'quantidade',  // Adicione aqui se estiver faltando
         'origem_tipo',
         'origem_id',
-        'gerar_financeiro'
+        'gerar_financeiro',
+        'veiculo_id',
+        'motorista_id',
+        'comissao_tipo',
+        'comissao_valor',
+        'valor_comissao',
     ];
 
     public function itens()
@@ -42,6 +47,16 @@ class Movimentacao extends Model
 public function formaPagamento()
 {
     return $this->belongsTo(FormaDePagamento::class, 'forma_pagamento_id');
+}
+
+public function veiculo()
+{
+    return $this->belongsTo(Veiculo::class);
+}
+
+public function motorista()
+{
+    return $this->belongsTo(Motorista::class);
 }
 
 

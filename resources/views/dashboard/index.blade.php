@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard Gerencial</title>
+@extends('layouts.app')
 
+@section('title', 'Dashboard Gerencial')
+
+@section('styles')
 <style>
 
 body{
@@ -49,10 +49,9 @@ body{
 }
 
 </style>
+@endsection
 
-</head>
-
-<body>
+@section('content')
 
 <h1>Dashboard Gerencial</h1>
 
@@ -747,5 +746,4 @@ function carregarGraficoRuptura() {
 
 </script>
 
-</body>
-</html>
+@endsection

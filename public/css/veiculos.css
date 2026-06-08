@@ -1,0 +1,344 @@
+.veiculos-page {
+    width: 95%;
+    margin: 35px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.12);
+}
+
+.veiculos-page h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+    color: #111;
+}
+
+.veiculos-alert-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #c3e6cb;
+}
+
+.veiculos-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.veiculos-search input {
+    flex: 1;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.veiculos-search button,
+.veiculos-search a {
+    padding: 9px 16px;
+    border-radius: 5px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-pesquisar {
+    background: #007bff;
+    color: #fff;
+}
+
+.btn-limpar {
+    background: #6c757d;
+    color: #fff;
+}
+
+.btn-novo {
+    display: inline-block;
+    background: #28a745;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.total-veiculos {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.veiculos-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.veiculos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.veiculos-table th {
+    background: #2f2f2f;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.veiculos-table td {
+    padding: 9px;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+.veiculos-table tr:hover {
+    background: #f5f5f5;
+}
+
+.status-ativo {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.status-inativo {
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.comissao-badge {
+    background: #e9ecef;
+    color: #333;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.btn-editar {
+    background: #ffc107;
+    color: #000;
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn-excluir {
+    background: #dc3545;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.form-excluir {
+    display: inline-block;
+}
+
+.veiculos-paginacao {
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .veiculos-page {
+        width: 98%;
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .veiculos-search {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .veiculos-search input,
+    .veiculos-search button,
+    .veiculos-search a {
+        width: 100%;
+    }
+
+    .veiculos-table {
+        font-size: 13px;
+    }
+}
+
+/* ==============================
+   FORMULÁRIO VEÍCULOS
+============================== */
+
+.veiculos-form-card {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.veiculos-form-header {
+    background: #2f2f2f;
+    color: #ffffff;
+    padding: 12px 18px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.veiculos-form-body {
+    padding: 20px;
+}
+
+.veiculos-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.veiculos-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.veiculos-field label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #222;
+}
+
+.veiculos-field input,
+.veiculos-field textarea,
+.veiculos-field select {
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 15px;
+}
+
+.veiculos-field textarea {
+    resize: vertical;
+}
+
+.field-15 {
+    flex: 0 0 15%;
+}
+
+.field-20 {
+    flex: 0 0 20%;
+}
+
+.field-25 {
+    flex: 0 0 25%;
+}
+
+.field-30 {
+    flex: 0 0 30%;
+}
+
+.field-35 {
+    flex: 0 0 35%;
+}
+
+.field-40 {
+    flex: 0 0 40%;
+}
+
+.field-50 {
+    flex: 0 0 50%;
+}
+
+.field-100 {
+    flex: 0 0 100%;
+}
+
+.veiculos-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+.veiculos-checkbox input {
+    width: 18px;
+    height: 18px;
+}
+
+.veiculos-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-salvar {
+    background: #007bff;
+    color: white;
+    padding: 11px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-cancelar {
+    background: #6c757d;
+    color: white;
+    padding: 11px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.veiculos-alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c6cb;
+}
+
+.veiculos-alert-danger ul {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .veiculos-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .field-15,
+    .field-20,
+    .field-25,
+    .field-30,
+    .field-35,
+    .field-40,
+    .field-50,
+    .field-100 {
+        flex: 0 0 100%;
+    }
+
+    .veiculos-actions {
+        flex-direction: column;
+    }
+
+    .btn-salvar,
+    .btn-cancelar {
+        width: 100%;
+        text-align: center;
+    }
+}

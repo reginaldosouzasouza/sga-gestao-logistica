@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financeiro</title>
+@extends('layouts.app')
+
+@section('title', 'Dashboard Financeiro')
+
+@section('styles')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Arial, Helvetica, sans-serif; background: #020617; color: #e2e8f0; }
@@ -245,9 +245,10 @@
             .products { grid-template-columns: 1fr; }
             .title h1 { font-size: 24px; }
         }
-    </style>
-</head>
-<body>
+      </style>
+@endsection
+
+@section('content')
     @php
         $cards = $dados['cards'];
         $comparativo = $dados['comparativo_semanal'];
@@ -585,5 +586,4 @@
             }
         });
     </script>
-</body>
-</html>
+@endsection
