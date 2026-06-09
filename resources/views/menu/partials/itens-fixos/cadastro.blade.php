@@ -10,6 +10,9 @@
 
     $podeVerClientes = $isMaster || $user->temPermissao('cliente_visualizar');
 
+    $podeVerVeiculos = $isMaster || $user->temPermissao('cliente_visualizar');
+
+     $podeVerMotoristas = $isMaster || $user->temPermissao('cliente_visualizar');
     /*
      * Compras não apareceu na sua lista antiga como permissão própria.
      * Mantive usando pedido_visualizar porque era o que seu arquivo usava.
@@ -75,5 +78,21 @@
     <a href="/produtos" target="_blank">
         Produtos
         <img src="{{ asset('images/imagem/produtos.png') }}" class="imagem">
+    </a>
+@endif
+
+{{-- Veiculos --}}
+@if($podeVerProdutos)
+    <a href="/veiculos" target="_blank">
+        Veiculos
+        <img src="{{ asset('images/imagem/veiculos.png') }}" class="imagem">
+    </a>
+@endif
+
+{{-- Motoristas --}}
+@if($podeVerMotoristas)
+    <a href="/motoristas" target="_blank">
+        Motoristas
+        <img src="{{ asset('images/imagem/motorista.png') }}" class="imagem">
     </a>
 @endif
