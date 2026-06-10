@@ -33,15 +33,35 @@ class EmpresaController extends Controller
             'cidade' => 'nullable|string|max:255',
             'estado' => 'nullable|string|max:2',
             'cep' => 'nullable|string|max:20',
+
+            // Controle geral
             'status' => 'required|in:ativo,inativo,bloqueado,teste',
+
+            // Controle SaaS
             'plano' => 'nullable|string|max:50',
+            'status_assinatura' => 'nullable|in:teste,ativa,vencida,bloqueada,cancelada',
             'data_inicio_teste' => 'nullable|date',
+            'data_fim_teste' => 'nullable|date',
             'data_vencimento' => 'nullable|date',
+            'motivo_bloqueio' => 'nullable|string|max:255',
+            'limite_usuarios' => 'nullable|integer|min:1',
+            'limite_clientes' => 'nullable|integer|min:1',
         ], [
             'nome_fantasia.required' => 'Informe o nome fantasia da empresa.',
             'cnpj.unique' => 'Este CNPJ já está cadastrado.',
             'email.email' => 'Informe um e-mail válido.',
         ]);
+
+        /*
+         * Checkbox: quando desmarcado, o campo não vem no request.
+         */
+        $validatedData['bloqueada'] = $request->has('bloqueada') ? 1 : 0;
+
+        /*
+         * Valores padrão SaaS
+         */
+        $validatedData['plano'] = $validatedData['plano'] ?? 'teste';
+        $validatedData['status_assinatura'] = $validatedData['status_assinatura'] ?? 'teste';
 
         Empresa::create($validatedData);
 
@@ -80,15 +100,35 @@ class EmpresaController extends Controller
             'cidade' => 'nullable|string|max:255',
             'estado' => 'nullable|string|max:2',
             'cep' => 'nullable|string|max:20',
+
+            // Controle geral
             'status' => 'required|in:ativo,inativo,bloqueado,teste',
+
+            // Controle SaaS
             'plano' => 'nullable|string|max:50',
+            'status_assinatura' => 'nullable|in:teste,ativa,vencida,bloqueada,cancelada',
             'data_inicio_teste' => 'nullable|date',
+            'data_fim_teste' => 'nullable|date',
             'data_vencimento' => 'nullable|date',
+            'motivo_bloqueio' => 'nullable|string|max:255',
+            'limite_usuarios' => 'nullable|integer|min:1',
+            'limite_clientes' => 'nullable|integer|min:1',
         ], [
             'nome_fantasia.required' => 'Informe o nome fantasia da empresa.',
             'cnpj.unique' => 'Este CNPJ já está cadastrado.',
             'email.email' => 'Informe um e-mail válido.',
         ]);
+
+        /*
+         * Checkbox: quando desmarcado, o campo não vem no request.
+         */
+        $validatedData['bloqueada'] = $request->has('bloqueada') ? 1 : 0;
+
+        /*
+         * Valores padrão SaaS
+         */
+        $validatedData['plano'] = $validatedData['plano'] ?? 'teste';
+        $validatedData['status_assinatura'] = $validatedData['status_assinatura'] ?? 'teste';
 
         $empresa->update($validatedData);
 

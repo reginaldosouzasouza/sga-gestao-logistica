@@ -2,13 +2,22 @@
 
 @section('title', 'Editar Empresa')
 
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/empresas-form.css') }}">
+@endsection
+
 @section('content')
 
-<div class="container mt-4">
+<div class="empresas-page">
 
-    <h2>Editar Empresa</h2>
+    <div class="empresas-header">
+        <div>
+            <h2>Editar Empresa</h2>
+            <p class="empresas-subtitle">Atualize os dados cadastrais e o controle SaaS da empresa.</p>
+        </div>
+    </div>
 
-    <div class="card mt-3">
+    <div class="card empresas-card mt-3">
         <div class="card-body">
 
             @if ($errors->any())
@@ -25,6 +34,8 @@
             <form action="{{ route('empresas.update', $empresa->id) }}" method="POST">
                 @csrf
                 @method('PUT')
+
+                <h5 class="empresas-section-title">Dados da Empresa</h5>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -92,9 +103,15 @@
                         <input type="text" name="estado" maxlength="2" class="form-control"
                                value="{{ old('estado', $empresa->estado) }}">
                     </div>
+                </div>
 
+                <hr class="empresas-divider">
+
+                <h5 class="empresas-section-title">Controle SaaS</h5>
+
+                <div class="row">
                     <div class="col-md-3 mb-3">
-                        <label>Status *</label>
+                        <label>Status da Empresa *</label>
                         <select name="status" class="form-control" required>
                             <option value="teste" {{ old('status', $empresa->status) == 'teste' ? 'selected' : '' }}>Teste</option>
                             <option value="ativo" {{ old('status', $empresa->status) == 'ativo' ? 'selected' : '' }}>Ativo</option>
@@ -105,24 +122,78 @@
 
                     <div class="col-md-3 mb-3">
                         <label>Plano</label>
-                        <input type="text" name="plano" class="form-control"
-                               value="{{ old('plano', $empresa->plano) }}">
+                        <select name="plano" class="form-control">
+                            <option value="teste" {{ old('plano', $empresa->plano) == 'teste' ? 'selected' : '' }}>Teste</option>
+                            <option value="basico" {{ old('plano', $empresa->plano) == 'basico' ? 'selected' : '' }}>Básico</option>
+                            <option value="completo" {{ old('plano', $empresa->plano) == 'completo' ? 'selected' : '' }}>Completo</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Status da Assinatura</label>
+                        <select name="status_assinatura" class="form-control">
+                            <option value="teste" {{ old('status_assinatura', $empresa->status_assinatura) == 'teste' ? 'selected' : '' }}>Teste</option>
+                            <option value="ativa" {{ old('status_assinatura', $empresa->status_assinatura) == 'ativa' ? 'selected' : '' }}>Ativa</option>
+                            <option value="vencida" {{ old('status_assinatura', $empresa->status_assinatura) == 'vencida' ? 'selected' : '' }}>Vencida</option>
+                            <option value="bloqueada" {{ old('status_assinatura', $empresa->status_assinatura) == 'bloqueada' ? 'selected' : '' }}>Bloqueada</option>
+                            <option value="cancelada" {{ old('status_assinatura', $empresa->status_assinatura) == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                        </select>
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label>Início do Teste</label>
                         <input type="date" name="data_inicio_teste" class="form-control"
-                               value="{{ old('data_inicio_teste', $empresa->data_inicio_teste) }}">
+                               value="{{ old('data_inicio_teste', optional($empresa->data_inicio_teste)->format('Y-m-d')) }}">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Fim do Teste</label>
+                        <input type="date" name="data_fim_teste" class="form-control"
+                               value="{{ old('data_fim_teste', optional($empresa->data_fim_teste)->format('Y-m-d')) }}">
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label>Vencimento</label>
                         <input type="date" name="data_vencimento" class="form-control"
-                               value="{{ old('data_vencimento', $empresa->data_vencimento) }}">
+                               value="{{ old('data_vencimento', optional($empresa->data_vencimento)->format('Y-m-d')) }}">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Limite de Usuários</label>
+                        <input type="number" name="limite_usuarios" class="form-control"
+                               min="1"
+                               value="{{ old('limite_usuarios', $empresa->limite_usuarios) }}">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Limite de Clientes</label>
+                        <input type="number" name="limite_clientes" class="form-control"
+                               min="1"
+                               value="{{ old('limite_clientes', $empresa->limite_clientes) }}">
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="bloqueada" value="1"
+                                   class="form-check-input"
+                                   id="bloqueada"
+                                   {{ old('bloqueada', $empresa->bloqueada) ? 'checked' : '' }}>
+
+                            <label class="form-check-label" for="bloqueada">
+                                Empresa bloqueada
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label>Motivo do Bloqueio</label>
+                        <input type="text" name="motivo_bloqueio" class="form-control"
+                               value="{{ old('motivo_bloqueio', $empresa->motivo_bloqueio) }}"
+                               placeholder="Ex: Teste vencido, inadimplência, bloqueio manual...">
                     </div>
                 </div>
 
-                <div class="mt-3">
+                <div class="empresas-actions">
                     <button type="submit" class="btn btn-success">
                         Atualizar Empresa
                     </button>
