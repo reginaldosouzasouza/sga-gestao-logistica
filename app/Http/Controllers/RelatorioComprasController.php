@@ -9,8 +9,7 @@ class RelatorioComprasController extends Controller
 {
     public function index(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $filtros = $request->only([
             'data_compra_inicio',
             'data_compra_fim',
@@ -54,8 +53,7 @@ class RelatorioComprasController extends Controller
     // -------------------------------------------------------------------------
     private function buscarCompras(array $f): \Illuminate\Support\Collection
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $params = [];
 
         $sql = "

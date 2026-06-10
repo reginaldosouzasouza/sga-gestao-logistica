@@ -14,8 +14,7 @@ class EstoqueController extends Controller
      */
     public function index(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $query = Estoque::with('produto')
             ->where('empresa_id', $empresaId);
 
@@ -56,8 +55,7 @@ class EstoqueController extends Controller
      */
     public function store(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $validatedData = $request->validate([
             'produto_id' => 'required|exists:produtos,id',
             'quantidade' => 'required|numeric',
@@ -102,8 +100,7 @@ class EstoqueController extends Controller
      */
     public function show($id)
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $estoque = Estoque::where('empresa_id', $empresaId)
             ->findOrFail($id);
 
@@ -120,8 +117,7 @@ class EstoqueController extends Controller
      */
     public function consultaEstoque(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $search = $request->input('search');
 
         $query = Produto::where('empresa_id', $empresaId);
@@ -143,8 +139,7 @@ class EstoqueController extends Controller
      */
     public function consulta(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
-
+        $empresaId = empresaAtualId();
         $search = $request->input('search');
         $sort = $request->input('sort', 'nome');
         $direction = $request->input('direction', 'asc');

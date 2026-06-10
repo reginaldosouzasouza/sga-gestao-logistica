@@ -22,7 +22,7 @@ class ComprasController extends Controller
 {
     private function empresaId()
     {
-        return auth()->user()->empresa_id;
+        return empresaAtualId();
     }
 
     public function create()

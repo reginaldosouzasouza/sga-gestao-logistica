@@ -37,7 +37,7 @@ class ContasAReceberExport
                 'Status',
             ], ';');
 
-            $empresaId = $this->filtros['empresa_id'] ?? auth()->user()->empresa_id;
+            $empresaId = $this->filtros['empresa_id'] ?? empresaAtualId();
 
             ContasAReceber::with(['cliente', 'formaPagamento'])
                 ->where('empresa_id', $empresaId)

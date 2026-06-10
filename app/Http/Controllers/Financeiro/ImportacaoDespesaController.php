@@ -18,8 +18,7 @@ class ImportacaoDespesaController extends Controller
     ImportacaoDespesaExcelService $service
 ) {
     try {
-        $empresaId = auth()->user()->empresa_id ?? session('empresa_id');
-
+    $empresaId = empresaAtualId() ?? session('empresa_id');
         if (!$empresaId) {
             return redirect()
                 ->back()

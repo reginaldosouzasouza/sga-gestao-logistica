@@ -22,9 +22,9 @@ use App\Models\Veiculo;
 
 class MovimentacaoController extends Controller
 {
-    private function empresaId()
+   private function empresaId()
     {
-        return auth()->user()->empresa_id;
+        return empresaAtualId();
     }
 
     public function create()

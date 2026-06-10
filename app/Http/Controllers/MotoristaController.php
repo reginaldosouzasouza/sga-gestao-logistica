@@ -9,8 +9,7 @@ class MotoristaController extends Controller
 {
     public function index(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
-
+        $empresaId = empresaAtualId();
         $query = Motorista::query();
 
         if ($empresaId) {
@@ -60,7 +59,7 @@ class MotoristaController extends Controller
         ]);
 
         Motorista::create([
-            'empresa_id' => auth()->user()->empresa_id ?? null,
+            'empresa_id' => empresaAtualId(),
             'nome' => $request->nome,
             'telefone' => $request->telefone,
             'cpf' => $request->cpf,
@@ -139,8 +138,7 @@ class MotoristaController extends Controller
 
     private function verificarEmpresa(Motorista $motorista)
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
-
+        $empresaId = empresaAtualId();
         if ($empresaId && $motorista->empresa_id != $empresaId) {
             abort(403, 'Acesso não autorizado.');
         }

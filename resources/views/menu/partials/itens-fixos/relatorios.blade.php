@@ -12,6 +12,7 @@
     $podeRelFinanceiro = $isMaster || $user->temPermissao('relatorio_financeiro');
     $podeRelCaixa      = $isMaster || $user->temPermissao('relatorio_financeiro');
     $podeRelGerencial  = $isMaster || $user->temPermissao('relatorio_financeiro');
+    $podeRelComissoes  = $isMaster || $user->temPermissao('relatorio_financeiro');
 
     /*
      * Controle de Vasilhames:
@@ -94,7 +95,7 @@
 
 
 {{-- Financeiro --}}
-@if($podeRelFinanceiro)
+@if($podeRelFinanceiro || $podeRelComissoes)
     <a href="#" class="menu-link" id="relcontasapagar-link">
         Financeiro
         <img src="{{ asset('images/imagem/contas_a_pagar.png') }}" class="imagem">
@@ -102,15 +103,28 @@
     </a>
 
     <div class="dropdown-submenu" id="relcontasapagar-submenu">
-        <a href="{{ url('/relatorio-contas-a-pagar') }}" target="_blank" rel="noopener noreferrer">
-            Relatório de Contas a Pagar
-        </a>
 
-        <a href="{{ url('/contas_a_receber/relatorio') }}" target="_blank" rel="noopener noreferrer">
-            Relatório de Contas a Receber
-        </a>
+        @if($podeRelFinanceiro)
+            <a href="{{ url('/relatorio-contas-a-pagar') }}" target="_blank" rel="noopener noreferrer">
+                Relatório de Contas a Pagar
+            </a>
+
+            <a href="{{ url('/contas_a_receber/relatorio') }}" target="_blank" rel="noopener noreferrer">
+                Relatório de Contas a Receber
+            </a>
+        @endif
+
+        @if($podeRelComissoes)
+            <a href="{{ route('relatorios.comissoes.index') }}" target="_blank" rel="noopener noreferrer">
+                Relatório de Comissões
+            </a>
+        @endif
+
     </div>
 @endif
+
+
+
 
 
 {{-- Caixa --}}

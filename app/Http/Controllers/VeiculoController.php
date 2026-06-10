@@ -10,7 +10,7 @@ class VeiculoController extends Controller
 {
     public function index(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
+        $empresaId = empresaAtualId();
 
         $query = Veiculo::with('motorista');
 
@@ -40,8 +40,7 @@ class VeiculoController extends Controller
 
     public function create()
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
-
+        $empresaId = empresaAtualId();
         $motoristas = Motorista::query()
             ->when($empresaId, function ($query) use ($empresaId) {
                 $query->where('empresa_id', $empresaId);
@@ -71,7 +70,7 @@ class VeiculoController extends Controller
         ]);
 
         Veiculo::create([
-            'empresa_id' => auth()->user()->empresa_id ?? null,
+            'empresa_id' => empresaAtualId(),
             'motorista_id' => $request->motorista_id,
             'descricao' => $request->descricao,
             'placa' => strtoupper($request->placa),
@@ -95,8 +94,7 @@ class VeiculoController extends Controller
     {
         $this->verificarEmpresa($veiculo);
 
-        $empresaId = auth()->user()->empresa_id ?? null;
-
+        $empresaId = empresaAtualId();
         $motoristas = Motorista::query()
             ->when($empresaId, function ($query) use ($empresaId) {
                 $query->where('empresa_id', $empresaId);
@@ -160,8 +158,7 @@ class VeiculoController extends Controller
 
     private function verificarEmpresa(Veiculo $veiculo)
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
-
+        $empresaId = empresaAtualId();
         if ($empresaId && $veiculo->empresa_id != $empresaId) {
             abort(403, 'Acesso não autorizado.');
         }

@@ -14,7 +14,7 @@ class FornecedorController extends Controller
      */
     public function index()
     {
-        $empresaId = auth()->user()->empresa_id;
+      $empresaId = empresaAtualId();
 
         $fornecedores = Fornecedor::where('empresa_id', $empresaId)
             ->orderBy('nome', 'asc')
@@ -43,7 +43,7 @@ class FornecedorController extends Controller
      */
     public function store(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
+        $empresaId = empresaAtualId();
 
         $validatedData = $request->validate([
             'cnpj' => [
@@ -77,7 +77,7 @@ class FornecedorController extends Controller
      */
     public function importarXML(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id;
+       $empresaId = empresaAtualId();
 
         $request->validate([
             'xml' => 'nullable|file|mimes:xml,txt',
@@ -183,7 +183,7 @@ class FornecedorController extends Controller
      */
     public function show($id)
     {
-        $empresaId = auth()->user()->empresa_id;
+        $empresaId = empresaAtualId();
 
         $fornecedor = Fornecedor::where('empresa_id', $empresaId)
             ->findOrFail($id);
@@ -196,7 +196,7 @@ class FornecedorController extends Controller
      */
     public function edit($id)
     {
-        $empresaId = auth()->user()->empresa_id;
+         $empresaId = empresaAtualId();
 
         $fornecedor = Fornecedor::where('empresa_id', $empresaId)
             ->findOrFail($id);
@@ -214,7 +214,7 @@ class FornecedorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $empresaId = auth()->user()->empresa_id;
+        $empresaId = empresaAtualId();
 
         $fornecedor = Fornecedor::where('empresa_id', $empresaId)
             ->findOrFail($id);
@@ -250,7 +250,7 @@ class FornecedorController extends Controller
      */
     public function destroy($id)
     {
-        $empresaId = auth()->user()->empresa_id;
+        $empresaId = empresaAtualId();
 
         $fornecedor = Fornecedor::where('empresa_id', $empresaId)
             ->findOrFail($id);

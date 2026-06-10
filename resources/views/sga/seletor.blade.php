@@ -73,6 +73,40 @@
             font-weight: bold;
         }
 
+
+        .empresa-master-form {
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .empresa-master-select {
+            max-width: 250px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+
+        .btn-trocar-empresa {
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: #0d6efd;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+
+        .btn-trocar-empresa:hover {
+            background: #0b5ed7;
+        }
+
+
         .badge-teste {
             background: #fff3cd;
             color: #856404;
@@ -255,6 +289,19 @@
                 text-align: left;
                 min-width: auto;
             }
+
+
+            .empresa-master-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .empresa-master-select,
+            .btn-trocar-empresa {
+                width: 100%;
+                max-width: 100%;
+            }
+
         }
 
         @media (max-width: 768px) {
@@ -332,10 +379,24 @@
     $nomeUsuario = $usuario->nome_completo ?? $usuario->usuario ?? 'Usuário';
     $primeiroNome = explode(' ', trim($nomeUsuario))[0];
 
-    $empresa = $usuario?->empresa;
+
+
+
+        $isMaster = $usuario && strtoupper(trim($usuario->tipo ?? '')) === 'MASTER';
+
+    $empresa = $isMaster
+        ? (empresaAtual() ?? $usuario?->empresa)
+        : $usuario?->empresa;
 
     $nomeEmpresa = $empresa?->nome_fantasia ?? 'Empresa não identificada';
     $statusEmpresa = strtolower($empresa?->status ?? '');
+
+    $empresasAtendimento = $isMaster
+        ? \App\Models\Empresa::orderBy('nome_fantasia')->get()
+        : collect();
+
+
+
 
     $ambiente = match ($statusEmpresa) {
         'teste' => 'PILOTO / TESTE',
@@ -347,7 +408,7 @@
 
     $modoAcesso = strtoupper($usuario?->tipo ?? 'USUÁRIO');
 
-    $isMaster = $usuario && strtoupper(trim($usuario->tipo ?? '')) === 'MASTER';
+    
 
 
 @endphp
@@ -366,7 +427,9 @@
 
         <div class="header-center">
             <div class="empresa-contexto">
-                <span class="empresa-label">Empresa Ativa</span>
+                <span class="empresa-label">
+                    {{ $isMaster ? 'Empresa em Atendimento' : 'Empresa Ativa' }}
+                </span>
 
                 <strong>{{ $nomeEmpresa }}</strong>
 
@@ -378,6 +441,26 @@
                 ">
                     {{ $ambiente }}
                 </span>
+
+                @if($isMaster)
+                <form action="{{ route('empresa-atendimento.trocar') }}" method="POST" class="empresa-master-form">
+                    @csrf
+
+                    <select name="empresa_id" class="empresa-master-select">
+                        @foreach($empresasAtendimento as $empresaOpcao)
+                            <option value="{{ $empresaOpcao->id }}"
+                                {{ $empresa && $empresa->id == $empresaOpcao->id ? 'selected' : '' }}>
+                                {{ $empresaOpcao->id }} - {{ $empresaOpcao->nome_fantasia }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="btn-trocar-empresa">
+                        Trocar
+                    </button>
+                </form>
+            @endif
+
             </div>
         </div>
 

@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
     private function empresaId()
     {
-        return auth()->user()->empresa_id;
+         return empresaAtualId();
     }
 
     public function index()

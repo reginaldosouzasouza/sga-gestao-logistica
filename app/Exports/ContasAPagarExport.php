@@ -38,7 +38,7 @@ class ContasAPagarExport
                 'Status',
             ], ';');
 
-            $empresaId = $this->filtros['empresa_id'] ?? auth()->user()->empresa_id;
+           $empresaId = $this->filtros['empresa_id'] ?? empresaAtualId();
 
             ContasAPagar::with(['fornecedor', 'formaPagamento'])
                 ->where('empresa_id', $empresaId)

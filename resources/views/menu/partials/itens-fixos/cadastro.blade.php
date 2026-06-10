@@ -4,29 +4,29 @@
     /*
      * MASTER vê tudo.
      * ADMIN, FINANCEIRO, GERENTE, OPERACIONAL etc.
-     * devem obedecer ao perfil/permissões.
+     * obedecem ao perfil/permissões.
      */
     $isMaster = $user && strtoupper($user->tipo ?? '') === 'MASTER';
 
-    $podeVerClientes = $isMaster || $user->temPermissao('cliente_visualizar');
-
-    $podeVerVeiculos = $isMaster || $user->temPermissao('cliente_visualizar');
-
-     $podeVerMotoristas = $isMaster || $user->temPermissao('cliente_visualizar');
-    /*
-     * Compras não apareceu na sua lista antiga como permissão própria.
-     * Mantive usando pedido_visualizar porque era o que seu arquivo usava.
-     * Se você tiver uma permissão específica de compras depois,
-     * podemos trocar para compra_visualizar.
-     */
-    $podeVerCompras = $isMaster || $user->temPermissao('pedido_visualizar');
-
+    $podeVerClientes     = $isMaster || $user->temPermissao('cliente_visualizar');
     $podeVerFornecedores = $isMaster || $user->temPermissao('fornecedor_visualizar');
     $podeVerProdutos     = $isMaster || $user->temPermissao('produto_visualizar');
 
     /*
+     * Veículos e Motoristas
+     * Ideal: criar permissões próprias no perfil.
+     */
+    $podeVerVeiculos   = $isMaster || $user->temPermissao('veiculo_visualizar');
+    $podeVerMotoristas = $isMaster || $user->temPermissao('motorista_visualizar');
+
+    /*
+     * Compras não apareceu na sua lista antiga como permissão própria.
+     * Mantive usando pedido_visualizar porque era o que seu arquivo usava.
+     */
+    $podeVerCompras = $isMaster || $user->temPermissao('pedido_visualizar');
+
+    /*
      * Naturezas Financeiras fica em configuração/cadastro auxiliar.
-     * Usei config_visualizar para controlar a exibição.
      */
     $podeVerNaturezas = $isMaster || $user->temPermissao('config_visualizar');
 
@@ -81,13 +81,15 @@
     </a>
 @endif
 
-{{-- Veiculos --}}
-@if($podeVerProdutos)
+
+{{-- Veículos --}}
+@if($podeVerVeiculos)
     <a href="/veiculos" target="_blank">
-        Veiculos
+        Veículos
         <img src="{{ asset('images/imagem/veiculos.png') }}" class="imagem">
     </a>
 @endif
+
 
 {{-- Motoristas --}}
 @if($podeVerMotoristas)

@@ -8,13 +8,15 @@ use Illuminate\Support\Facades\Log;
 
 class ClienteController extends Controller
 {
-    /**
-     * Retorna o ID da empresa do usuário logado.
+        /**
+     * Retorna o ID da empresa atual.
+     * Para usuário comum, retorna a empresa do usuário.
+     * Para MASTER, retorna a empresa em atendimento selecionada na sessão.
      */
-    private function empresaId()
-    {
-        return auth()->user()->empresa_id;
-    }
+        private function empresaId()
+        {
+            return empresaAtualId();
+        }
 
     /**
      * Display a listing of the resource.
@@ -261,4 +263,6 @@ class ClienteController extends Controller
 
         return response()->json($clientes);
     }
+    
 }
+

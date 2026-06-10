@@ -10,7 +10,7 @@ class FinanceiroHelper
 {
     private static function empresaId()
     {
-        return auth()->user()->empresa_id ?? null;
+       $empresaId = empresaAtualId();
     }
 
     public static function saldoCaixaAtual()

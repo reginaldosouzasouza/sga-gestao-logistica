@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "doctrine/dbal": "^4.3",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
@@ -23,12 +24,17 @@
         "phpunit/phpunit": "^11.0.1"
     },
     "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
-        }
-    },
+    "files": [
+        "app/Helpers/FinanceiroHelper.php",
+        "app/Helpers/EmpresaHelper.php"
+    ],
+    "psr-4": {
+        "App\\": "app/",
+        "Database\\Factories\\": "database/factories/",
+        "Database\\Seeders\\": "database/seeders/"
+    }
+},
+   
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"

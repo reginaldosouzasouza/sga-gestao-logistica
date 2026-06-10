@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Http;
 
 class DashboardController extends Controller
 {
+
+    private function empresaId()
+    {
+        return empresaAtualId();
+    }
+
     public function index()
     {
         return view('gerencial.dashboard.index');

@@ -49,6 +49,7 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ImportacaoClientesController;
 use App\Http\Controllers\MotoristaController;
 use App\Http\Controllers\RelatorioComissaoController;
+use App\Http\Controllers\EmpresaAtendimentoController;
 
 
 
@@ -952,5 +953,15 @@ Route::get('/relatorios/comissoes/pdf', [RelatorioComissaoController::class, 'pd
     ->name('relatorios.comissoes.pdf');
 });
 
+
+// EMPRESA DE ATENDIMENTO MASTER
+
+Route::post('/empresa-atendimento/trocar', [EmpresaAtendimentoController::class, 'trocar'])
+    ->name('empresa-atendimento.trocar')
+    ->middleware('auth');
+
+Route::post('/empresa-atendimento/limpar', [EmpresaAtendimentoController::class, 'limpar'])
+    ->name('empresa-atendimento.limpar')
+    ->middleware('auth');
 
 

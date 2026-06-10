@@ -12,7 +12,7 @@ class RelatorioComissaoController extends Controller
 {
     public function index(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
+       return empresaAtualId();
 
         $dataInicial = $request->data_inicial;
         $dataFinal = $request->data_final;
@@ -90,7 +90,7 @@ class RelatorioComissaoController extends Controller
 
     public function pdf(Request $request)
     {
-        $empresaId = auth()->user()->empresa_id ?? null;
+        $empresaId = empresaAtualId();
 
         $dataInicial = $request->data_inicial;
         $dataFinal = $request->data_final;
