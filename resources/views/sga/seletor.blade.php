@@ -245,7 +245,73 @@
     outline: 2px solid #dc3545;
     box-shadow: 0 6px 18px rgba(220,53,69,.25);
 }
+        /* Alerta de aniversariantes */
+        .alerta-aniversariantes {
+            max-width: 1100px;
+            margin: 28px auto 0 auto;
+            background: linear-gradient(135deg, #fff7ed, #ffffff);
+            border: 1px solid #fed7aa;
+            border-left: 6px solid #f97316;
+            border-radius: 16px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        }
 
+        .alerta-aniversariantes-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .alerta-aniversariantes-icone {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #ffedd5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .alerta-aniversariantes h3 {
+            margin: 0 0 5px 0;
+            color: #1f2937;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .alerta-aniversariantes p {
+            margin: 0;
+            color: #374151;
+            font-size: 15px;
+        }
+
+        .alerta-aniversariantes small {
+            color: #6b7280;
+        }
+
+        .btn-ver-aniversariantes {
+            background: #22c55e;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: 0.2s ease;
+        }
+
+        .btn-ver-aniversariantes:hover {
+            background: #16a34a;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
 
 
         /* RESPONSIVO - CELULAR */
@@ -346,6 +412,26 @@
                 font-size: 17px;
             }
         }
+
+        @media (max-width: 768px) {
+            .alerta-aniversariantes {
+                flex-direction: column;
+                align-items: flex-start;
+                margin: 18px 16px 0 16px;
+                padding: 16px;
+            }
+
+            .alerta-aniversariantes-info {
+                align-items: flex-start;
+            }
+
+            .btn-ver-aniversariantes {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+        }
+
 
         /* CELULARES BEM ESTREITOS */
         @media (max-width: 420px) {
@@ -486,6 +572,33 @@
 </header>
 
 <main>
+    @if(isset($aniversariantesHoje) && $aniversariantesHoje->count() > 0)
+        <div class="alerta-aniversariantes">
+            <div class="alerta-aniversariantes-info">
+                <div class="alerta-aniversariantes-icone">
+                    🎂
+                </div>
+
+                <div>
+                    <h3>Aniversariante(s) de hoje</h3>
+
+                    <p>
+                        Hoje temos <strong>{{ $aniversariantesHoje->count() }}</strong>
+                        cliente(s) fazendo aniversário.
+                    </p>
+
+                    <small>
+                        Aproveite para enviar uma mensagem de parabéns pelo WhatsApp.
+                    </small>
+                </div>
+            </div>
+
+            <a href="{{ route('clientes.aniversariantes') }}" class="btn-ver-aniversariantes">
+                Ver aniversariantes
+            </a>
+        </div>
+    @endif
+
     <div class="grid">
 
         @if($isMaster)

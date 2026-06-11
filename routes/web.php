@@ -50,6 +50,7 @@ use App\Http\Controllers\ImportacaoClientesController;
 use App\Http\Controllers\MotoristaController;
 use App\Http\Controllers\RelatorioComissaoController;
 use App\Http\Controllers\EmpresaAtendimentoController;
+use App\Http\Controllers\ClienteAniversarioController;
 
 
 
@@ -126,6 +127,18 @@ Route::middleware(['auth', 'nocache', 'empresa.ativa'])->group(function () {
     })
         ->middleware('master')
         ->name('menu');
+
+
+// rotas de aniversário cliente;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/clientes/aniversariantes', [ClienteAniversarioController::class, 'index'])
+        ->name('clientes.aniversariantes');
+});
+
+
+
+
 
 
 /*
@@ -963,5 +976,7 @@ Route::post('/empresa-atendimento/trocar', [EmpresaAtendimentoController::class,
 Route::post('/empresa-atendimento/limpar', [EmpresaAtendimentoController::class, 'limpar'])
     ->name('empresa-atendimento.limpar')
     ->middleware('auth');
+
+
 
 

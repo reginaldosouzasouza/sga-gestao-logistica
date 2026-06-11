@@ -114,8 +114,8 @@ class ValeGasController extends Controller
         ]);
 
         return redirect()
-            ->route('vale-gas.index')
-            ->with('success', 'Vale Gás cadastrado com sucesso.');
+            ->route('vale-gas.show', $vale->id)
+            ->with('success', 'Vale Gás cadastrado com sucesso. Agora você pode enviar a cópia pelo WhatsApp.');
     }
 
     public function show($id)
@@ -313,7 +313,7 @@ class ValeGasController extends Controller
 
             return redirect()
                 ->route('vale-gas.show', $vale->id)
-                ->with('success', 'Vale retirado com sucesso e estoque baixado automaticamente.');
+                ->with('success', 'Vale retirado com sucesso e estoque baixado automaticamente. Agora você pode enviar a confirmação da baixa pelo WhatsApp.');
         } catch (\Throwable $e) {
             DB::rollBack();
 

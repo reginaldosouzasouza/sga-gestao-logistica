@@ -9,6 +9,8 @@
     $isMaster = $user && strtoupper($user->tipo ?? '') === 'MASTER';
 
     $podeVerClientes     = $isMaster || $user->temPermissao('cliente_visualizar');
+   
+
     $podeVerFornecedores = $isMaster || $user->temPermissao('fornecedor_visualizar');
     $podeVerProdutos     = $isMaster || $user->temPermissao('produto_visualizar');
 
@@ -37,12 +39,27 @@
 @endphp
 
 
-{{-- Clientes --}}
+{{-- Clientes / Aniversariantes --}}
 @if($podeVerClientes)
-    <a href="/clientes" target="_blank">
+    <a href="#" class="menu-link" id="cliente-link">
         Clientes
         <img src="{{ asset('images/imagem/clientes.png') }}" class="imagem">
+        <i class="bi bi-caret-right-fill" style="margin-left:auto"></i>
     </a>
+
+    <div class="dropdown-submenu" id="cliente-submenu">
+
+        <a href="/clientes" target="_blank">
+            Clientes
+            <img src="{{ asset('images/imagem/clientes.png') }}" class="imagem">
+        </a>
+
+        <a href="{{ route('clientes.aniversariantes') }}" target="_blank">
+            Aniversariantes
+            <i class="bi bi-cake2" style="margin-left:auto"></i>
+        </a>
+
+    </div>
 @endif
 
 

@@ -119,6 +119,43 @@
     }
 </style>
 
+@php
+    $telefoneCliente = preg_replace('/\D/', '', $vale->cliente->telefone ?? '');
+
+    if ($telefoneCliente && strlen($telefoneCliente) <= 11) {
+        $telefoneCliente = '55' . $telefoneCliente;
+    }
+
+   $mensagemVale = "*A MARIGÁS INFORMA:*\n\n"
+    . "Olá, " . ($vale->cliente->nome ?? 'cliente') . "!\n\n"
+    . "Segue a cópia do seu *Vale Gás*:\n\n"
+    . "*Código:* " . $vale->codigo . "\n"
+    . "*Produto:* " . ($vale->produto->nome ?? '-') . "\n"
+    . "*Quantidade:* " . $vale->quantidade . "\n"
+    . "*Valor pago:* R$ " . number_format($vale->valor_pago, 2, ',', '.') . "\n"
+    . "*Data do vale:* " . $vale->data_vale->format('d/m/Y') . "\n"
+    . "*Status:* " . $vale->status . "\n\n"
+    . "Obrigado pela preferência.";
+
+    $linkWhatsappVale = $telefoneCliente
+        ? 'https://wa.me/' . $telefoneCliente . '?text=' . urlencode($mensagemVale)
+        : null;
+
+    $mensagemBaixa = "*A MARIGÁS INFORMA:*\n\n"
+    . "Olá, " . ($vale->cliente->nome ?? 'cliente') . "!\n\n"
+    . "Confirmamos a *baixa/retirada* do seu Vale Gás:\n\n"
+    . "*Código:* " . $vale->codigo . "\n"
+    . "*Produto:* " . ($vale->produto->nome ?? '-') . "\n"
+    . "*Quantidade retirada:* " . $vale->quantidade . "\n"
+    . "*Data da retirada:* " . ($vale->data_retirada ? $vale->data_retirada->format('d/m/Y H:i') : '-') . "\n"
+    . "*Status: RETIRADO*\n\n"
+    . "Obrigado pela preferência.";
+     
+    $linkWhatsappBaixa = $telefoneCliente
+        ? 'https://wa.me/' . $telefoneCliente . '?text=' . urlencode($mensagemBaixa)
+        : null;
+@endphp
+
 <div class="container-fluid mt-4 vale-gas-page">
     <div class="d-flex justify-content-between align-items-center topo-pagina">
         <div>
@@ -263,6 +300,28 @@
 
             <div class="bloco-acoes">
                 <a href="{{ route('vale-gas.index') }}" class="btn btn-secondary">Voltar</a>
+
+                @if($linkWhatsappVale)
+                    <a href="{{ $linkWhatsappVale }}" target="_blank" class="btn btn-success">
+                        Enviar Vale pelo WhatsApp
+                    </a>
+                @else
+                    <button type="button" class="btn btn-outline-secondary" disabled>
+                        Cliente sem telefone
+                    </button>
+                @endif
+
+                @if($vale->status === 'RETIRADO')
+                    @if($linkWhatsappBaixa)
+                        <a href="{{ $linkWhatsappBaixa }}" target="_blank" class="btn btn-success">
+                            Enviar Baixa pelo WhatsApp
+                        </a>
+                    @else
+                        <button type="button" class="btn btn-outline-secondary" disabled>
+                            Cliente sem telefone
+                        </button>
+                    @endif
+                @endif
 
                 @if($vale->pedido_coleta_id)
                     <a href="{{ route('movimentacao.show', $vale->pedido_coleta_id) }}" class="btn btn-info">
