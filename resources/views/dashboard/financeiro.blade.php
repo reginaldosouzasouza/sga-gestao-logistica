@@ -324,10 +324,10 @@
             </div>
 
             <div class="card cyan">
-                <div class="label">Recebido no Período até Ontem</div>
+                <div class="label">Recebido no Período</div>
                 <div class="value">{{ moeda($cards['recebido_ate_ontem']) }}</div>
                 <div class="detail">
-                    Entradas efetivas em caixa e banco considerando somente os dias fechados
+                    Entradas efetivas em caixa e banco no período
                 </div>
             </div>
 

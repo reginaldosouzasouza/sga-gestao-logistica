@@ -36,9 +36,11 @@ class DashboardFinanceiroService
         $vendidoOntem = $this->getVendidoOntem($ontemString);
         $acumuladoMes = $this->getAcumuladoMes($inicioMes, $fimMes);
 
-        $fimRecebido = $fimPeriodo->lessThan($ontem)
+       $hojeString = $hoje->toDateString();
+
+        $fimRecebido = $fimPeriodo->lessThan($hoje)
             ? $fimPeriodo->toDateString()
-            : $ontemString;
+            : $hojeString;
 
         $recebidoAteOntem = $this->getRecebidoMes($inicioMes, $fimRecebido);
         $contasReceberPendentesMes = $this->getContasReceberPendentesMes($inicioMes, $fimMes);
