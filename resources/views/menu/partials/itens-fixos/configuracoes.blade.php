@@ -49,7 +49,7 @@
 
 
 {{-- Usuários --}}
-@if($podeVerUsuarios || $podeCadastrarUsuarios)
+@if($podeVerUsuarios || $podeCadastrarUsuarios || $isMaster)
     <a href="#" class="menu-link" id="config-usuarios-link">
         Usuários
         <i class="bi bi-caret-right-fill" style="margin-left:auto"></i>
@@ -66,6 +66,12 @@
         @if($podeVerUsuarios)
             <a href="{{ url('/usuarios') }}" target="_blank" rel="noopener noreferrer">
                 Gerenciar Usuários
+            </a>
+        @endif
+
+        @if($isMaster)
+            <a href="{{ route('usuarios.monitor-acessos') }}" target="_blank" rel="noopener noreferrer">
+                Monitor de Acessos
             </a>
         @endif
 
@@ -123,9 +129,6 @@
         Importação de Clientes
     </a>
 @endif
-
-
-
 
 
 {{-- Importação de Despesas --}}

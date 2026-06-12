@@ -59,6 +59,70 @@ class UserController extends Controller
         return view('usuarios.index', compact('usuarios'));
     }
 
+    public function monitorAcessos()
+    {
+        $query = User::leftJoin('perfis', 'perfis.id', '=', 'users.perfil_id')
+            ->leftJoin('empresas', 'empresas.id', '=', 'users.empresa_id')
+            ->select(
+                'users.id',
+                'users.usuario',
+                'users.nome_completo',
+                'users.email',
+                'users.tipo',
+                'users.empresa_id',
+                'users.last_seen_at',
+                'users.last_login_at',
+                'users.last_login_ip',
+                'users.last_user_agent',
+                'perfis.nome as perfil',
+                'empresas.nome_fantasia as empresa'
+            );
+
+        /*
+         * MASTER enxerga todas as empresas.
+         * ADMIN enxerga somente os usuários da própria empresa.
+         */
+        if (!$this->isMaster()) {
+            $query->where('users.empresa_id', $this->empresaId());
+        }
+
+        $usuarios = $query
+            ->orderByRaw('users.last_seen_at IS NULL')
+            ->orderByDesc('users.last_seen_at')
+            ->orderBy('empresas.nome_fantasia')
+            ->orderBy('users.nome_completo')
+            ->get()
+            ->map(function ($usuario) {
+                $lastSeen = $usuario->last_seen_at;
+
+                if (!$lastSeen) {
+                    $usuario->status_acesso = 'Nunca acessou';
+                    $usuario->status_classe = 'status-nunca';
+                    $usuario->ultima_atividade_formatada = '-';
+                    return $usuario;
+                }
+
+                $minutos = $lastSeen->diffInMinutes(now());
+
+                if ($minutos <= 5) {
+                    $usuario->status_acesso = 'Online';
+                    $usuario->status_classe = 'status-online';
+                } elseif ($minutos <= 30) {
+                    $usuario->status_acesso = 'Inativo';
+                    $usuario->status_classe = 'status-inativo';
+                } else {
+                    $usuario->status_acesso = 'Offline';
+                    $usuario->status_classe = 'status-offline';
+                }
+
+                $usuario->ultima_atividade_formatada = $lastSeen->format('d/m/Y H:i:s');
+
+                return $usuario;
+            });
+
+        return view('usuarios.monitor_acessos', compact('usuarios'));
+    }
+
     public function create()
     {
         $perfis = DB::table('perfis')->orderBy('nome')->get();
@@ -223,11 +287,20 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        Log::info('Tentativa de login', $request->all());
+        Log::info('Tentativa de login', $request->except('password'));
 
         $credentials = $request->only('codigo_usuario', 'password');
 
         if (auth()->attempt(['id' => $credentials['codigo_usuario'], 'password' => $credentials['password']])) {
+            $request->session()->regenerate();
+
+            auth()->user()->forceFill([
+                'last_login_at' => now(),
+                'last_seen_at' => now(),
+                'last_login_ip' => $request->ip(),
+                'last_user_agent' => substr((string) $request->userAgent(), 0, 1000),
+            ])->save();
+
             Log::info('Login bem-sucedido para o usuário ID: ' . auth()->user()->id);
             return redirect()->route('sga');
         }

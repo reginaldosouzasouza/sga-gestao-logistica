@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Perfil;
-use App\Models\PerfilPermissao;
 use App\Models\Empresa;
 use Illuminate\Support\Facades\DB;
 
@@ -22,11 +21,22 @@ class User extends Authenticatable
         'password',
         'tipo',
         'perfil_id',
+
+        // Monitor de acessos
+        'last_seen_at',
+        'last_login_at',
+        'last_login_ip',
+        'last_user_agent',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'last_seen_at' => 'datetime',
+        'last_login_at' => 'datetime',
     ];
 
     public function perfil()

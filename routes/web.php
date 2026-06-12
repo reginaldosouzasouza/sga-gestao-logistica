@@ -850,7 +850,12 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
     Route::get('/perfis/financeiro', [PerfilController::class, 'financeiro'])
         ->name('perfis.financeiro');
+        
 
+        // Monitor de Acessos
+// Coloque junto das rotas de usuários, dentro do middleware auth.
+    Route::get('/usuarios/monitor-acessos', [UserController::class, 'monitorAcessos'])
+        ->name('usuarios.monitor-acessos');
 
     /*
     |--------------------------------------------------------------------------
