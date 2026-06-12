@@ -90,7 +90,17 @@ Route::get('/buscar-usuario/{id}', function ($id) {
     ]);
 })->name('buscar.usuario');
 
-Route::redirect('/', '/login');
+/*
+|--------------------------------------------------------------------------
+| SITE PÚBLICO DO S.G.A.
+|--------------------------------------------------------------------------
+| Página inicial de apresentação do sistema.
+| O login continua acessível por /abrir-sistema.
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function () {
+    return view('site.index');
+})->name('site.index');
 
 /*
 |--------------------------------------------------------------------------
