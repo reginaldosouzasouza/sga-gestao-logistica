@@ -202,7 +202,7 @@
                             <td>{{ $usuario->perfil ?? '-' }}</td>
                             <td>{{ $usuario->ultima_atividade_formatada }}</td>
                             <td>
-                                {{ $usuario->last_login_at ? $usuario->last_login_at->format('d/m/Y H:i:s') : '-' }}
+                                {{ $usuario->last_login_at ? $usuario->last_login_at->copy()->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s') : '-' }}
                             </td>
                             <td>{{ $usuario->last_login_ip ?? '-' }}</td>
                             <td>

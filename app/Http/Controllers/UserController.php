@@ -86,13 +86,15 @@ class UserController extends Controller
             $query->where('users.empresa_id', $this->empresaId());
         }
 
-        $usuarios = $query
-            ->orderByRaw('users.last_seen_at IS NULL')
-            ->orderByDesc('users.last_seen_at')
-            ->orderBy('empresas.nome_fantasia')
-            ->orderBy('users.nome_completo')
-            ->get()
-            ->map(function ($usuario) {
+            $timezone = 'America/Sao_Paulo';
+
+            $usuarios = $query
+                ->orderByRaw('users.last_seen_at IS NULL')
+                ->orderByDesc('users.last_seen_at')
+                ->orderBy('empresas.nome_fantasia')
+                ->orderBy('users.nome_completo')
+                ->get()
+                ->map(function ($usuario) use ($timezone) {
                 $lastSeen = $usuario->last_seen_at;
 
                 if (!$lastSeen) {
@@ -115,7 +117,10 @@ class UserController extends Controller
                     $usuario->status_classe = 'status-offline';
                 }
 
-                $usuario->ultima_atividade_formatada = $lastSeen->format('d/m/Y H:i:s');
+               $usuario->ultima_atividade_formatada = $lastSeen
+                ->copy()
+                ->timezone($timezone)
+                ->format('d/m/Y H:i:s');
 
                 return $usuario;
             });
