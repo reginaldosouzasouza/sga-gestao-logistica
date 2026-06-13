@@ -9,8 +9,6 @@
     $isMaster = $user && strtoupper($user->tipo ?? '') === 'MASTER';
 
     $podeVerClientes     = $isMaster || $user->temPermissao('cliente_visualizar');
-   
-
     $podeVerFornecedores = $isMaster || $user->temPermissao('fornecedor_visualizar');
     $podeVerProdutos     = $isMaster || $user->temPermissao('produto_visualizar');
 
@@ -39,60 +37,41 @@
 @endphp
 
 
-{{-- Clientes / Aniversariantes --}}
+{{-- Clientes --}}
 @if($podeVerClientes)
-    <a href="#" class="menu-link" id="cliente-link">
+    <a href="{{ url('/clientes') }}">
         Clientes
         <img src="{{ asset('images/imagem/clientes.png') }}" class="imagem">
-        <i class="bi bi-caret-right-fill" style="margin-left:auto"></i>
     </a>
 
-    <div class="dropdown-submenu" id="cliente-submenu">
-
-        <a href="/clientes" target="_blank">
-            Clientes
-            <img src="{{ asset('images/imagem/clientes.png') }}" class="imagem">
-        </a>
-
-        <a href="{{ route('clientes.aniversariantes') }}" target="_blank">
-            Aniversariantes
-            <i class="bi bi-cake2" style="margin-left:auto"></i>
-        </a>
-
-    </div>
+    <a href="{{ route('clientes.aniversariantes') }}">
+        Aniversariantes
+        <i class="bi bi-cake2" style="margin-left:auto"></i>
+    </a>
 @endif
 
 
-{{-- Fornecedores / Naturezas Financeiras --}}
-@if($podeVerFornecedores || $podeVerNaturezas)
-    <a href="#" class="menu-link" id="fornecedor-link">
+{{-- Fornecedores --}}
+@if($podeVerFornecedores)
+    <a href="{{ url('/fornecedores') }}">
         Fornecedores
         <img src="{{ asset('images/imagem/fornecedor.png') }}" class="imagem">
-        <i class="bi bi-caret-right-fill" style="margin-left:auto"></i>
     </a>
+@endif
 
-    <div class="dropdown-submenu" id="fornecedor-submenu">
 
-        @if($podeVerFornecedores)
-            <a href="/fornecedores" target="_blank">
-                Fornecedores
-                <img src="{{ asset('images/imagem/fornecedor.png') }}" class="imagem">
-            </a>
-        @endif
-
-        @if($podeVerNaturezas)
-            <a href="{{ url('/naturezas-financeiras') }}" target="_blank" rel="noopener noreferrer">
-                Naturezas Financeiras
-            </a>
-        @endif
-
-    </div>
+{{-- Naturezas Financeiras --}}
+@if($podeVerNaturezas)
+    <a href="{{ url('/naturezas-financeiras') }}">
+        Naturezas Financeiras
+        <i class="bi bi-diagram-3" style="margin-left:auto"></i>
+    </a>
 @endif
 
 
 {{-- Produtos --}}
 @if($podeVerProdutos)
-    <a href="/produtos" target="_blank">
+    <a href="{{ url('/produtos') }}">
         Produtos
         <img src="{{ asset('images/imagem/produtos.png') }}" class="imagem">
     </a>
@@ -101,7 +80,7 @@
 
 {{-- Veículos --}}
 @if($podeVerVeiculos)
-    <a href="/veiculos" target="_blank">
+    <a href="{{ url('/veiculos') }}">
         Veículos
         <img src="{{ asset('images/imagem/veiculos.png') }}" class="imagem">
     </a>
@@ -110,7 +89,7 @@
 
 {{-- Motoristas --}}
 @if($podeVerMotoristas)
-    <a href="/motoristas" target="_blank">
+    <a href="{{ url('/motoristas') }}">
         Motoristas
         <img src="{{ asset('images/imagem/motorista.png') }}" class="imagem">
     </a>

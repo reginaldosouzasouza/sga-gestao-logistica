@@ -466,6 +466,25 @@
                 font-size: 14px !important;
             }
         }
+
+
+        /* =====================================================
+           CORREÇÃO CLIQUE SUBMENU MOBILE
+           ===================================================== */
+        @media (max-width: 768px) {
+            nav .dropdown-submenu,
+            nav .dropdown-submenu * {
+                pointer-events: auto !important;
+            }
+
+            nav .dropdown-submenu a {
+                position: relative !important;
+                z-index: 10050 !important;
+                cursor: pointer !important;
+                touch-action: manipulation !important;
+                -webkit-tap-highlight-color: rgba(232,176,0,.25) !important;
+            }
+        }
     </style>
 </head>
 
@@ -728,121 +747,135 @@
     // Data e hora
     function updateDateTime() {
         const now = new Date();
-        document.getElementById('date').innerText = now.toLocaleDateString('pt-BR');
-        document.getElementById('time').innerText = now.toLocaleTimeString('pt-BR');
+        const dateEl = document.getElementById('date');
+        const timeEl = document.getElementById('time');
+
+        if (dateEl) dateEl.innerText = now.toLocaleDateString('pt-BR');
+        if (timeEl) timeEl.innerText = now.toLocaleTimeString('pt-BR');
     }
+
     setInterval(updateDateTime, 1000);
     updateDateTime();
 
-    // Submenus de Relatórios acionados por clique
     document.addEventListener('DOMContentLoaded', function () {
-        const menuLinks = document.querySelectorAll('.menu-link');
+        const isMobile = () => window.innerWidth <= 768;
 
-        menuLinks.forEach(function (link) {
+        /**
+         * Links dos submenus no celular.
+         * Esta captura vem antes do clique do grupo, para garantir que
+         * Clientes, Fornecedores, Produtos etc. naveguem normalmente.
+         */
+        function navegarLinkSubmenu(e) {
+            const link = e.target.closest('nav .dropdown-submenu a');
+
+            if (!link || !isMobile()) return;
+
+            const href = link.getAttribute('href');
+
+            if (!href || href === '#') return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Pequeno atraso evita conflito com touch/click do navegador mobile.
+            setTimeout(function () {
+                if (link.getAttribute('target') === '_blank') {
+                    window.open(href, '_blank');
+                } else {
+                    window.location.assign(href);
+                }
+            }, 30);
+        }
+
+        document.addEventListener('click', navegarLinkSubmenu, true);
+        document.addEventListener('touchend', navegarLinkSubmenu, true);
+
+        /**
+         * Clique nos grupos principais: Cadastro, Financeiro, Relatórios etc.
+         * No celular abre/fecha o submenu. No desktop mantém o hover normal.
+         */
+        document.querySelectorAll('nav li.dropdown > a').forEach(function (link) {
             link.addEventListener('click', function (e) {
-                e.preventDefault();
+                if (!isMobile()) return;
 
-                menuLinks.forEach(function (item) {
-                    if (item !== link) {
-                        item.classList.remove('active');
-                        const sub = item.nextElementSibling;
-                        if (sub) sub.style.display = 'none';
-                    }
+                const item = link.closest('li.dropdown');
+                const submenu = item ? item.querySelector('.dropdown-submenu') : null;
+
+                if (!submenu) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                document.querySelectorAll('nav li.dropdown.open').forEach(function (aberto) {
+                    if (aberto !== item) aberto.classList.remove('open');
                 });
 
-                link.classList.toggle('active');
-                const submenu = link.nextElementSibling;
-                if (submenu)
-                    submenu.style.display = (submenu.style.display === 'block') ? 'none' : 'block';
+                item.classList.toggle('open');
             });
         });
 
-        // Fecha ao clicar fora
+        // Fecha submenu ao clicar fora do menu no celular.
         document.addEventListener('click', function (e) {
+            if (!isMobile()) return;
             if (!e.target.closest('nav')) {
-                menuLinks.forEach(function (link) {
-                    link.classList.remove('active');
-                    const sub = link.nextElementSibling;
-                    if (sub) sub.style.display = 'none';
+                document.querySelectorAll('nav li.dropdown.open').forEach(function (item) {
+                    item.classList.remove('open');
                 });
             }
         });
-    });
 
-
-
-    // Dropdowns no celular: abre pelo toque em vez de depender do hover
-    document.querySelectorAll('nav li.dropdown > a').forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            if (window.innerWidth > 768) return;
-
-            const item = link.closest('li.dropdown');
-            const submenu = item ? item.querySelector(':scope > .dropdown-submenu') : null;
-            if (!submenu) return;
-
-            e.preventDefault();
-
-            document.querySelectorAll('nav li.dropdown.open').forEach(function (aberto) {
-                if (aberto !== item) aberto.classList.remove('open');
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') enviarParaIA();
             });
-
-            item.classList.toggle('open');
-        });
+        }
     });
 
+    function toggleChat() {
+        const box = document.getElementById('box-chat');
+        if (!box) return;
+        box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'flex' : 'none';
+    }
 
-function toggleChat() {
-    const box = document.getElementById('box-chat');
-    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
-}
+    async function enviarParaIA() {
+        const input = document.getElementById('chat-input');
+        const content = document.getElementById('chat-content');
 
-async function enviarParaIA() {
-    const input = document.getElementById('chat-input');
-    const content = document.getElementById('chat-content');
-    const msg = input.value.trim();
+        if (!input || !content) return;
 
-    if (!msg) return;
+        const msg = input.value.trim();
+        if (!msg) return;
 
-    // Exibe a mensagem do usuário na tela
-    content.innerHTML += `<div style="text-align:right; margin-bottom:10px;"><b>Você:</b> <span style="background:#e2f3ff; padding:5px 10px; border-radius:10px; display:inline-block;">${msg}</span></div>`;
-    input.value = '';
-    content.scrollTop = content.scrollHeight;
-
-    // Efeito de "Digitando..."
-    const loadingId = 'loading-' + Date.now();
-    content.innerHTML += `<div id="${loadingId}" style="margin-bottom:10px; color:#888;"><i>SGA está pensando...</i></div>`;
-
-    try {
-        const response = await fetch('/chat-suporte', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Obrigatório no Laravel
-            },
-            body: JSON.stringify({ mensagem: msg })
-        });
-
-        const data = await response.json();
-        document.getElementById(loadingId).remove();
-
-        // Exibe a resposta da IA
-        content.innerHTML += `<div style="margin-bottom:10px;"><b>SGA:</b> <div style="background:#eee; padding:8px; border-radius:10px;">${data.resposta}</div></div>`;
+        content.innerHTML += `<div style="text-align:right; margin-bottom:10px;"><b>Você:</b> <span style="background:#e2f3ff; padding:5px 10px; border-radius:10px; display:inline-block;">${msg}</span></div>`;
+        input.value = '';
         content.scrollTop = content.scrollHeight;
 
-    } catch (error) {
-        document.getElementById(loadingId).innerText = "Erro ao falar com o servidor.";
+        const loadingId = 'loading-' + Date.now();
+        content.innerHTML += `<div id="${loadingId}" style="margin-bottom:10px; color:#888;"><i>SGA está pensando...</i></div>`;
+
+        try {
+            const response = await fetch('/chat-suporte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ mensagem: msg })
+            });
+
+            const data = await response.json();
+            const loading = document.getElementById(loadingId);
+            if (loading) loading.remove();
+
+            content.innerHTML += `<div style="margin-bottom:10px;"><b>SGA:</b> <div style="background:#eee; padding:8px; border-radius:10px;">${data.resposta}</div></div>`;
+            content.scrollTop = content.scrollHeight;
+
+        } catch (error) {
+            const loading = document.getElementById(loadingId);
+            if (loading) loading.innerText = "Erro ao falar com o servidor.";
+        }
     }
-}
-
-// Enviar ao apertar "Enter"
-document.getElementById('chat-input').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') enviarParaIA();
-});
-</script>    
-
-
-
-
-
+</script>
 </body>
 </html>
