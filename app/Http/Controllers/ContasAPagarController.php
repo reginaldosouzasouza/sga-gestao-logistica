@@ -345,21 +345,21 @@ class ContasAPagarController extends Controller
         ));
     }
 
-    public function exportarExcel(Request $request)
-    {
-        $filtros = $request->only([
-            'fornecedor',
-            'status',
-            'forma_pagamento_id',
-            'data_compra_inicial',
-            'data_compra_final',
-            'data_vencimento_inicial',
-            'data_vencimento_final',
-            'data_pagamento',
-        ]);
+   public function exportarExcel(Request $request)
+{
+    $filtros = $request->only([
+        'fornecedor',
+        'status',
+        'forma_pagamento_id',
+        'data_compra_inicial',
+        'data_compra_final',
+        'data_vencimento_inicial',
+        'data_vencimento_final',
+        'data_pagamento',
+    ]);
 
-        $filtros['empresa_id'] = $this->empresaId();
+    $filtros['empresa_id'] = $this->empresaId();
 
-        return (new ContasAPagarExport($filtros))->download();
-    }
+    return (new ContasAPagarExport($filtros))->download();
+}
 }

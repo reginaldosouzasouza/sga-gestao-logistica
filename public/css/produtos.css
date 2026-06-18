@@ -1,127 +1,435 @@
+/* =====================================================
+   PRODUTOS - DESKTOP
+   ===================================================== */
+
 body {
     background-color: #f0f8ff;
     font-family: Arial, sans-serif;
 }
 
-.container {
-    max-width: 800px;
+.produtos-page {
+    width: 100%;
+    padding: 20px 10px;
+    box-sizing: border-box;
+}
+
+.container-produtos {
+    max-width: 1000px;
     margin: 0 auto;
+    padding: 20px;
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0px 0px 10px 0px #0000001a;
-    display:inline-table;
-  
+    box-sizing: border-box;
 }
-
-.table {
-    width: 100%;
-    table-layout: auto; /* Permite que a tabela se ajuste ao conteúdo */
-    white-space: nowrap; /* Impede a quebra de linha dentro das células */
-}
-
-thead th {
-   text-align: left;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
-
-tbody td {
-    padding: 10px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.table th, .table td {
-    text-align: left;
-    min-width: 250px; /* Define uma largura mínima para as colunas */
-}
-
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     color: #333;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.actions {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.actions a {
+    background-color: #90ee90;
+    color: #551a8b;
+    padding: 8px 14px;
+    display: inline-block;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 22px;
+    text-decoration: underline;
+}
+
+.actions a:hover {
+    background-color: #74df74;
+    color: #3d0f6d;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.search-container input[type="text"] {
+    width: 320px;
+    padding: 10px;
+    background-color: rgb(221, 235, 240);
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.search-container button {
+    padding: 10px 18px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.produtos-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabela-produtos {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.tabela-produtos thead th {
+    text-align: left;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #000;
+    font-size: 16px;
+}
+
+.tabela-produtos tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #dee2e6;
+    color: #000;
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.tabela-produtos tbody tr:hover {
+    background-color: #eef7ff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-excluir,
+.btn-consultar {
+    width: auto;
+    min-width: 125px;
+    padding: 7px 10px;
+    margin: 4px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+    color: #000;
+    cursor: pointer;
+}
+
+.btn-consultar {
+    background-color: aqua;
+}
+
+.btn-consultar:hover {
+    background-color: rgb(17, 211, 237);
+}
+
+.btn-excluir {
+    background-color: red;
+    color: white;
+}
+
+.btn-excluir:hover {
+    background-color: #c90000;
+}
+
+.form-excluir-produto {
+    display: inline;
+}
+
+.acoes-produto {
+    white-space: nowrap;
 }
 
 label {
     font-weight: bold;
 }
 
-.search-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
+/* =====================================================
+   PRODUTOS - CELULAR
+   No celular não exibe Módulo nem Descrição.
+   Cada produto vira um card.
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    .produtos-page {
+        padding: 12px 8px;
+        box-sizing: border-box;
+    }
+
+    .container-produtos {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 14px 12px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    h1 {
+        font-size: 22px;
+        margin-bottom: 16px;
+    }
+
+    .actions a {
+        width: 100%;
+        max-width: 240px;
+        padding: 11px 12px;
+        font-size: 17px;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .search-container {
+        flex-direction: column;
+        gap: 8px;
+        margin: 14px 0 18px;
+    }
+
+    .search-container input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    .search-container button {
+        width: 100%;
+        max-width: 180px;
+        padding: 11px;
+        font-size: 15px;
+    }
+
+    .produtos-table-wrapper {
+        overflow: visible;
+    }
+
+    .tabela-produtos,
+    .tabela-produtos tbody,
+    .tabela-produtos tr,
+    .tabela-produtos td {
+        display: block;
+        width: 100%;
+    }
+
+    .tabela-produtos {
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        white-space: normal;
+    }
+
+    .tabela-produtos thead {
+        display: none;
+    }
+
+    .tabela-produtos tbody tr {
+        background: #ffffff;
+        border: 1px solid #dddddd;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 14px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        box-sizing: border-box;
+    }
+
+    .tabela-produtos tbody tr:hover {
+        background: #ffffff;
+    }
+
+    .tabela-produtos tbody td {
+        border: none;
+        border-bottom: 1px solid #eeeeee;
+        padding: 10px 0;
+        text-align: left;
+        font-size: 15px;
+        line-height: 1.35;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+
+    .tabela-produtos tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .tabela-produtos tbody td::before {
+        content: attr(data-label);
+        display: block;
+        width: 100%;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333333;
+        font-size: 14px;
+    }
+
+    /* Oculta no celular as colunas que você pediu */
+    .tabela-produtos .col-modulo,
+    .tabela-produtos .col-descricao {
+        display: none !important;
+    }
+
+    .acoes-produto {
+        padding-top: 12px !important;
+    }
+
+    .acoes-produto::before {
+        margin-bottom: 8px !important;
+    }
+
+    .btn-consultar,
+    .btn-excluir {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        margin: 7px 0;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    .form-excluir-produto {
+        display: block;
+        width: 100%;
+    }
 }
 
-.search-container input[type="text"] {
-    width: 300px; /* Ajuste a largura conforme necessário */
-    padding: 10px;
-    background-color: rgb(221, 235, 240);
-}
+@media (max-width: 420px) {
+    .container-produtos {
+        padding: 12px 10px;
+    }
 
-.search-container button {
-    padding: 10px 20px;
-    margin-left: 10px;
-}
+    h1 {
+        font-size: 20px;
+    }
 
-
-.actions a {
-    background-color: #90ee90; /* Cor de fundo verde */
-    padding: 5px 10px; /* Adiciona espaço ao redor do texto */
-    display: inline-block; /* Garante que o fundo só ocupe o espaço do texto */
-    border-radius: 5px; /* Arredonda as bordas para um visual mais suave */
-    font-weight: bold; /* Deixa o texto em negrito */
-    font-size: 25px;
-   
-} 
-
-
-.btn-excluir {
-
-    background-color: red;
-    width: 50%;   
-     padding: 5px;
-     margin: 5px 0 10px 0;
-    display:inline-block;
-     border: 1px solid #ccc;
-     border-radius: 4px;
-     box-sizing: border-box;
-     font-size: 15px;
-
-}
-
-.btn-excluir:hover {
-
-    background-color: red;
-    
-
-}
-
-.btn-consultar {
-
-     background-color: aqua; 
-     width: 50%;   
-     padding: 5px;
-     margin: 5px 0 10px 0;
-    display:inline-block;
-     border: 1px solid #ccc;
-     border-radius: 4px;
-     box-sizing: border-box;
-     font-size: 15px;
-    
-    
-}
-
-.btn-consultar:hover {
-
-    background-color: rgb(17, 211, 237);
-}
-
-/* Efeito de hover para as linhas da tabela */
-tbody tr:hover {
-    background-color: #a7a7a7; /* Cor de fundo ao passar o mouse */
-    cursor: pointer; /* Muda o cursor para o ícone de mão */
-    transition: background-color 0.3s ease; /* Adiciona uma transição suave */
+    .tabela-produtos tbody td {
+        font-size: 14px;
+    }
 }
 
 
+/* =====================================================
+   MENU INTERNO COMPACTO - CELULAR
+   Usado nas telas internas: clientes, produtos, fornecedores etc.
+   ===================================================== */
+@media (max-width: 768px) {
+
+    nav {
+        width: 100% !important;
+        max-height: 52px !important;
+        background: #2f2f2f !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        white-space: nowrap !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    nav::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    nav::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    nav ul {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        width: max-content !important;
+        min-width: 100% !important;
+        margin: 0 !important;
+        padding: 7px 8px !important;
+        gap: 6px !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+
+    nav ul li {
+        display: inline-flex !important;
+        width: auto !important;
+        min-width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: 0 0 auto !important;
+        box-sizing: border-box !important;
+    }
+
+    nav ul li a {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: auto !important;
+        min-width: auto !important;
+        height: auto !important;
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    nav ul li a:hover {
+        background-color: #444 !important;
+    }
+
+    /*
+       Esconde o bloco amarelo nas telas internas no celular.
+       Ele ocupa muito espaço e não ajuda na navegação.
+    */
+    .gestao,
+    .box-gestao {
+        display: none !important;
+    }
+
+    /*
+       Submenus abertos no celular
+    */
+    .dropdown-submenu {
+        position: absolute !important;
+        top: 52px !important;
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        min-width: 220px !important;
+        max-width: calc(100vw - 16px) !important;
+        background-color: #252525 !important;
+        border-radius: 8px !important;
+        padding: 8px !important;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.35) !important;
+    }
+
+    .dropdown-submenu a {
+        display: flex !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 11px 12px !important;
+        font-size: 14px !important;
+        white-space: normal !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    .dropdown-submenu a:hover {
+        background-color: #3a3a3a !important;
+    }
+}

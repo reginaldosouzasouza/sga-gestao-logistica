@@ -12,20 +12,40 @@ class VasilhameEmprestimoController extends Controller
         return empresaAtualId();
     }
 
-    public function index(Request $request)
-    {
-        $empresaId = $this->empresaId();
+  public function index(Request $request)
+{
+    $empresaId = $this->empresaId();
 
-        $emprestimos = VasilhameEmprestimo::where('empresa_id', $empresaId)
-            ->orderBy('data_saida', 'desc')
-            ->get();
+    $dataLimite = now()->subDays(5)->toDateString();
 
-        if ($request->expectsJson() || $request->wantsJson()) {
-            return response()->json($emprestimos);
-        }
+    $emprestimos = VasilhameEmprestimo::where('empresa_id', $empresaId)
+        ->where(function ($query) use ($dataLimite) {
+            $query->where('status', 'pendente')
+                ->orWhere(function ($q) use ($dataLimite) {
+                    $q->where('status', 'devolvido')
+                        ->where(function ($sub) use ($dataLimite) {
+                            $sub->whereNull('data_devolucao')
+                                ->orWhereDate('data_devolucao', '>', $dataLimite);
+                        });
+                });
+        })
+        ->orderByRaw("CASE WHEN status = 'pendente' THEN 0 ELSE 1 END")
+        ->orderBy('data_saida', 'desc')
+        ->get();
 
-        return redirect()->route('controle-vasilhames.index');
+    $totalEmprestadosPendentes = VasilhameEmprestimo::where('empresa_id', $empresaId)
+        ->where('status', 'pendente')
+        ->sum('quantidade');
+
+    if ($request->expectsJson() || $request->wantsJson()) {
+        return response()->json([
+            'emprestimos' => $emprestimos,
+            'totalEmprestadosPendentes' => $totalEmprestadosPendentes,
+        ]);
     }
+
+    return redirect()->route('controle-vasilhames.index');
+}
 
     public function store(Request $request)
     {

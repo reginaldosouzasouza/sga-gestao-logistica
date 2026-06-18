@@ -485,6 +485,25 @@
                 -webkit-tap-highlight-color: rgba(232,176,0,.25) !important;
             }
         }
+
+        /* Corrige sub-submenu que sai da tela pela direita */
+.dropdown-submenu .dropdown-submenu {
+    left: auto !important;
+    right: 100% !important;
+    top: 0 !important;
+}
+
+/* z-index para menu principal */
+nav {
+    position: relative;
+    z-index: 99999 !important;
+}
+
+.dropdown-submenu {
+    z-index: 99999 !important;
+}
+
+
     </style>
 </head>
 

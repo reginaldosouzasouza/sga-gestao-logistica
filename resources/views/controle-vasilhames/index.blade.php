@@ -367,12 +367,28 @@
 
         .emprestados-titulo {
             background: #d9e3ef;
-            text-align: center;
             font-size: 16px;
             font-weight: 800;
             padding: 8px 10px;
             color: #214e7a;
             letter-spacing: .3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            text-align: center;
+        }
+
+        .emprestados-total-pendente {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffe08a;
+            border-radius: 999px;
+            padding: 3px 12px;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
         }
 
         .emprestados-form {
@@ -600,7 +616,10 @@
 
             {{-- BLOCO EMPRESTADOS INFORMATIVO --}}
             <div class="emprestados-bloco">
-                <div class="emprestados-titulo">📋 DETALHE DOS EMPRESTADOS <span style="font-size:11px; font-weight:400;">(informativo)</span></div>
+                <div class="emprestados-titulo">
+                    <span>📋 DETALHE DOS EMPRESTADOS <span style="font-size:11px; font-weight:400;">(informativo)</span></span>
+                    <span id="total-pendentes-emprestados" class="emprestados-total-pendente">Pendentes: 0</span>
+                </div>
 
                 <div class="emprestados-form">
                     <div>
@@ -1019,16 +1038,37 @@
         return tr;
     }
 
+    function atualizarTotalPendentesEmprestados(total) {
+        const totalNumerico = parseInt(total, 10) || 0;
+
+        const badgeTotal = document.getElementById('total-pendentes-emprestados');
+        if (badgeTotal) {
+            badgeTotal.textContent = `Pendentes: ${totalNumerico}`;
+        }
+
+    }
+
     function carregarEmprestados() {
         fetch(EMP_URL, { headers: { 'Accept': 'application/json' } })
             .then(r => r.json())
-            .then(dados => {
+            .then(resposta => {
+                const dados = Array.isArray(resposta) ? resposta : (resposta.emprestimos || []);
+                const totalPendentes = Array.isArray(resposta)
+                    ? dados
+                        .filter(item => item.status === 'pendente')
+                        .reduce((soma, item) => soma + (parseInt(item.quantidade, 10) || 0), 0)
+                    : resposta.totalEmprestadosPendentes;
+
+                atualizarTotalPendentesEmprestados(totalPendentes);
+
                 const tbody = document.getElementById('emp-tbody');
                 tbody.innerHTML = '';
+
                 if (dados.length === 0) {
                     tbody.innerHTML = '<tr id="emp-linha-vazia"><td colspan="8" class="emp-vazio">Nenhum emprestado informado.</td></tr>';
                     return;
                 }
+
                 dados.forEach(item => tbody.appendChild(criarLinha(item)));
             })
             .catch(() => console.error('Erro ao carregar emprestados.'));
@@ -1063,17 +1103,14 @@
         })
         .then(r => r.json())
         .then(item => {
-            const linhaVazia = document.getElementById('emp-linha-vazia');
-            if (linhaVazia) linhaVazia.remove();
-
-            document.getElementById('emp-tbody').appendChild(criarLinha(item));
-
             document.getElementById('emp-cliente').value  = '';
             document.getElementById('emp-produto').value  = '';
             document.getElementById('emp-qtde').value     = '';
             document.getElementById('emp-data-emp').value = '';
             document.getElementById('emp-data-ent').value = '';
             document.getElementById('emp-cliente').focus();
+
+            carregarEmprestados();
         })
         .catch(() => alert('Erro ao salvar empréstimo.'));
     }
@@ -1138,11 +1175,7 @@
         })
         .then(r => r.json())
         .then(() => {
-            btn.closest('tr').remove();
-            const tbody = document.getElementById('emp-tbody');
-            if (tbody.querySelectorAll('tr[data-id]').length === 0) {
-                tbody.innerHTML = '<tr id="emp-linha-vazia"><td colspan="8" class="emp-vazio">Nenhum emprestado informado.</td></tr>';
-            }
+            carregarEmprestados();
         })
         .catch(() => alert('Erro ao excluir registro.'));
     }

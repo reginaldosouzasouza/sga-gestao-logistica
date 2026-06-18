@@ -49,11 +49,11 @@
                 <tbody>
                     @foreach($fornecedores as $fornecedor)
                         <tr>
-                            <td>{{ $fornecedor->cnpj }}</td>
-                            <td>{{ $fornecedor->nome }}</td>
-                            <td>{{ $fornecedor->telefone }}</td>
-                            <td>{{ $fornecedor->cidade }}</td>
-                            <td class="col-acoes">
+                            <td data-label="CNPJ">{{ $fornecedor->cnpj }}</td>
+                            <td data-label="Nome">{{ $fornecedor->nome }}</td>
+                            <td data-label="Telefone">{{ $fornecedor->telefone }}</td>
+                            <td data-label="Cidade">{{ $fornecedor->cidade }}</td>
+                            <td data-label="Ações" class="col-acoes">
                                 <div class="btn-group-acoes">
                                     <a href="{{ route('fornecedores.edit', $fornecedor->id) }}" class="btn-consultar">
                                         Consultar/Alterar
@@ -63,7 +63,11 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit" class="btn-excluir">
+                                        <button 
+                                            type="submit" 
+                                            class="btn-excluir"
+                                            onclick="return confirm('Tem certeza que deseja excluir este fornecedor?')"
+                                        >
                                             Excluir
                                         </button>
                                     </form>
@@ -84,17 +88,23 @@
 @section('scripts')
 <script>
     document.getElementById('search').addEventListener('input', function() {
-        let filter = this.value.toUpperCase();
+        let filter = this.value
+            .toUpperCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
         let rows = document.querySelectorAll('.tabela-fornecedores tbody tr');
 
         rows.forEach(row => {
-            let nome = row.querySelector('td:nth-child(2)').textContent.toUpperCase();
-            let telefone = row.querySelector('td:nth-child(3)').textContent.toUpperCase();
+            let textoLinha = row.textContent
+                .toUpperCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
 
-            if (nome.indexOf(filter) > -1 || telefone.indexOf(filter) > -1) {
-                row.style.display = '';
+            if (textoLinha.indexOf(filter) > -1) {
+                row.classList.remove('linha-oculta');
             } else {
-                row.style.display = 'none';
+                row.classList.add('linha-oculta');
             }
         });
     });
