@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use App\Models\Veiculo;
+use App\Models\EntregaRastreio;
+use Illuminate\Support\Facades\Http;
 
 class MovimentacaoController extends Controller
 {
@@ -178,12 +180,13 @@ class MovimentacaoController extends Controller
                 }
 
                 MovimentacaoItem::create([
-                    'empresa_id' => $empresaId,
-                    'movimentacao_id' => $movimentacao->id,
-                    'produto_id' => $produto->id,
-                    'quantidade' => $item['quantidade'],
-                    'valor_unitario' => $item['valor_unitario'],
-                    'valor_total' => $item['valor_total'],
+                    'empresa_id'             => $empresaId,
+                    'movimentacao_id'        => $movimentacao->id,
+                    'produto_id'             => $produto->id,
+                    'quantidade'             => $item['quantidade'],
+                    'valor_unitario'         => $item['valor_unitario'],
+                    'preco_compra_momento'   => $produto->preco_compra,
+                    'valor_total'            => $item['valor_total'],
                 ]);
 
                 Estoque::create([
@@ -253,9 +256,9 @@ class MovimentacaoController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('movimentacao.index')
-                ->with('success', 'Movimentação salva com sucesso.');
+           return redirect()
+            ->route('movimentacao.confirmar-rastreio', $movimentacao->id)
+            ->with('success', 'Movimentação salva com sucesso.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -370,4 +373,122 @@ class MovimentacaoController extends Controller
             'quantidade_estoque' => $produto?->quantidade_estoque ?? 0
         ]);
     }
+
+    public function confirmarRastreio($id)
+    {
+        $empresaId = $this->empresaId();
+
+        $movimentacao = Movimentacao::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $rastreio = EntregaRastreio::where('empresa_id', $empresaId)
+            ->where('movimentacao_id', $movimentacao->id)
+            ->first();
+
+        return view('movimentacao.confirmar-rastreio', compact('movimentacao', 'rastreio'));
+    }
+    
+
+    public function gerarRastreio($id)
+    {
+        $empresaId = $this->empresaId();
+
+        $movimentacao = Movimentacao::where('empresa_id', $empresaId)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Evita gerar rastreio duplicado para a mesma movimentação
+        $rastreioExistente = EntregaRastreio::where('empresa_id', $empresaId)
+            ->where('movimentacao_id', $movimentacao->id)
+            ->first();
+
+        if ($rastreioExistente) {
+            return redirect()
+                ->route('pedido_coleta.create')
+                ->with('info', 'Esta movimentação já possui rastreio: ' . $rastreioExistente->codigo_rastreio);
+        }
+
+                // Monta endereço completo
+          $enderecoCompleto = trim(
+            ($movimentacao->endereco ?? '') .
+            ', ' . ($movimentacao->numero ?? '') .
+            ' - ' . ($movimentacao->bairro ?? '') .
+            ', Maringá, PR - Brasil'
+        );
+
+        // URL local do sistema de rastreio
+        $urlApi = 'http://127.0.0.1:8085/api/criar_coleta.php';
+
+        try {
+            $cliente = null;
+
+            if (!empty($movimentacao->cliente_id)) {
+               $cliente = Cliente::where('empresa_id', $empresaId)
+                    ->where('id', $movimentacao->cliente_id)
+                    ->first();
+            }
+
+            $nomeCliente = $movimentacao->nome ?? ($cliente->nome ?? '');
+            $telefoneCliente = $movimentacao->telefone
+                ?? $movimentacao->celular
+                ?? $movimentacao->whatsapp
+                ?? ($cliente->telefone ?? '')
+                ?? ($cliente->celular ?? '')
+                ?? ($cliente->whatsapp ?? '');
+
+            $telefoneCliente = preg_replace('/\D/', '', $telefoneCliente);
+
+            if ($telefoneCliente === '') {
+                return redirect()
+                    ->route('movimentacao.confirmar-rastreio', $movimentacao->id)
+                    ->with('error', 'Não foi possível gerar o rastreio: telefone do cliente não encontrado.');
+            }
+
+            $response = Http::withHeaders([
+                'X-API-TOKEN' => 'SENHA_API_SGA_RASTREIO_2026',
+            ])->asForm()->post($urlApi, [
+                'cliente' => $nomeCliente,
+                'telefone' => $telefoneCliente,
+                'endereco' => $enderecoCompleto,
+                'origem' => 'sga',
+                'movimentacao_id' => $movimentacao->id,
+            ]);
+           
+
+            if (!$response->successful()) {
+                return redirect()
+                    ->route('movimentacao.confirmar-rastreio', $movimentacao->id)
+                    ->with('error', 'Não foi possível gerar o rastreio. Verifique se o sistema de rastreio está aberto na porta 8085.');
+            }
+
+            $dados = $response->json();
+
+            if (!isset($dados['success']) || $dados['success'] !== true) {
+                return redirect()
+                    ->route('movimentacao.confirmar-rastreio', $movimentacao->id)
+                    ->with('error', $dados['message'] ?? 'Erro ao gerar rastreio.');
+            }
+
+            EntregaRastreio::create([
+                'empresa_id' => $empresaId,
+                'movimentacao_id' => $movimentacao->id,
+                'cliente_id' => $movimentacao->cliente_id ?? null,
+                'codigo_rastreio' => $dados['codigo'],
+                'link_rastreio' => $dados['link_rastreio'] ?? null,
+                'link_whatsapp' => $dados['link_whatsapp'] ?? null,
+                'status' => $dados['status'] ?? 'coletado',
+            ]);
+
+            return redirect()
+                ->route('pedido_coleta.create')
+                ->with('success', 'Movimentação salva e rastreio gerado com sucesso! Código: ' . $dados['codigo']);
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('movimentacao.confirmar-rastreio', $movimentacao->id)
+                ->with('error', 'Erro ao conectar com o sistema de rastreio: ' . $e->getMessage());
+        }
+    }
+
 }

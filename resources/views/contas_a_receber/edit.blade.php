@@ -115,4 +115,16 @@
         </a>
     </form>
 </div>
+
+
+<script>
+document.querySelectorAll('input[type="date"]').forEach(function (campo) {
+    campo.addEventListener('click', function () {
+        if (this.showPicker) {
+            this.showPicker();
+        }
+    });
+});
+</script>
+
 @endsection

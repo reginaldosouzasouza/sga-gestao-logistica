@@ -84,3 +84,30 @@
         <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
     </a>
 @endif
+
+
+{{-- Dashboard Previsao de Giro de Caixa --}}
+@if($podeVerDashboard)
+    <a href="{{ route('dashboard.previsao-giro-caixa') }}" target="_blank" rel="noopener noreferrer">
+    Previsão de Giro e Caixa        
+        <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
+    </a>
+@endif
+
+
+{{-- Dashboard Margem de Emissao --}}
+@if($podeVerDashboard)
+    <a href="{{ route('relatorios.margem-emissao') }}" target="_blank" rel="noopener noreferrer">
+    Margem de Emissao        
+        <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
+    </a>
+@endif
+
+{{-- Dashboard Comparativo Mensal por Natureza Financeira --}}
+@if($podeVerDashboard)
+    <a href="{{ route('relatorios.comparativo-natureza') }}" target="_blank" rel="noopener noreferrer">
+    Comparativo Mensal       
+        <img src="{{ asset('images/imagem/gerencial.png') }}" class="imagem">
+    </a>
+@endif
+

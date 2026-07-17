@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Vale GÁS')
+@section('title', 'Vale GÁS e ÁGUA')
 
 @section('content')
 
@@ -139,18 +139,64 @@
         font-size: 20px;
         color: #267C01;
     }
+
+    /*
+     * IMPORTANTE:
+     * O layout principal usa CSS global para a tag nav.
+     * A paginação do Laravel também usa <nav>.
+     * Por isso precisamos neutralizar o CSS do menu aqui.
+     */
+    .vale-gas-page nav[role="navigation"] {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: auto !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        z-index: auto !important;
+    }
+
+    .vale-gas-page nav[role="navigation"] ul.pagination {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .vale-gas-page nav[role="navigation"] li {
+        display: list-item;
+        position: static;
+    }
+
+    .vale-gas-page nav[role="navigation"] li a,
+    .vale-gas-page nav[role="navigation"] li span {
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        display: block;
+    }
+
+    .vale-gas-page .pagination {
+        margin-bottom: 0;
+    }
+
+    .vale-gas-page .small.text-muted {
+        margin-bottom: 0;
+    }
+
 </style>
 
 <div class="container mt-4 vale-gas-page">
     <div class="d-flex justify-content-between align-items-center topo-pagina">
         <div>
-            <h1 class="titulo-pagina">Vale Gás</h1>
+            <h1 class="titulo-pagina">Vale Gás e Água</h1>
             <p class="subtitulo-pagina">Controle de vales cadastrados</p>
         </div>
 
         <div class="valegas">
             <a href="{{ route('vale-gas.create') }}" class="btn btn-success px-4">
-                Cadastrar Vale Gás
+                Cadastrar Vale Gás e Água
             </a>
         </div>
     </div>
@@ -287,17 +333,22 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center">Nenhum vale encontrado.</td>
+                                <td colspan="10" class="text-center">Nenhum vale encontrado.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $vales->links() }}
-            </div>
         </div>
+
+        @if($vales->hasPages())
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-center">
+                    {{ $vales->appends(request()->query())->onEachSide(1)->links('pagination::bootstrap-5') }}
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

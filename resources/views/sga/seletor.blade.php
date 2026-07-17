@@ -237,6 +237,7 @@
         .card.gerencial:hover { background: rgba(13,110,253,.1); }
         .card.padoca:hover    { background: rgba(139,69,19,.1); }
         .card.caixa:hover     { background: rgba(47,123,11,.1); }
+        .card.salao:hover     { background: rgba(236, 72, 153, .10); }
 
 
     
@@ -466,9 +467,16 @@
     $primeiroNome = explode(' ', trim($nomeUsuario))[0];
 
 
+    $isMaster = $usuario && strtoupper(trim($usuario->tipo ?? '')) === 'MASTER';
 
+    $podeAcessarSalao = $isMaster
+            || ($usuario && $usuario->temPermissao('salao_acessar'));
 
-        $isMaster = $usuario && strtoupper(trim($usuario->tipo ?? '')) === 'MASTER';
+    $podeAcessarGas = $isMaster
+    || ($usuario && $usuario->temPermissao('gas_acessar'));    
+    
+       
+
 
     $empresa = $isMaster
         ? (empresaAtual() ?? $usuario?->empresa)
@@ -613,10 +621,48 @@
             </a>
         @endif
 
-        <a href="{{ url('/menu/gas') }}" class="card gas" target="_blank" rel="noopener noreferrer">
-            <span class="icon">🧯</span>
-            <h4>Revenda de Gás</h4>
-        </a>
+
+        
+     
+
+
+        @if($podeAcessarSalao)
+            <a href="{{ url('/menu/salao') }}" class="card salao">
+             <span class="icon">💇‍♀️🧔‍♂️</span>
+                    <h4>Salão / Barbearia</h4>
+            </a>
+        @else
+            <a href="#" class="card salao bloqueado" onclick="return moduloNaoAutorizado();">
+               <span class="icon">💇‍♀️🧔‍♂️</span>
+                    <h4>Salão / Barbearia</h4>
+            </a>
+        @endif
+
+
+
+
+       @if($podeAcessarGas)
+    <a href="{{ url('/menu/gas') }}"
+       class="card gas"
+       target="_blank"
+       rel="noopener noreferrer">
+        <span class="icon">🧯</span>
+        <h4>Revenda de Gás</h4>
+    </a>
+@else
+    <a href="#"
+       class="card gas bloqueado"
+       onclick="return moduloNaoAutorizado();">
+        <span class="icon">🧯</span>
+        <h4>Revenda de Gás</h4>
+    </a>
+@endif
+
+
+
+
+
+
 
         @if($isMaster)
             <a href="{{ url('/menu/gerencial') }}" class="card gerencial">

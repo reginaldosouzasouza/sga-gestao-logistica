@@ -91,4 +91,15 @@
         <a href="{{ route('contas-a-pagar.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
+
+<script>
+document.querySelectorAll('input[type="date"]').forEach(function (campo) {
+    campo.addEventListener('click', function () {
+        if (this.showPicker) {
+            this.showPicker();
+        }
+    });
+});
+</script>
+
 @endsection

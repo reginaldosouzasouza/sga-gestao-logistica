@@ -605,6 +605,9 @@ function carregarGraficoTicketClientes(){
 }
 
 
+
+
+
 let graficoRuptura = null;
 
 function carregarGraficoRuptura() {
@@ -619,12 +622,23 @@ function carregarGraficoRuptura() {
         console.log("Ruptura:", dados);
 
         const labels = dados.map(item => item.produto);
-        const valores = dados.map(item => Number(item.dias));
+
+        /*
+         * Agora o gráfico vai mostrar a compra recomendada,
+         * que é mais útil para decisão de compra.
+         */
+        const valores = dados.map(item => Number(item.compra_recomendada || 0));
 
         const cores = dados.map(item => {
 
-            if(item.dias <= 3) return "#e53935"; // vermelho
-            if(item.dias <= 7) return "#fbc02d"; // amarelo
+            if (Number(item.compra_recomendada || 0) > 0 && Number(item.dias || 0) <= 3) {
+                return "#e53935"; // vermelho
+            }
+
+            if (Number(item.compra_recomendada || 0) > 0) {
+                return "#fbc02d"; // amarelo
+            }
+
             return "#43a047"; // verde
 
         });
@@ -643,7 +657,7 @@ function carregarGraficoRuptura() {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: "Dias restantes para acabar",
+                    label: "Compra recomendada",
                     data: valores,
                     backgroundColor: cores
                 }]
@@ -652,12 +666,12 @@ function carregarGraficoRuptura() {
                 responsive: true,
                 plugins: {
                     legend: {
-                        display: false
+                        display: true
                     },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return `Dias restantes: ${context.raw}`;
+                                return `Compra recomendada: ${context.raw} un`;
                             }
                         }
                     }
@@ -665,85 +679,151 @@ function carregarGraficoRuptura() {
             }
         });
 
-    let html = "";
+        let html = "";
 
         dados.forEach(item => {
 
-        let cor = "#43a047";
-        let status = "Estoque seguro";
+            let cor = "#43a047";
+            let status = "Estoque seguro";
 
-        if(item.dias <= 3){
-        cor = "#e53935";
-        status = "Risco crítico";
-        }
-        else if(item.dias <= 7){
-        cor = "#fbc02d";
-        status = "Atenção";
-        }
+            if (Number(item.compra_recomendada || 0) > 0 && Number(item.dias || 0) <= 3) {
+                cor = "#e53935";
+                status = "Risco crítico";
+            }
+            else if (Number(item.compra_recomendada || 0) > 0) {
+                cor = "#fbc02d";
+                status = "Comprar com atenção";
+            }
 
-        html += `
-        <div style="
-        background:white;
-        border-radius:10px;
-        padding:15px;
-        margin-bottom:15px;
-        box-shadow:0 2px 6px rgba(0,0,0,0.08);
-        border-left:6px solid ${cor};
-        color:#333;
-        ">
+            let ajustesHtml = "";
 
-        <h3 style="margin-bottom:10px;">${item.produto}</h3>
+            if (item.ajustes_aplicados && item.ajustes_aplicados.length > 0) {
+                ajustesHtml = `
+                    <div style="margin-top:12px;">
+                        <b>Ajustes aplicados:</b>
+                        <ul style="margin:6px 0 0 18px;padding:0;">
+                            ${item.ajustes_aplicados.map(ajuste => `
+                                <li>
+                                    ${ajuste.tipo}
+                                    ${ajuste.percentual !== null && ajuste.percentual !== undefined
+                                        ? `(${Number(ajuste.percentual).toLocaleString('pt-BR')}%)`
+                                        : ''
+                                    }
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                ajustesHtml = `
+                    <div style="margin-top:12px;color:#666;">
+                        Nenhum ajuste aplicado.
+                    </div>
+                `;
+            }
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;">
+            html += `
+            <div style="
+                background:white;
+                border-radius:10px;
+                padding:15px;
+                margin-bottom:15px;
+                box-shadow:0 2px 6px rgba(0,0,0,0.08);
+                border-left:6px solid ${cor};
+                color:#333;
+            ">
 
-        <div>
-        <span style="color:#666;">Estoque atual</span><br>
-        <b style="font-size:18px;">${item.estoque}</b>
-        </div>
+                <h3 style="margin-bottom:10px;">${item.produto}</h3>
 
-        <div>
-        <span style="color:#666;">Vendido no período</span><br>
-        <b style="font-size:18px;">${item.vendido_periodo}</b>
-        </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;">
 
-        <div>
-        <span style="color:#666;">Média por dia(vendas)</span><br>
-        <b style="font-size:18px;">${item.media}</b>
-        </div>
+                    <div>
+                        <span style="color:#666;">Estoque atual</span><br>
+                        <b style="font-size:18px;">${Number(item.estoque || 0).toLocaleString('pt-BR')} un</b>
+                    </div>
 
-        <div>
-        <span style="color:#666;">Estoque no máximo (em dias)</span><br>
-        <b style="font-size:18px;">${item.dias}</b>
-        </div>
+                    <div>
+                        <span style="color:#666;">Vendido no período</span><br>
+                        <b style="font-size:18px;">${Number(item.vendido_periodo || 0).toLocaleString('pt-BR')} un</b>
+                    </div>
 
-        </div>
+                    <div>
+                        <span style="color:#666;">Média base/dia</span><br>
+                        <b style="font-size:18px;">${Number(item.media || 0).toLocaleString('pt-BR')}</b>
+                    </div>
 
-        <div style="
-        margin-top:12px;
-        padding:6px 12px;
-        border-radius:6px;
-        background:${cor};
-        color:white;
-        font-weight:bold;
-        font-size:13px;
-        display:inline-block;
-        ">
-        ${status}
-        </div>
+                    <div>
+                        <span style="color:#666;">Média ajustada/dia</span><br>
+                        <b style="font-size:18px;">${Number(item.media_ajustada || 0).toLocaleString('pt-BR')}</b>
+                    </div>
 
-        </div>
-        `;
+                    <div>
+                        <span style="color:#666;">Cobertura atual</span><br>
+                        <b style="font-size:18px;">${Number(item.cobertura_atual_dias_ajustada || item.dias || 0).toLocaleString('pt-BR')} dias</b>
+                    </div>
 
-      
+                    <div>
+                        <span style="color:#666;">Dias restantes</span><br>
+                        <b style="font-size:18px;">${Number(item.dias_restantes_ate_fim || 0).toLocaleString('pt-BR')} dias</b>
+                    </div>
+
+                    <div>
+                        <span style="color:#666;">Venda prevista</span><br>
+                        <b style="font-size:18px;">${Number(item.venda_prevista || 0).toLocaleString('pt-BR')} un</b>
+                    </div>
+
+                    <div>
+                        <span style="color:#666;">Estoque segurança</span><br>
+                        <b style="font-size:18px;">${Number(item.estoque_seguranca_dias || 0).toLocaleString('pt-BR')} dia(s)</b>
+                    </div>
+
+                    <div>
+                        <span style="color:#666;">Compra mínima</span><br>
+                        <b style="font-size:18px;">${Number(item.compra_minima || 0).toLocaleString('pt-BR')} un</b>
+                    </div>
+
+                    <div>
+                        <span style="color:#666;">Compra recomendada</span><br>
+                        <b style="font-size:18px;color:${cor};">${Number(item.compra_recomendada || 0).toLocaleString('pt-BR')} un</b>
+                    </div>
+
+                    <div>
+                        <span style="color:#666;">Custo mínimo</span><br>
+                        <b style="font-size:18px;">${formatMoney(item.custo_compra_minima || 0)}</b>
+                    </div>
+
+                    <div>
+                        <span style="color:#666;">Custo recomendado</span><br>
+                        <b style="font-size:18px;">${formatMoney(item.custo_compra_recomendada || 0)}</b>
+                    </div>
+
+                </div>
+
+                ${ajustesHtml}
+
+                <div style="
+                    margin-top:12px;
+                    padding:6px 12px;
+                    border-radius:6px;
+                    background:${cor};
+                    color:white;
+                    font-weight:bold;
+                    font-size:13px;
+                    display:inline-block;
+                ">
+                    ${status}
+                </div>
+
+            </div>
+            `;
 
         });
 
-        document.getElementById("infoRuptura").innerHTML = html;   
+        document.getElementById("infoRuptura").innerHTML = html;
 
     })
     .catch(err => console.error("Erro ruptura:", err));
 }
-
 </script>
 
 @endsection

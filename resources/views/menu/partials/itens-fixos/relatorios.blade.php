@@ -7,12 +7,13 @@
      */
     $isMaster = $user && strtoupper($user->tipo ?? '') === 'MASTER';
 
-    $podeRelEstoque    = $isMaster || $user->temPermissao('relatorio_estoque');
-    $podeRelVendas     = $isMaster || $user->temPermissao('relatorio_vendas');
-    $podeRelFinanceiro = $isMaster || $user->temPermissao('relatorio_financeiro');
-    $podeRelCaixa      = $isMaster || $user->temPermissao('relatorio_financeiro');
-    $podeRelGerencial  = $isMaster || $user->temPermissao('relatorio_financeiro');
-    $podeRelComissoes  = $isMaster || $user->temPermissao('relatorio_financeiro');
+    $podeRelEstoque       = $isMaster || $user->temPermissao('relatorio_estoque');
+    $podeRelVendas        = $isMaster || $user->temPermissao('relatorio_vendas');
+    $podeRelFinanceiro    = $isMaster || $user->temPermissao('relatorio_financeiro');
+    $podeRelCaixa         = $isMaster || $user->temPermissao('relatorio_financeiro');
+    $podeRelGerencial     = $isMaster || $user->temPermissao('relatorio_financeiro');
+    $podeRelComissoes     = $isMaster || $user->temPermissao('relatorio_financeiro');
+
 
     /*
      * Controle de Vasilhames:
@@ -119,6 +120,9 @@
                 Relatório de Comissões
             </a>
         @endif
+
+       
+
 
     </div>
 @endif

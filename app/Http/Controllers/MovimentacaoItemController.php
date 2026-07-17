@@ -12,7 +12,7 @@ class MovimentacaoItemController extends Controller
 {
     private function empresaId()
     {
-      return empresaAtualId();
+        return empresaAtualId();
     }
 
     public function index()
@@ -61,18 +61,23 @@ class MovimentacaoItemController extends Controller
                     return $query->where('empresa_id', $empresaId);
                 }),
             ],
-            'quantidade'      => 'required|numeric',
-            'valor_unitario'  => 'required|numeric',
-            'valor_total'     => 'required|numeric',
+            'quantidade'      => 'required|numeric|min:0.01',
+            'valor_unitario'  => 'required|numeric|min:0',
+            'valor_total'     => 'required|numeric|min:0',
         ]);
 
+        $produto = Produto::where('empresa_id', $empresaId)
+            ->where('id', $request->produto_id)
+            ->firstOrFail();
+
         MovimentacaoItem::create([
-            'empresa_id'       => $empresaId,
-            'movimentacao_id'  => $request->movimentacao_id,
-            'produto_id'       => $request->produto_id,
-            'quantidade'       => $request->quantidade,
-            'valor_unitario'   => $request->valor_unitario,
-            'valor_total'      => $request->valor_total,
+            'empresa_id'             => $empresaId,
+            'movimentacao_id'        => $request->movimentacao_id,
+            'produto_id'             => $produto->id,
+            'quantidade'             => $request->quantidade,
+            'valor_unitario'         => $request->valor_unitario,
+            'preco_compra_momento'   => $produto->preco_compra,
+            'valor_total'            => $request->valor_total,
         ]);
 
         return redirect()
@@ -127,9 +132,9 @@ class MovimentacaoItemController extends Controller
                     return $query->where('empresa_id', $empresaId);
                 }),
             ],
-            'quantidade'     => 'required|numeric',
-            'valor_unitario' => 'required|numeric',
-            'valor_total'    => 'required|numeric',
+            'quantidade'     => 'required|numeric|min:0.01',
+            'valor_unitario' => 'required|numeric|min:0',
+            'valor_total'    => 'required|numeric|min:0',
         ]);
 
         $movimentacaoItem = MovimentacaoItem::where('empresa_id', $empresaId)
@@ -143,8 +148,18 @@ class MovimentacaoItemController extends Controller
             'valor_total'    => $request->valor_total,
         ];
 
-        if ($request->filled('produto_id')) {
-            $dados['produto_id'] = $request->produto_id;
+        /*
+         * Regra de segurança:
+         * - Se apenas quantidade ou valor de venda mudar, mantém o custo histórico salvo.
+         * - Se o produto for alterado, grava o custo atual do novo produto.
+         */
+        if ($request->filled('produto_id') && (int) $request->produto_id !== (int) $movimentacaoItem->produto_id) {
+            $produto = Produto::where('empresa_id', $empresaId)
+                ->where('id', $request->produto_id)
+                ->firstOrFail();
+
+            $dados['produto_id'] = $produto->id;
+            $dados['preco_compra_momento'] = $produto->preco_compra;
         }
 
         $movimentacaoItem->update($dados);

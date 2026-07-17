@@ -114,6 +114,40 @@
             </div>
         @endif
 
+
+        @if(session('error'))
+            <div style="
+                background: #fee2e2;
+                color: #991b1b;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                font-weight: 700;
+            ">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div style="
+                background: #fee2e2;
+                color: #991b1b;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+            ">
+                <strong>Não foi possível salvar o usuário:</strong>
+
+                <ul style="margin: 8px 0 0; padding-left: 20px;">
+                    @foreach($errors->all() as $erro)
+                        <li>{{ $erro }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+
+
         <form action="{{ route('usuarios.store') }}" method="POST" autocomplete="off">
             @csrf
 

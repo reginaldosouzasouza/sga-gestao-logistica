@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'salao_sso' => [
+    'secret' => env('SALAO_SSO_SECRET'),
+    'url' => env('SALAO_URL', 'http://127.0.0.1:8030'),
+    ],
+
 ];

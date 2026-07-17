@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Consultas - Vale GÁS')
+@section('title', 'Consultas - Vale')
 
 @section('content')
 
@@ -128,7 +128,7 @@
 
    $mensagemVale = "*A MARIGÁS INFORMA:*\n\n"
     . "Olá, " . ($vale->cliente->nome ?? 'cliente') . "!\n\n"
-    . "Segue a cópia do seu *Vale Gás*:\n\n"
+    . "Segue a cópia do seu *Vale*:\n\n"
     . "*Código:* " . $vale->codigo . "\n"
     . "*Produto:* " . ($vale->produto->nome ?? '-') . "\n"
     . "*Quantidade:* " . $vale->quantidade . "\n"
@@ -143,7 +143,7 @@
 
     $mensagemBaixa = "*A MARIGÁS INFORMA:*\n\n"
     . "Olá, " . ($vale->cliente->nome ?? 'cliente') . "!\n\n"
-    . "Confirmamos a *baixa/retirada* do seu Vale Gás:\n\n"
+    . "Confirmamos a *baixa/retirada* do seu Vale:\n\n"
     . "*Código:* " . $vale->codigo . "\n"
     . "*Produto:* " . ($vale->produto->nome ?? '-') . "\n"
     . "*Quantidade retirada:* " . $vale->quantidade . "\n"
@@ -159,7 +159,7 @@
 <div class="container-fluid mt-4 vale-gas-page">
     <div class="d-flex justify-content-between align-items-center topo-pagina">
         <div>
-            <h1 class="titulo-pagina">Detalhes do Vale Gás</h1>
+            <h1 class="titulo-pagina">Detalhes do Vale</h1>
             <p class="subtitulo-pagina">Consulta completa do vale cadastrado</p>
         </div>
 
@@ -330,7 +330,7 @@
                 @endif
 
                 @if($vale->status === 'ABERTO')
-                    <form action="{{ route('vale-gas.iniciar-retirada', $vale->id) }}" method="POST"
+                    <form action="{{ route('vale-gas.iniciar-retirada', $vale->id) }}" method="POST" class="m-0 p-0"
                         onsubmit="return confirm('Deseja iniciar a retirada deste vale?')">
                         @csrf
                         <button type="submit" class="btn btn-warning">Retirada do Vale</button>
@@ -338,7 +338,7 @@
 
                     <a href="{{ route('vale-gas.edit', $vale->id) }}" class="btn btn-primary">Editar</a>
 
-                    <form action="{{ route('vale-gas.cancelar', $vale->id) }}" method="POST"
+                    <form action="{{ route('vale-gas.cancelar', $vale->id) }}" method="POST" class="m-0 p-0"
                         onsubmit="return confirm('Deseja realmente cancelar este vale?')">
                         @csrf
                         <button type="submit" class="btn btn-danger">Cancelar</button>

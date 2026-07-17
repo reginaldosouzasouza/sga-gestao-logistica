@@ -128,18 +128,32 @@ class UserController extends Controller
         return view('usuarios.monitor_acessos', compact('usuarios'));
     }
 
-    public function create()
+   public function create()
     {
-        $perfis = DB::table('perfis')->orderBy('nome')->get();
-
         if ($this->isMaster()) {
             $empresas = Empresa::orderBy('nome_fantasia')->get();
+
+            /*
+            * O MASTER escolhe primeiro a empresa no formulário.
+            * Os perfis serão filtrados também na validação do store.
+            */
+            $perfis = DB::table('perfis')
+                ->orderBy('nome')
+                ->get();
         } else {
             $empresas = Empresa::where('id', $this->empresaId())->get();
+
+            $perfis = DB::table('perfis')
+                ->where(function ($query) {
+                    $query->where('empresa_id', $this->empresaId())
+                        ->orWhereNull('empresa_id');
+                })
+                ->orderBy('nome')
+                ->get();
         }
 
         return view('usuarios.create', compact('perfis', 'empresas'));
-    }
+    } 
 
     public function store(Request $request)
     {
@@ -167,6 +181,27 @@ class UserController extends Controller
                 ->with('error', 'Somente o MASTER pode criar outro usuário MASTER.');
         }
 
+
+        if ($request->filled('perfil_id')) {
+    $perfilValido = DB::table('perfis')
+        ->where('id', $request->perfil_id)
+        ->where(function ($query) use ($request) {
+            $query->where('empresa_id', $request->empresa_id)
+                ->orWhereNull('empresa_id');
+        })
+        ->exists();
+
+    if (!$perfilValido) {
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with(
+                'error',
+                'O perfil selecionado não pertence à empresa informada.'
+            );
+    }
+}
+
         User::create([
             'empresa_id' => $request->empresa_id,
             'usuario' => $request->usuario,
@@ -185,27 +220,29 @@ class UserController extends Controller
     public function edit($id)
     {
         $usuario = User::findOrFail($id);
-
-        if (!$this->isMaster() && (int) $usuario->empresa_id !== (int) $this->empresaId()) {
-            return redirect()
-                ->route('usuarios.index')
-                ->with('error', 'Você não pode editar usuário de outra empresa.');
-        }
-
-        if ($usuario->id == 1 && auth()->id() != 1) {
-            return redirect()
-                ->route('usuarios.index')
-                ->with('error', 'O usuário MASTER é protegido e só pode ser alterado pelo próprio MASTER.');
-        }
-
-        $perfis = DB::table('perfis')->orderBy('nome')->get();
-
         if ($this->isMaster()) {
-            $empresas = Empresa::orderBy('nome_fantasia')->get();
-        } else {
-            $empresas = Empresa::where('id', $this->empresaId())->get();
-        }
+        $perfis = DB::table('perfis')
+            ->where(function ($query) use ($usuario) {
+                $query->where('empresa_id', $usuario->empresa_id)
+                    ->orWhereNull('empresa_id');
+            })
+            ->orderBy('nome')
+            ->get();
 
+        $empresas = Empresa::orderBy('nome_fantasia')->get();
+    } else {
+        $perfis = DB::table('perfis')
+            ->where(function ($query) {
+                $query->where('empresa_id', $this->empresaId())
+                    ->orWhereNull('empresa_id');
+            })
+            ->orderBy('nome')
+            ->get();
+
+        $empresas = Empresa::where('id', $this->empresaId())->get();
+    }
+
+        
         return view('usuarios.edit', compact('usuario', 'perfis', 'empresas'));
     }
 
@@ -222,6 +259,28 @@ class UserController extends Controller
                 ->route('usuarios.index')
                 ->with('error', 'O usuário MASTER é protegido e só pode ser alterado pelo próprio MASTER.');
         }
+
+
+
+        if ($request->filled('perfil_id')) {
+    $perfilValido = DB::table('perfis')
+        ->where('id', $request->perfil_id)
+        ->where(function ($query) use ($request) {
+            $query->where('empresa_id', $request->empresa_id)
+                ->orWhereNull('empresa_id');
+        })
+        ->exists();
+
+    if (!$perfilValido) {
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with(
+                'error',
+                'O perfil selecionado não pertence à empresa informada.'
+            );
+    }
+}
 
         $request->validate([
             'empresa_id' => 'required|exists:empresas,id',

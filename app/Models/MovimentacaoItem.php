@@ -19,6 +19,7 @@ class MovimentacaoItem extends Model
         'produto_id',
         'quantidade', 
         'valor_unitario', 
+        'preco_compra_momento',
         'valor_total'
     ];
 

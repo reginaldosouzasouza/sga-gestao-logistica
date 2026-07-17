@@ -2,18 +2,31 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Perfil extends Model
 {
-    protected $table = 'perfils'; // ajuste se o nome da tabela for outro
+    protected $table = 'perfis';
 
-    public function permissoes()
+    protected $fillable = [
+        'empresa_id',
+        'modulo',
+        'nome',
+        'descricao',
+    ];
+
+    public function empresa(): BelongsTo
+    {
+        return $this->belongsTo(Empresa::class);
+    }
+
+    public function permissoes(): BelongsToMany
     {
         return $this->belongsToMany(
             Permissao::class,
-            'perfil_permissao',   // nome da tabela pivô
+            'perfil_permissoes',
             'perfil_id',
             'permissao_id'
         );

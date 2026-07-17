@@ -92,7 +92,7 @@
 <div class="container-fluid mt-4 vale-gas-page">
     <div class="d-flex justify-content-between align-items-center topo-pagina">
         <div>
-            <h1 class="titulo-pagina">Editar Vale Gás</h1>
+            <h1 class="titulo-pagina">Editar Vale</h1>
             <p class="subtitulo-pagina">Atualize os dados do vale selecionado</p>
         </div>
 
@@ -114,7 +114,7 @@
 
     <div class="card-principal">
         <div class="card-header-custom">
-            Alteração do Vale Gás
+            Alteração do Vale
         </div>
 
         <div class="card-body-custom">

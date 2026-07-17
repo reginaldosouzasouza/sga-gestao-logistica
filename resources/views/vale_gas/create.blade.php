@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Cadastro Vale GÁS')
+@section('title', 'Cadastro Vale')
 
 @section('content')
 
@@ -34,7 +34,7 @@
 
 <div class="container mt-4 vale-gas-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0 titulo-pagina">Novo Vale Gás</h3>
+        <h3 class="mb-0 titulo-pagina">Novo Vale</h3>
         <a href="{{ route('vale-gas.index') }}" class="btn btn-secondary">Voltar</a>
     </div>
 
@@ -51,7 +51,7 @@
 
     <div class="card">
         <div class="card-header">
-            Dados do Vale Gás
+            Dados do Vale
         </div>
         <div class="card-body">
             <form action="{{ route('vale-gas.store') }}" method="POST">

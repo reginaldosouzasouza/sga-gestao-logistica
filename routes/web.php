@@ -51,7 +51,15 @@ use App\Http\Controllers\MotoristaController;
 use App\Http\Controllers\RelatorioComissaoController;
 use App\Http\Controllers\EmpresaAtendimentoController;
 use App\Http\Controllers\ClienteAniversarioController;
-
+use App\Http\Controllers\ConfiguracaoPrevisaoVendaController;
+use App\Services\PrevisaoGiroService;
+use App\Models\Produto;
+use Carbon\Carbon;
+use App\Http\Controllers\RelatorioComparativoNaturezaController;
+use App\Http\Controllers\RelatorioComparativoFluxoController;
+use App\Http\Controllers\RelatorioMargemEmissaoController;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -89,6 +97,31 @@ Route::get('/buscar-usuario/{id}', function ($id) {
         'usuario' => $user?->usuario ?? '',
     ]);
 })->name('buscar.usuario');
+
+
+// rotas previsao de venda controller
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/configuracao-previsao-vendas', [ConfiguracaoPrevisaoVendaController::class, 'index'])
+        ->name('configuracao-previsao-vendas.index');
+
+    Route::put('/configuracao-previsao-vendas/{id}', [ConfiguracaoPrevisaoVendaController::class, 'update'])
+        ->name('configuracao-previsao-vendas.update');
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -395,6 +428,15 @@ Route::delete('/produtos/{produto}', [ProdutoController::class, 'destroy'])
         ->name('pedidos');
 
     Route::resource('movimentacao-itens', MovimentacaoItemController::class);
+
+
+//  ROTA DA CONFIRMAÇÃO DO RASTREIO
+
+    Route::get('/movimentacao/{id}/confirmar-rastreio', [MovimentacaoController::class, 'confirmarRastreio'])
+    ->name('movimentacao.confirmar-rastreio');
+
+    Route::post('/movimentacao/{id}/gerar-rastreio', [MovimentacaoController::class, 'gerarRastreio'])
+    ->name('movimentacao.gerar-rastreio');
 
 
    /*
@@ -772,6 +814,15 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
         Route::get('/natureza-financeira', [RelatorioNaturezaFinanceiraController::class, 'index'])
             ->name('natureza-financeira');
+
+        Route::get('/comparativo-natureza', [RelatorioComparativoNaturezaController::class, 'index'])
+            ->name('comparativo-natureza');
+
+        Route::get('/comparativo-fluxo', [RelatorioComparativoFluxoController::class, 'index'])
+            ->name('comparativo-fluxo');      
+
+
+
     });
 
     Route::get('/relatorio-vendas-emissao', [RelatorioVendasEmissaoController::class, 'index'])
@@ -993,5 +1044,152 @@ Route::post('/empresa-atendimento/limpar', [EmpresaAtendimentoController::class,
     ->middleware('auth');
 
 
+ // rota  previsão de giro e caixa
+Route::get('/dashboard/previsao-giro-caixa', [DashboardController::class, 'previsaoGiroCaixa'])
+    ->name('dashboard.previsao-giro-caixa');
+
+// TORA PARA RELATÓRIO DE MARGEM POR EMISSÃO
+    Route::get('/relatorios/margem-emissao', [RelatorioMargemEmissaoController::class, 'index'])
+    ->name('relatorios.margem-emissao');
+
+    Route::get('/relatorios/margem-emissao/exportar', [RelatorioMargemEmissaoController::class, 'exportar'])
+    ->name('relatorios.margem-emissao.exportar');
 
 
+   //   rota salao do seletor de modulos
+   
+
+Route::middleware('auth')->get('/menu/salao', function () {
+    $usuario = auth()->user();
+
+    if (!$usuario || !$usuario->temPermissao('salao_acessar')) {
+        return redirect('/sga')
+            ->with(
+                'error',
+                'Você não possui permissão para acessar o módulo Salão / Barbearia.'
+            );
+    }
+
+    /*
+     * MASTER usa a empresa escolhida no seletor.
+     * Os demais usuários usam sua própria empresa.
+     */
+    $empresa = $usuario->isMaster()
+        ? (empresaAtual() ?? $usuario->empresa)
+        : $usuario->empresa;
+
+    if (!$empresa) {
+        return redirect('/sga')
+            ->with(
+                'error',
+                'Nenhuma empresa foi identificada para o acesso ao Salão.'
+            );
+    }
+
+    $secret = config('services.salao_sso.secret');
+    $salaoUrl = rtrim(
+        (string) config('services.salao_sso.url'),
+        '/'
+    );
+
+    if (!$secret || !$salaoUrl) {
+        return redirect('/sga')
+            ->with(
+                'error',
+                'A integração com o Salão não está configurada.'
+            );
+    }
+
+    /*
+     * MASTER recebe todas as permissões cadastradas
+     * para o módulo Salão.
+     */
+    if ($usuario->isMaster()) {
+        $permissoes = DB::table('permissoes')
+            ->where('modulo', 'salao')
+            ->orderBy('nome')
+            ->pluck('nome')
+            ->toArray();
+    } else {
+        /*
+         * Usuário comum recebe somente as permissões
+         * vinculadas ao perfil dele.
+         */
+        $permissoes = DB::table('perfil_permissoes as pp')
+            ->join(
+                'permissoes as p',
+                'p.id',
+                '=',
+                'pp.permissao_id'
+            )
+            ->where('pp.perfil_id', $usuario->perfil_id)
+            ->where('p.modulo', 'salao')
+            ->orderBy('p.nome')
+            ->pluck('p.nome')
+            ->toArray();
+    }
+
+    $permissoes = array_values(
+        array_unique(
+            array_map('strval', $permissoes)
+        )
+    );
+
+    /*
+     * Codifica a lista para ser transportada pela URL.
+     * Ela também será incluída na assinatura.
+     */
+    $permissoesCodificadas = base64_encode(
+        json_encode(
+            $permissoes,
+            JSON_UNESCAPED_UNICODE
+            | JSON_UNESCAPED_SLASHES
+        )
+    );
+
+    $dados = [
+        'user_id' => $usuario->id,
+        'empresa_id' => $empresa->id,
+        'nome' => $usuario->nome_completo
+            ?? $usuario->usuario
+            ?? 'Usuário',
+        'usuario' => $usuario->usuario ?? '',
+        'email' => $usuario->email,
+        'tipo' => strtoupper(
+            $usuario->tipo ?? 'FUNCIONARIO'
+        ),
+        'perfil_id' => $usuario->perfil_id ?? '',
+        'permissoes' => $permissoesCodificadas,
+        'expires' => now()->addSeconds(60)->timestamp,
+        'nonce' => (string) Str::uuid(),
+    ];
+
+    /*
+     * A ordem precisa ser idêntica à utilizada
+     * no SgaLoginController do Salão.
+     */
+    $payload = implode('|', [
+        (string) $dados['user_id'],
+        (string) $dados['empresa_id'],
+        (string) $dados['nome'],
+        (string) $dados['usuario'],
+        (string) $dados['email'],
+        (string) $dados['tipo'],
+        (string) $dados['perfil_id'],
+        (string) $dados['permissoes'],
+        (string) $dados['expires'],
+        (string) $dados['nonce'],
+    ]);
+
+    $dados['signature'] = hash_hmac(
+        'sha256',
+        $payload,
+        $secret
+    );
+
+    return redirect()->away(
+        $salaoUrl
+        . '/acesso-sga?'
+        . http_build_query($dados)
+    );
+})->name('menu.salao');

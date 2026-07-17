@@ -101,5 +101,15 @@ $(document).ready(function() {
         minLength: 2
     });
 });
+
+
+document.querySelectorAll('input[type="date"]').forEach(function (campo) {
+    campo.addEventListener('click', function () {
+        if (this.showPicker) {
+            this.showPicker();
+        }
+    });
+});
 </script>
+
 @endsection

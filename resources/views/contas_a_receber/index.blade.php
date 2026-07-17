@@ -35,7 +35,11 @@
     <form method="GET" action="{{ route('contas_a_receber.index') }}" class="form-filtro mb-3">
         <div class="form-group">
             <label for="cliente"><strong>Cliente:</strong></label>
-            <input type="text" name="cliente" value="{{ request('cliente') }}" class="form-control" placeholder="Nome do Cliente">
+            <input type="text"
+                   name="cliente"
+                   value="{{ request('cliente') }}"
+                   class="form-control"
+                   placeholder="Nome do Cliente">
         </div>
 
         <div class="form-group">
@@ -53,7 +57,7 @@
             <select name="forma_pagamento_id" class="form-control">
                 <option value="">Todas</option>
                 @foreach($formasDePagamento as $forma)
-                    <option value="{{ $forma->id }}" {{ (string)request('forma_pagamento_id') === (string)$forma->id ? 'selected' : '' }}>
+                    <option value="{{ $forma->id }}" {{ (string) request('forma_pagamento_id') === (string) $forma->id ? 'selected' : '' }}>
                         {{ $forma->nome }}
                     </option>
                 @endforeach
@@ -62,22 +66,34 @@
 
         <div class="form-group">
             <label for="data_venda_inicial"><strong>Data da Venda Inicial:</strong></label>
-            <input type="date" name="data_venda_inicial" value="{{ request('data_venda_inicial') }}" class="form-control">
+            <input type="date"
+                   name="data_venda_inicial"
+                   value="{{ request('data_venda_inicial') }}"
+                   class="form-control">
         </div>
 
         <div class="form-group">
             <label for="data_venda_final"><strong>Data da Venda Final:</strong></label>
-            <input type="date" name="data_venda_final" value="{{ request('data_venda_final') }}" class="form-control">
+            <input type="date"
+                   name="data_venda_final"
+                   value="{{ request('data_venda_final') }}"
+                   class="form-control">
         </div>
 
         <div class="form-group">
             <label for="data_vencimento"><strong>Data de Vencimento:</strong></label>
-            <input type="date" name="data_vencimento" value="{{ request('data_vencimento') }}" class="form-control">
+            <input type="date"
+                   name="data_vencimento"
+                   value="{{ request('data_vencimento') }}"
+                   class="form-control">
         </div>
 
         <div class="form-group">
             <label for="data_recebimento"><strong>Data de Recebimento:</strong></label>
-            <input type="date" name="data_recebimento" value="{{ request('data_recebimento') }}" class="form-control">
+            <input type="date"
+                   name="data_recebimento"
+                   value="{{ request('data_recebimento') }}"
+                   class="form-control">
         </div>
 
         <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
@@ -95,7 +111,7 @@
     </a>
 
     <div class="table-responsive">
-        <table class="table table-striped tabela-contas-receber">
+        <table class="table tabela-contas-receber">
             <thead>
                 <tr>
                     <th>Cliente</th>
@@ -111,20 +127,48 @@
 
             <tbody>
                 @foreach($contasAReceber as $conta)
-                    <tr class="
-                        @if($conta->status == 'pendente') bg-warning
-                        @elseif($conta->status == 'recebido') bg-success
-                        @elseif($conta->status == 'atrasado') bg-danger
-                        @endif">
 
-                        <td>{{ $conta->cliente->nome }}</td>
-                        <td>{{ $conta->formaPagamento->nome }}</td>
+                    @php
+                        $statusLinha = strtolower(trim($conta->status ?? ''));
+
+                        if ($statusLinha === 'recebido') {
+                            $classeLinha = 'linha-recebido';
+                            $textoStatus = 'Recebido';
+                            $corStatus = '#000';
+                        } elseif ($statusLinha === 'atrasado') {
+                            $classeLinha = 'linha-atrasado';
+                            $textoStatus = 'Atrasado';
+                            $corStatus = '#fff';
+                        } else {
+                            $classeLinha = 'linha-pendente';
+                            $textoStatus = 'Pendente';
+                            $corStatus = '#fff';
+                        }
+                    @endphp
+
+                    <tr class="{{ $classeLinha }}">
+                        <td>{{ $conta->cliente->nome ?? 'CLIENTE NÃO CADASTRADO' }}</td>
+                        <td>{{ $conta->formaPagamento->nome ?? '-' }}</td>
                         <td>{{ number_format($conta->valor, 2, ',', '.') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($conta->data_venda)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y') }}</td>
 
                         <td>
-                            @if ($conta->data_recebimento)
+                            @if($conta->data_venda)
+                                {{ \Carbon\Carbon::parse($conta->data_venda)->format('d/m/Y') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            @if($conta->data_vencimento)
+                                {{ \Carbon\Carbon::parse($conta->data_vencimento)->format('d/m/Y') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td>
+                            @if($conta->data_recebimento)
                                 {{ \Carbon\Carbon::parse($conta->data_recebimento)->format('d/m/Y') }}
                             @else
                                 -
@@ -132,15 +176,9 @@
                         </td>
 
                         <td>
-                            @if($conta->status == 'pendente')
-                                <span style="color: white; font-weight: bold;">Pendente</span>
-                            @elseif($conta->status == 'recebido')
-                                <span style="color: black; font-weight: bold;">Recebido</span>
-                            @elseif($conta->status == 'atrasado')
-                                <span style="color: white; font-weight: bold;">Atrasado</span>
-                            @else
-                                {{ ucfirst($conta->status) }}
-                            @endif
+                            <span style="color: {{ $corStatus }}; font-weight: bold;">
+                                {{ $textoStatus }}
+                            </span>
                         </td>
 
                         <td>
@@ -161,8 +199,8 @@
                                 </form>
                             </div>
                         </td>
-
                     </tr>
+
                 @endforeach
             </tbody>
         </table>

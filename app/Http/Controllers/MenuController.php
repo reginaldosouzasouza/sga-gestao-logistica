@@ -2,51 +2,99 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class MenuController extends Controller
 {
     /**
-     * Grava o módulo na session e redireciona para a view do menu.
-     * Rota: GET /menu/{modulo}
+     * Grava o módulo na sessão e abre o menu correspondente.
      *
-     * O módulo é passado pela URL → sem conflito de session entre abas,
-     * pois cada aba carrega sua própria URL com o módulo explícito.
+     * Rota:
+     * GET /menu/{modulo}
      */
     public function index(string $modulo)
     {
-        // Valida módulos permitidos
+        $usuario = auth()->user();
 
-        
-        $user = auth()->user();
+    
 
-        $isMaster = $user && strtoupper(trim($user->tipo ?? '')) === 'MASTER';
 
-        $modulosPermitidosParaCliente = ['gas'];
 
-        if (!$isMaster && !in_array($modulo, $modulosPermitidosParaCliente)) {
+        if (!$usuario) {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Faça login para continuar.');
+        }
+
+        /*
+         * Primeiro confirma se o módulo existe
+         * na configuração do sistema.
+         */
+        $modulosConfigurados = array_keys(
+            config('modulos', [])
+        );
+
+        if (!in_array($modulo, $modulosConfigurados, true)) {
+            abort(
+                404,
+                "Módulo [{$modulo}] não encontrado."
+            );
+        }
+
+        /*
+         * Permissão necessária para acessar cada módulo.
+         *
+         * O Salão não aparece aqui porque possui uma rota
+         * própria: /menu/salao.
+         */
+        $permissoesPorModulo = [
+            'gas' => 'gas_acessar',
+            'oficina' => 'oficina_acessar',
+            'gerencial' => 'gerencial_acessar',
+            'padoca' => 'padoca_acessar',
+            'caixa' => 'financeiro_acessar',
+        ];
+
+        $permissaoNecessaria =
+            $permissoesPorModulo[$modulo] ?? null;
+
+         /*
+         * MASTER acessa todos os módulos.
+         *
+         * Os demais usuários precisam possuir
+         * a permissão correspondente em seu perfil.
+         */
+        if (
+            !$usuario->isMaster()
+            && (
+                !$permissaoNecessaria
+                || !$usuario->temPermissao(
+                    $permissaoNecessaria
+                )
+            )
+        ) {
             return redirect('/sga')
-                ->with('error', 'ACESSO NÃO AUTORIZADO, contate o suporte.');
+                ->with(
+                    'error',
+                    'ACESSO NÃO AUTORIZADO, contate o suporte.'
+                );
         }
 
-        $permitidos = array_keys(config('modulos'));
+        /*
+         * Mantido para compatibilidade com códigos antigos
+         * que utilizam session('modulo_atual').
+         */
+        session([
+            'modulo_atual' => $modulo,
+        ]);
 
-        if (!in_array($modulo, $permitidos)) {
-            abort(404, "Módulo [{$modulo}] não encontrado.");
-        }
-
-        // Grava na session SOMENTE para compatibilidade com código legado
-        // que ainda usa session('modulo_atual')
-        session(['modulo_atual' => $modulo]);
-
-        // Carrega config do módulo
-        $cfg = config("modulos.{$modulo}");
+        $configuracao = config(
+            "modulos.{$modulo}"
+        );
 
         return view('menu.index', [
-            'modulo'    => $modulo,          // ex: 'oficina'
-            'moduloNome'=> $cfg['label'],    // ex: 'Oficina'
-            'moduloCor' => $cfg['cor'],      // ex: 'mod-oficina'
-            'menuExtra' => $cfg['menu'],     // itens extras do módulo
+            'modulo' => $modulo,
+            'moduloNome' => $configuracao['label'],
+            'moduloCor' => $configuracao['cor'],
+            'menuExtra' => $configuracao['menu'],
         ]);
     }
 }
