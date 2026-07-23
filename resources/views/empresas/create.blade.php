@@ -37,16 +37,49 @@
                 <h5 class="empresas-section-title">Dados da Empresa</h5>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label>Nome Fantasia *</label>
-                        <input type="text" name="nome_fantasia" class="form-control"
-                               value="{{ old('nome_fantasia') }}" required>
+                        <input
+                            type="text"
+                            name="nome_fantasia"
+                            class="form-control"
+                            value="{{ old('nome_fantasia') }}"
+                            required
+                        >
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
+                        <label>Módulo *</label>
+
+                        <select
+                            name="modulo"
+                            class="form-control"
+                            required
+                        >
+                            <option value="">Selecione o módulo</option>
+
+                            <option value="gas" {{ old('modulo') === 'gas' ? 'selected' : '' }}>
+                                Revenda de Gás
+                            </option>
+
+                            <option value="salao" {{ old('modulo') === 'salao' ? 'selected' : '' }}>
+                                Salão / Barbearia
+                            </option>
+
+                            <option value="oficina" {{ old('modulo') === 'oficina' ? 'selected' : '' }}>
+                                Oficina
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
                         <label>Razão Social</label>
-                        <input type="text" name="razao_social" class="form-control"
-                               value="{{ old('razao_social') }}">
+                        <input
+                            type="text"
+                            name="razao_social"
+                            class="form-control"
+                            value="{{ old('razao_social') }}"
+                        >
                     </div>
 
                     <div class="col-md-4 mb-3">

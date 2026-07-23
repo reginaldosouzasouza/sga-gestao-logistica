@@ -8,6 +8,7 @@ class Empresa extends Model
 {
     protected $fillable = [
     'nome_fantasia',
+    'modulo',
     'razao_social',
     'cnpj',
     'telefone',

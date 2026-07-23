@@ -220,10 +220,20 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label-custom">Perfil</label>
-                        <select name="perfil_id" class="form-select">
+
+                        <select
+                            name="perfil_id"
+                            id="perfil_id"
+                            class="form-select"
+                        >
                             <option value="">Selecione o perfil</option>
+
                             @foreach($perfis as $perfil)
-                                <option value="{{ $perfil->id }}" {{ old('perfil_id') == $perfil->id ? 'selected' : '' }}>
+                                <option
+                                    value="{{ $perfil->id }}"
+                                    data-empresa-id="{{ $perfil->empresa_id ?? '' }}"
+                                    {{ old('perfil_id') == $perfil->id ? 'selected' : '' }}
+                                >
                                     {{ $perfil->nome }}
                                 </option>
                             @endforeach
@@ -244,4 +254,51 @@
         </form>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const empresaSelect = document.getElementById('empresa_id');
+        const perfilSelect = document.getElementById('perfil_id');
+
+        if (!empresaSelect || !perfilSelect) {
+            return;
+        }
+
+        const opcoesPerfis = Array.from(
+            perfilSelect.querySelectorAll('option[data-empresa-id]')
+        );
+
+        function filtrarPerfis() {
+            const empresaId = empresaSelect.value;
+            const perfilSelecionado = perfilSelect.value;
+
+            opcoesPerfis.forEach(function (option) {
+                const perfilEmpresaId = option.dataset.empresaId;
+
+                const perfilGeral = perfilEmpresaId === '';
+                const pertenceEmpresa = perfilEmpresaId === empresaId;
+
+                option.hidden = !(perfilGeral || pertenceEmpresa);
+                option.disabled = !(perfilGeral || pertenceEmpresa);
+            });
+
+            const selecionado = perfilSelect.querySelector(
+                `option[value="${perfilSelecionado}"]`
+            );
+
+            if (
+                selecionado &&
+                selecionado.disabled
+            ) {
+                perfilSelect.value = '';
+            }
+        }
+
+        empresaSelect.addEventListener('change', filtrarPerfis);
+
+        filtrarPerfis();
+    });
+</script>
+
 @endsection

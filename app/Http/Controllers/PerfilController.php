@@ -106,4 +106,26 @@ class PerfilController extends Controller
                 'Permissões atualizadas com sucesso.'
             );
     }
+
+    public function administradorSalao()
+    {
+        $perfil = DB::table('perfis')
+            ->where('modulo', 'salao')
+            ->orderBy('id')
+            ->first();
+
+        if (!$perfil) {
+            return redirect('/sga')
+                ->with(
+                    'error',
+                    'O perfil Administrador do Salão ainda não foi cadastrado.'
+                );
+        }
+
+        return redirect()
+            ->route(
+                'perfis.permissoes',
+                ['perfil' => $perfil->id]
+            );
+    }
 }

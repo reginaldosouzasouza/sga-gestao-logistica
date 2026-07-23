@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClienteController;
@@ -65,10 +65,10 @@ use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
-| ROTAS PÚBLICAS
+| ROTAS PÃšBLICAS
 |--------------------------------------------------------------------------
-| Somente login, logout, redirecionamento inicial e busca do usuário do
-| formulário de login ficam fora do grupo auth.
+| Somente login, logout, redirecionamento inicial e busca do usuÃ¡rio do
+| formulÃ¡rio de login ficam fora do grupo auth.
 |--------------------------------------------------------------------------
 */
 
@@ -78,7 +78,7 @@ Route::get('/abrir-sistema', function (\Illuminate\Http\Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/login')->with('status', 'Sessão anterior encerrada. Faça login novamente.');
+    return redirect('/login')->with('status', 'SessÃ£o anterior encerrada. FaÃ§a login novamente.');
 })->name('abrir.sistema');
 
 
@@ -125,10 +125,10 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| SITE PÚBLICO DO S.G.A.
+| SITE PÃšBLICO DO S.G.A.
 |--------------------------------------------------------------------------
-| Página inicial de apresentação do sistema.
-| O login continua acessível por /abrir-sistema.
+| PÃ¡gina inicial de apresentaÃ§Ã£o do sistema.
+| O login continua acessÃ­vel por /abrir-sistema.
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
@@ -139,9 +139,9 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 | ROTAS PROTEGIDAS DO SISTEMA
 |--------------------------------------------------------------------------
-| Tudo abaixo exige usuário autenticado.
+| Tudo abaixo exige usuÃ¡rio autenticado.
 |
-| Observação: se você já criou e registrou o middleware NoCache, pode trocar
+| ObservaÃ§Ã£o: se vocÃª jÃ¡ criou e registrou o middleware NoCache, pode trocar
 | ['auth'] por ['auth', 'nocache'] neste grupo principal.
 |--------------------------------------------------------------------------
 */
@@ -150,7 +150,7 @@ Route::middleware(['auth', 'nocache', 'empresa.ativa'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | S.G.A — SELETOR E MENU DE MÓDULOS
+    | S.G.A â€” SELETOR E MENU DE MÃ“DULOS
     |--------------------------------------------------------------------------
     */
 
@@ -172,7 +172,7 @@ Route::middleware(['auth', 'nocache', 'empresa.ativa'])->group(function () {
         ->name('menu');
 
 
-// rotas de aniversário cliente;
+// rotas de aniversÃ¡rio cliente;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/clientes/aniversariantes', [ClienteAniversarioController::class, 'index'])
@@ -186,7 +186,7 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| CLIENTES - ROTAS COM PERMISSÃO
+| CLIENTES - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
@@ -198,7 +198,7 @@ Route::get('/clientes/create', [ClienteController::class, 'create'])
     ->middleware('permissao:cliente_cadastrar')
     ->name('clientes.create');
 
-/* ROTAS IMPORTAÇÃO DE CLIENTES */
+/* ROTAS IMPORTAÃ‡ÃƒO DE CLIENTES */
 Route::get('/clientes/importar', [ImportacaoClientesController::class, 'index'])
     ->middleware('auth')
     ->name('clientes.importar');
@@ -243,13 +243,13 @@ Route::get('/buscar-cliente', [ClienteController::class, 'buscar'])
 
    /*
 |--------------------------------------------------------------------------
-| FORNECEDORES - ROTAS COM PERMISSÃO
+| FORNECEDORES - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
 /*
-| Importação XML
-| Precisa ficar antes das rotas com {fornecedor}, por segurança.
+| ImportaÃ§Ã£o XML
+| Precisa ficar antes das rotas com {fornecedor}, por seguranÃ§a.
 */
 Route::post('/fornecedores/importarXML', [FornecedorController::class, 'importarXML'])
     ->middleware('permissao:fornecedor_cadastrar')
@@ -292,10 +292,10 @@ Route::delete('/fornecedores/{fornecedor}', [FornecedorController::class, 'destr
     ->name('fornecedores.destroy');
 
 
-   
+
 /*
 |--------------------------------------------------------------------------
-| PRODUTOS - ROTAS COM PERMISSÃO
+| PRODUTOS - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
@@ -409,7 +409,7 @@ Route::delete('/produtos/{produto}', [ProdutoController::class, 'destroy'])
 
     /*
     |--------------------------------------------------------------------------
-    | MOVIMENTAÇÃO / PEDIDOS
+    | MOVIMENTAÃ‡ÃƒO / PEDIDOS
     |--------------------------------------------------------------------------
     */
 
@@ -430,7 +430,7 @@ Route::delete('/produtos/{produto}', [ProdutoController::class, 'destroy'])
     Route::resource('movimentacao-itens', MovimentacaoItemController::class);
 
 
-//  ROTA DA CONFIRMAÇÃO DO RASTREIO
+//  ROTA DA CONFIRMAÃ‡ÃƒO DO RASTREIO
 
     Route::get('/movimentacao/{id}/confirmar-rastreio', [MovimentacaoController::class, 'confirmarRastreio'])
     ->name('movimentacao.confirmar-rastreio');
@@ -442,12 +442,12 @@ Route::delete('/produtos/{produto}', [ProdutoController::class, 'destroy'])
    /*
 /*
 |--------------------------------------------------------------------------
-| CONTAS A PAGAR - ROTAS COM PERMISSÃO
+| CONTAS A PAGAR - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
 /*
-| Listagem / visualização
+| Listagem / visualizaÃ§Ã£o
 */
 Route::get('/contas-a-pagar', [ContasAPagarController::class, 'index'])
     ->middleware('permissao:conta_pagar_visualizar')
@@ -462,7 +462,7 @@ Route::post('/contas-a-pagar', [ContasAPagarController::class, 'store'])
     ->name('contas-a-pagar.store');
 
 /*
-| Rota antiga mantida para não quebrar formulários antigos
+| Rota antiga mantida para nÃ£o quebrar formulÃ¡rios antigos
 */
 Route::post('/contas_a_pagar/store', [ContasAPagarController::class, 'store'])
     ->middleware('permissao:conta_pagar_lancar')
@@ -498,7 +498,7 @@ Route::post('/contas-a-pagar/{id}/baixar', [ContasAPagarController::class, 'baix
 
 
 /*
-| Relatórios de contas a pagar
+| RelatÃ³rios de contas a pagar
 */
 Route::get('/relatorio-contas-a-pagar', [ContasAPagarController::class, 'relatorioContasAPagar'])
     ->middleware('permissao:relatorio_financeiro')
@@ -510,7 +510,7 @@ Route::get('/relatorio-contas-a-pagar/exportar', [ContasAPagarController::class,
 
 
 /*
-| Importação de despesas
+| ImportaÃ§Ã£o de despesas
 */
 Route::prefix('financeiro/contas-a-pagar')->group(function () {
     Route::get('/importar-despesas', [ImportacaoDespesaController::class, 'index'])
@@ -524,12 +524,12 @@ Route::prefix('financeiro/contas-a-pagar')->group(function () {
 
     /*
 |--------------------------------------------------------------------------
-| CONTAS A RECEBER - ROTAS COM PERMISSÃO
+| CONTAS A RECEBER - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
 /*
-| Relatório e exportação
+| RelatÃ³rio e exportaÃ§Ã£o
 */
 Route::get('/contas_a_receber/exportar', [ContasAReceberController::class, 'exportarCsv'])
     ->middleware('permissao:relatorio_financeiro')
@@ -541,8 +541,8 @@ Route::get('/contas_a_receber/relatorio', [ContasAReceberController::class, 'rel
 
 
 /*
-| Atualização de status / baixa
-| Como altera situação financeira, protegemos como baixa.
+| AtualizaÃ§Ã£o de status / baixa
+| Como altera situaÃ§Ã£o financeira, protegemos como baixa.
 */
 Route::post('/contas_a_receber/atualizar-status', [ContasAReceberController::class, 'atualizarStatus'])
     ->middleware('permissao:conta_receber_baixar')
@@ -586,9 +586,9 @@ Route::delete('/contas_a_receber/{id}', [ContasAReceberController::class, 'destr
 
 
 /*
-| Rota alternativa com hífen
+| Rota alternativa com hÃ­fen
 | Mantida somente para compatibilidade de URL.
-| Os nomes continuam no padrão contas_a_receber.*
+| Os nomes continuam no padrÃ£o contas_a_receber.*
 */
 Route::get('/contas-a-receber', [ContasAReceberController::class, 'index'])
     ->middleware('permissao:conta_receber_visualizar');
@@ -612,7 +612,7 @@ Route::delete('/contas-a-receber/{id}', [ContasAReceberController::class, 'destr
 
     /*
 |--------------------------------------------------------------------------
-| CAIXA OPERACIONAL - ROTAS COM PERMISSÃO
+| CAIXA OPERACIONAL - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
@@ -630,8 +630,8 @@ Route::post('/caixa/fechar', [CaixaController::class, 'fecharCaixa'])
 
 /*
 | Ajuste manual do caixa.
-| Por enquanto protegido com caixa_fechar, pois é uma ação sensível.
-| Futuramente podemos criar a permissão caixa_ajustar.
+| Por enquanto protegido com caixa_fechar, pois Ã© uma aÃ§Ã£o sensÃ­vel.
+| Futuramente podemos criar a permissÃ£o caixa_ajustar.
 */
 Route::post('/caixa/ajuste', [CaixaController::class, 'ajuste'])
     ->middleware('permissao:caixa_fechar')
@@ -651,9 +651,9 @@ Route::get('/caixa/{data}', [CaixaController::class, 'visualizar'])
     ->name('caixa.visualizar');
 
 /*
-| Exclusão e estorno são ações sensíveis.
+| ExclusÃ£o e estorno sÃ£o aÃ§Ãµes sensÃ­veis.
 | Por enquanto ficam protegidas por caixa_fechar.
-| Futuramente podemos criar permissões próprias:
+| Futuramente podemos criar permissÃµes prÃ³prias:
 | caixa_estornar
 | caixa_excluir_movimentacao
 */
@@ -676,7 +676,7 @@ Route::post('/caixa-banco/estornar/{id}', [CaixaController::class, 'estornarCaix
 
 /*
 |--------------------------------------------------------------------------
-| RELATÓRIOS DE CAIXA - ROTAS COM PERMISSÃO
+| RELATÃ“RIOS DE CAIXA - ROTAS COM PERMISSÃƒO
 |--------------------------------------------------------------------------
 */
 
@@ -706,13 +706,13 @@ Route::prefix('api')->group(function () {
     Route::get('/relatorios/rel-caixa', [RelCaixaController::class, 'api'])
         ->middleware('permissao:relatorio_financeiro');
 });
-    
+
    /*
 |--------------------------------------------------------------------------
-| DASHBOARDS — PROTEGIDOS
+| DASHBOARDS â€” PROTEGIDOS
 |--------------------------------------------------------------------------
 | Este bloco substitui todas as rotas antigas/duplicadas de dashboard.
-| Não deixe outras rotas /dashboard fora deste grupo.
+| NÃ£o deixe outras rotas /dashboard fora deste grupo.
 |--------------------------------------------------------------------------
 */
 
@@ -789,7 +789,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
     /*
     |--------------------------------------------------------------------------
-    | RELATÓRIOS GERAIS
+    | RELATÃ“RIOS GERAIS
     |--------------------------------------------------------------------------
     */
 
@@ -819,7 +819,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
             ->name('comparativo-natureza');
 
         Route::get('/comparativo-fluxo', [RelatorioComparativoFluxoController::class, 'index'])
-            ->name('comparativo-fluxo');      
+            ->name('comparativo-fluxo');
 
 
 
@@ -840,7 +840,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
     /*
     |--------------------------------------------------------------------------
-    | CONTROLE DE VASILHAMES E VALE GÁS
+    | CONTROLE DE VASILHAMES E VALE GÃS
     |--------------------------------------------------------------------------
     */
 
@@ -877,7 +877,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
     /*
     |--------------------------------------------------------------------------
-    | USUÁRIOS, PERFIS E EMPRESAS
+    | USUÃRIOS, PERFIS E EMPRESAS
     |--------------------------------------------------------------------------
     */
 
@@ -901,10 +901,15 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
     Route::get('/perfis/financeiro', [PerfilController::class, 'financeiro'])
         ->name('perfis.financeiro');
-        
+
+    Route::get('/perfis/administrador-salao', [PerfilController::class, 'administradorSalao'])
+        ->name('perfis.administrador-salao');
+
+
+
 
         // Monitor de Acessos
-// Coloque junto das rotas de usuários, dentro do middleware auth.
+// Coloque junto das rotas de usuÃ¡rios, dentro do middleware auth.
     Route::get('/usuarios/monitor-acessos', [UserController::class, 'monitorAcessos'])
         ->name('usuarios.monitor-acessos');
 
@@ -940,7 +945,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
     |--------------------------------------------------------------------------
     | OFICINA
     |--------------------------------------------------------------------------
-    
+
 
     Route::resource('ordens-servico', OrdemServicoController::class)->except(['show']);
 
@@ -1004,7 +1009,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
 
     /*
     |--------------------------------------------------------------------------
-    | SUPORTE, MANUAL E DURAÇÃO
+    | SUPORTE, MANUAL E DURAÃ‡ÃƒO
     |--------------------------------------------------------------------------
     */
 
@@ -1027,7 +1032,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/relatorios/comissoes', [RelatorioComissaoController::class, 'index'])
         ->name('relatorios.comissoes.index');
 
-       
+
 Route::get('/relatorios/comissoes/pdf', [RelatorioComissaoController::class, 'pdf'])
     ->name('relatorios.comissoes.pdf');
 });
@@ -1044,11 +1049,11 @@ Route::post('/empresa-atendimento/limpar', [EmpresaAtendimentoController::class,
     ->middleware('auth');
 
 
- // rota  previsão de giro e caixa
+ // rota  previsÃ£o de giro e caixa
 Route::get('/dashboard/previsao-giro-caixa', [DashboardController::class, 'previsaoGiroCaixa'])
     ->name('dashboard.previsao-giro-caixa');
 
-// TORA PARA RELATÓRIO DE MARGEM POR EMISSÃO
+// TORA PARA RELATÃ“RIO DE MARGEM POR EMISSÃƒO
     Route::get('/relatorios/margem-emissao', [RelatorioMargemEmissaoController::class, 'index'])
     ->name('relatorios.margem-emissao');
 
@@ -1057,7 +1062,7 @@ Route::get('/dashboard/previsao-giro-caixa', [DashboardController::class, 'previ
 
 
    //   rota salao do seletor de modulos
-   
+
 
 Route::middleware('auth')->get('/menu/salao', function () {
     $usuario = auth()->user();
@@ -1066,13 +1071,13 @@ Route::middleware('auth')->get('/menu/salao', function () {
         return redirect('/sga')
             ->with(
                 'error',
-                'Você não possui permissão para acessar o módulo Salão / Barbearia.'
+                'VocÃª nÃ£o possui permissÃ£o para acessar o mÃ³dulo SalÃ£o / Barbearia.'
             );
     }
 
     /*
      * MASTER usa a empresa escolhida no seletor.
-     * Os demais usuários usam sua própria empresa.
+     * Os demais usuÃ¡rios usam sua prÃ³pria empresa.
      */
     $empresa = $usuario->isMaster()
         ? (empresaAtual() ?? $usuario->empresa)
@@ -1082,7 +1087,7 @@ Route::middleware('auth')->get('/menu/salao', function () {
         return redirect('/sga')
             ->with(
                 'error',
-                'Nenhuma empresa foi identificada para o acesso ao Salão.'
+                'Nenhuma empresa foi identificada para o acesso ao SalÃ£o.'
             );
     }
 
@@ -1096,13 +1101,13 @@ Route::middleware('auth')->get('/menu/salao', function () {
         return redirect('/sga')
             ->with(
                 'error',
-                'A integração com o Salão não está configurada.'
+                'A integraÃ§Ã£o com o SalÃ£o nÃ£o estÃ¡ configurada.'
             );
     }
 
     /*
-     * MASTER recebe todas as permissões cadastradas
-     * para o módulo Salão.
+     * MASTER recebe todas as permissÃµes cadastradas
+     * para o mÃ³dulo SalÃ£o.
      */
     if ($usuario->isMaster()) {
         $permissoes = DB::table('permissoes')
@@ -1112,7 +1117,7 @@ Route::middleware('auth')->get('/menu/salao', function () {
             ->toArray();
     } else {
         /*
-         * Usuário comum recebe somente as permissões
+         * UsuÃ¡rio comum recebe somente as permissÃµes
          * vinculadas ao perfil dele.
          */
         $permissoes = DB::table('perfil_permissoes as pp')
@@ -1137,7 +1142,7 @@ Route::middleware('auth')->get('/menu/salao', function () {
 
     /*
      * Codifica a lista para ser transportada pela URL.
-     * Ela também será incluída na assinatura.
+     * Ela tambÃ©m serÃ¡ incluÃ­da na assinatura.
      */
     $permissoesCodificadas = base64_encode(
         json_encode(
@@ -1152,7 +1157,7 @@ Route::middleware('auth')->get('/menu/salao', function () {
         'empresa_id' => $empresa->id,
         'nome' => $usuario->nome_completo
             ?? $usuario->usuario
-            ?? 'Usuário',
+            ?? 'UsuÃ¡rio',
         'usuario' => $usuario->usuario ?? '',
         'email' => $usuario->email,
         'tipo' => strtoupper(
@@ -1165,8 +1170,8 @@ Route::middleware('auth')->get('/menu/salao', function () {
     ];
 
     /*
-     * A ordem precisa ser idêntica à utilizada
-     * no SgaLoginController do Salão.
+     * A ordem precisa ser idÃªntica Ã  utilizada
+     * no SgaLoginController do SalÃ£o.
      */
     $payload = implode('|', [
         (string) $dados['user_id'],

@@ -1,20 +1,20 @@
-@php
+﻿@php
     $user = auth()->user();
 
     /*
-     * MASTER vê tudo.
-     * Os demais usuários obedecem ao perfil/permissões.
+     * MASTER vÃª tudo.
+     * Os demais usuÃ¡rios obedecem ao perfil/permissÃµes.
      */
     $isMaster = $user && strtoupper(trim($user->tipo ?? '')) === 'MASTER';
 
     /*
-     * Usuários
+     * UsuÃ¡rios
      */
     $podeVerUsuarios = $isMaster || ($user && $user->temPermissao('usuario_visualizar'));
     $podeCadastrarUsuarios = $isMaster || ($user && $user->temPermissao('usuario_cadastrar'));
 
     /*
-     * Perfis e permissões
+     * Perfis e permissÃµes
      */
     $podeVerPerfis = $isMaster || ($user && $user->temPermissao('perfil_visualizar'));
     $podeEditarPerfis = $isMaster || ($user && $user->temPermissao('perfil_editar'));
@@ -25,7 +25,7 @@
     $podeVerEmpresas = $isMaster || ($user && $user->temPermissao('empresa_visualizar'));
 
     /*
-     * Importação de Despesas
+     * ImportaÃ§Ã£o de Despesas
      */
     $podeVerImportacaoDespesas =
         $isMaster ||
@@ -42,16 +42,16 @@
         ($user && $user->temPermissao('backup_excluir'));
 
     /*
-     * Emissão de NF-e
+     * EmissÃ£o de NF-e
      */
     $podeVerEmissaoNfe = $isMaster || ($user && $user->temPermissao('nfe_visualizar'));
 @endphp
 
 
-{{-- Usuários --}}
+{{-- UsuÃ¡rios --}}
 @if($podeVerUsuarios || $podeCadastrarUsuarios || $isMaster)
     <a href="#" class="menu-link" id="config-usuarios-link">
-        Usuários
+        UsuÃ¡rios
         <i class="bi bi-caret-right-fill" style="margin-left:auto"></i>
     </a>
 
@@ -59,13 +59,13 @@
 
         @if($podeCadastrarUsuarios)
             <a href="{{ url('/usuarios/create') }}" target="_blank" rel="noopener noreferrer">
-                Cadastrar Usuário
+                Cadastrar UsuÃ¡rio
             </a>
         @endif
 
         @if($podeVerUsuarios)
             <a href="{{ url('/usuarios') }}" target="_blank" rel="noopener noreferrer">
-                Gerenciar Usuários
+                Gerenciar UsuÃ¡rios
             </a>
         @endif
 
@@ -110,6 +110,13 @@
             <a href="{{ url('/perfis/4/permissoes') }}" target="_blank" rel="noopener noreferrer">
                 Perfil - Financeiro
             </a>
+
+            <a href="{{ route('perfis.administrador-salao') }}"
+                target="_blank"
+                rel="noopener noreferrer">
+                Perfil - Administrador do SalÃ£o
+            </a>
+
         @endif
 
     </div>
@@ -123,18 +130,18 @@
     </a>
 @endif
 
-{{-- Importação de Clientes - Somente MASTER --}}
+{{-- ImportaÃ§Ã£o de Clientes - Somente MASTER --}}
 @if($isMaster)
     <a href="{{ route('clientes.importar') }}" target="_blank" rel="noopener noreferrer">
-        Importação de Clientes
+        ImportaÃ§Ã£o de Clientes
     </a>
 @endif
 
 
-{{-- Importação de Despesas --}}
+{{-- ImportaÃ§Ã£o de Despesas --}}
 @if($podeVerImportacaoDespesas)
     <a href="{{ url('/financeiro/contas-a-pagar/importar-despesas') }}" target="_blank" rel="noopener noreferrer">
-        Importação de Despesas
+        ImportaÃ§Ã£o de Despesas
     </a>
 @endif
 
@@ -147,9 +154,9 @@
 @endif
 
 
-{{-- Emissão NF-e externa --}}
+{{-- EmissÃ£o NF-e externa --}}
 @if($podeVerEmissaoNfe)
     <a href="https://emissornfe.sebrae.com.br/" target="_blank" rel="noopener noreferrer">
-        Emissão de NF-e
+        EmissÃ£o de NF-e
     </a>
 @endif
