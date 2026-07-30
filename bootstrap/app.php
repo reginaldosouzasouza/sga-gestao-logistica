@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'nocache' => \App\Http\Middleware\NoCache::class,
             'permissao' => \App\Http\Middleware\CheckPermissao::class,
             'empresa.ativa' => VerificaEmpresaAtiva::class,
+            'demo.restrito' => \App\Http\Middleware\RestringeAcessoDemo::class,
             
         ]);
 

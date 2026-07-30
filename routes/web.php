@@ -60,6 +60,7 @@ use App\Http\Controllers\RelatorioComparativoFluxoController;
 use App\Http\Controllers\RelatorioMargemEmissaoController;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\DemoController;
 
 
 
@@ -97,6 +98,11 @@ Route::get('/buscar-usuario/{id}', function ($id) {
         'usuario' => $user?->usuario ?? '',
     ]);
 })->name('buscar.usuario');
+
+
+Route::get('/demo/gas-e-agua', [DemoController::class, 'gas'])
+    ->middleware('throttle:20,1')
+    ->name('demo.gas');
 
 
 // rotas previsao de venda controller
@@ -146,7 +152,7 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'nocache', 'empresa.ativa'])->group(function () {
+Route::middleware(['auth', 'nocache', 'empresa.ativa', 'demo.restrito'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
