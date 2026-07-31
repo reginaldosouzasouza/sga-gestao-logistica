@@ -21,10 +21,13 @@ class RestaurarDemoGas extends Command
     /**
      * Empresa utilizada como demonstração.
      */
-    private int $empresaId = 3;
+    private int $empresaId;
 
     public function handle(): int
     {
+
+        $this->empresaId = (int) config('demo.gas.empresa_id');
+
         $this->info('Iniciando restauração da demonstração...');
 
         try {
