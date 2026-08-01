@@ -546,6 +546,121 @@
             color: var(--laranja);
         }
 
+
+        .secao-aviso {
+            padding: 42px 24px;
+            background: #f5f7fb;
+        }
+
+        .aviso-desenvolvimento {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 34px;
+            border: 1px solid #fed7aa;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 90% 10%, rgba(232, 93, 4, 0.10), transparent 28%),
+                #ffffff;
+            text-align: center;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.09);
+        }
+
+        .selo-em-breve {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 15px;
+            margin-bottom: 17px;
+            border-radius: 999px;
+            background: var(--laranja);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .aviso-conteudo h2 {
+            margin: 0 0 12px;
+            color: #111827;
+            font-size: 32px;
+            line-height: 1.2;
+        }
+
+        .aviso-conteudo p {
+            max-width: 720px;
+            margin: 8px auto;
+            color: #64748b;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        .aviso-acoes {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn-aviso {
+            min-width: 210px;
+            padding: 14px 22px;
+            border-radius: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: 0.2s ease;
+        }
+
+        .btn-aviso:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-aviso-principal {
+            background: var(--laranja);
+            border: 2px solid var(--laranja);
+            color: #ffffff;
+            box-shadow: 0 12px 24px rgba(232, 93, 4, 0.23);
+        }
+
+        .btn-aviso-principal:hover {
+            background: var(--laranja-escuro);
+            border-color: var(--laranja-escuro);
+        }
+
+        .btn-aviso-secundario {
+            background: #ffffff;
+            border: 2px solid var(--laranja);
+            color: var(--laranja);
+        }
+
+        .btn-aviso-secundario:hover {
+            background: var(--laranja-claro);
+        }
+
+        @media (max-width: 600px) {
+            .secao-aviso {
+                padding: 28px 16px;
+            }
+
+            .aviso-desenvolvimento {
+                padding: 26px 18px;
+            }
+
+            .aviso-conteudo h2 {
+                font-size: 26px;
+            }
+
+            .aviso-acoes {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-aviso {
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+
         @media (max-width: 980px) {
             .menu {
                 display: none;
@@ -662,6 +777,7 @@
                 <small>Gestão simples para oficinas</small>
             </a>
 
+
             <nav class="menu" aria-label="Menu da página">
                 <a href="#recursos">Recursos</a>
                 <a href="#diferenciais">Diferenciais</a>
@@ -670,12 +786,59 @@
 
             <div class="acoes-topo">
                 <a href="{{ route('site.index') }}" class="btn btn-claro">Voltar ao site</a>
-                <a href="{{ route('abrir.sistema') }}" class="btn btn-laranja">Acessar sistema</a>
+                <a
+                    href="https://wa.me/5544999995767?text=Ol%C3%A1%20Reginaldo%2C%20gostaria%20de%20ser%20avisado%20quando%20o%20sistema%20para%20oficinas%20estiver%20pronto."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-laranja"
+                >
+                    Quero ser avisado
+                </a>
             </div>
         </div>
     </header>
 
     <main>
+        <section class="secao-aviso">
+            <div class="container">
+                <div class="aviso-desenvolvimento">
+                    <span class="selo-em-breve">EM BREVE</span>
+
+                    <div class="aviso-conteudo">
+                        <h2>Sistema em desenvolvimento</h2>
+
+                        <p>
+                            Nossa solução para oficinas mecânicas está em desenvolvimento
+                            e em breve estará disponível.
+                        </p>
+
+                        <p>
+                            Quer conhecer o projeto ou ser avisado quando o sistema estiver pronto?
+                        </p>
+
+                        <div class="aviso-acoes">
+                            <a
+                                href="https://wa.me/5544999995767?text=Ol%C3%A1%20Reginaldo%2C%20gostaria%20de%20ser%20avisado%20quando%20o%20sistema%20para%20oficinas%20estiver%20pronto."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="btn-aviso btn-aviso-secundario"
+                            >
+                                Quero ser avisado
+                            </a>
+
+                            <a
+                                href="https://wa.me/5544999995767?text=Ol%C3%A1%20Reginaldo%2C%20gostaria%20de%20conhecer%20melhor%20o%20projeto%20do%20sistema%20para%20oficinas."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="btn-aviso btn-aviso-principal"
+                            >
+                                Conhecer o projeto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section class="hero">
             <div class="container hero-container">
                 <div>
