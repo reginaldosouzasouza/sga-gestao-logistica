@@ -131,7 +131,7 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| SITE PÃšBLICO DO S.G.A.
+| SITE  S.G.A.
 |--------------------------------------------------------------------------
 | PÃ¡gina inicial de apresentaÃ§Ã£o do sistema.
 | O login continua acessÃ­vel por /abrir-sistema.
@@ -140,6 +140,17 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/', function () {
     return view('site.index');
 })->name('site.index');
+
+Route::view('/sistemas/gas-e-agua', 'site.sistemas.gas-e-agua')
+    ->name('site.sistemas.gas');
+
+Route::view('/sistemas/oficina', 'site.sistemas.oficina')
+    ->name('site.sistemas.oficina');
+
+Route::view('/sistemas/salao-barbearia', 'site.sistemas.salao-barbearia')
+    ->name('site.sistemas.salao');
+
+    
 
 /*
 |--------------------------------------------------------------------------
