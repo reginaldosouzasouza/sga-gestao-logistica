@@ -621,6 +621,72 @@
             font-size: 13px;
         }
 
+
+
+        .cta-botoes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn-cta {
+    min-width: 220px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.btn-cta:hover {
+    transform: translateY(-2px);
+}
+
+.btn-cta-principal {
+    background: #ff7a00;
+    color: #fff;
+    border: 2px solid #ff7a00;
+    box-shadow: 0 14px 28px rgba(255, 122, 0, 0.25);
+}
+
+.btn-cta-principal:hover {
+    background: #e96f00;
+    border-color: #e96f00;
+    color: #fff;
+}
+
+.btn-cta-secundario {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.btn-cta-secundario:hover {
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 600px) {
+    .cta-botoes {
+        flex-direction: column;
+    }
+
+    .btn-cta {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
         @media (max-width: 980px) {
             .menu {
                 display: none;
@@ -986,20 +1052,35 @@
 
         <section class="faixa" id="contato">
             <div class="container">
-                <h2>Descubra qual sistema combina com o seu negócio</h2>
+                <h2>Seu negócio é único. Seu sistema também pode ser.</h2>
                 <p>
                     Fale diretamente com o desenvolvedor, conheça os recursos disponíveis
                     e veja como o S.G.A. pode ajudar na organização da sua empresa.
+                    Não encontrou exatamente o que precisa? 
+                    Desenvolvemos uma solução personalizada para a realidade da sua empresa.
+                    
                 </p>
 
-                <a
-                    href="https://wa.me/5544999995767?text=Ol%C3%A1%2C%20Reginaldo.%20Quero%20conhecer%20melhor%20os%20sistemas%20S.G.A."
-                    class="btn btn-principal"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    Falar pelo WhatsApp
-                </a>
+                <div class="cta-botoes">
+                    <a
+                        href="https://wa.me/44999995767?text=Ol%C3%A1%20Reginaldo%2C%20gostaria%20de%20conhecer%20melhor%20as%20solu%C3%A7%C3%B5es%20dispon%C3%ADveis%20da%20S.G.A."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn-cta btn-cta-secundario"
+                    >
+                        Conhecer as soluções
+                    </a>
+
+                    <a
+                        href="https://wa.me/44999995767?text=Ol%C3%A1%2C%20Reginaldo%2C%20tenho%20uma%20necessidade%20espec%C3%ADfica%20e%20gostaria%20de%20conversar%20sobre%20um%20sistema%20personalizado."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn-cta btn-cta-principal"
+                    >
+                        Falar sobre meu projeto
+                    </a>
+                </div>
+                
             </div>
         </section>
     </main>
