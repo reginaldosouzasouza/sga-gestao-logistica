@@ -217,6 +217,16 @@
     <div class="cards-resumo">
         <div class="card">
             <div class="label">Recebimento Projetado Restante</div>
+                    <span class="tooltip-label">
+                        Informação ⓘ
+                       <span class="tooltip-text">
+                            Este valor é uma estimativa do que ainda poderá ser recebido até o fim do mês.
+                            O sistema soma todas as entradas registradas no Caixa e no Caixa Banco,
+                            do primeiro dia do mês até ontem, e divide pela quantidade de dias já concluídos
+                            para calcular a média diária. Depois, multiplica essa média pelos dias restantes
+                            do mês.
+                        </span>
+                    </span>
             <div class="valor">
                 R$ {{ number_format($recebimentoProjetadoRestante, 2, ',', '.') }}
             </div>
@@ -337,6 +347,8 @@
                         Base do cálculo ⓘ
                         <span class="tooltip-text">
                             A média base vem das vendas reais do período filtrado.
+                            1ª média é o cáculo (vendidos no período / pelo dia do mês -1)
+                            2ª média é o cáculo () dia do mêscalculado os dias 
                             A média ajustada aplica as regras configuradas, como sazonalidade,
                             fim de mês e outros parâmetros da previsão.
                         </span>

@@ -129,12 +129,42 @@ class ImportacaoDespesaExcelService
     private function normalizarCabecalho(array $cabecalho): array
     {
         return array_map(function ($coluna) {
-            $coluna = trim((string) $coluna);
-            $coluna = mb_strtolower($coluna);
+            $coluna = (string) $coluna;
+
+            /*
+            * Remove BOM e caracteres invisíveis que podem vir
+            * de arquivos XLS, XLSX, CSV ou do LibreOffice.
+            */
+            $coluna = preg_replace(
+                '/[\x{FEFF}\x{200B}\x{00A0}]/u',
+                '',
+                $coluna
+            );
+
+            /*
+            * Remove aspas que possam existir nos cabeçalhos.
+            * Exemplo: "Forma de Pagamento"
+            */
+            $coluna = str_replace(
+                ['"', "'", '“', '”', '‘', '’'],
+                '',
+                $coluna
+            );
+
+            /*
+            * Normaliza tabulações, espaços e quebras de linha.
+            */
+            $coluna = preg_replace('/\s+/u', ' ', $coluna);
+
+            $coluna = trim($coluna);
+            $coluna = mb_strtolower($coluna, 'UTF-8');
             $coluna = $this->removerAcentos($coluna);
+
             return $coluna;
         }, $cabecalho);
     }
+    
+    
 
     private function validarCabecalho(array $cabecalho): void
     {

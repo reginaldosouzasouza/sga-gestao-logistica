@@ -109,7 +109,8 @@ class RelatorioComparativoNaturezaController extends Controller
                 'data_movimentacao',
                 'tipo',
                 'valor',
-                'referencia_id'
+                'referencia_id',
+                'origem'
             )
             ->where('tipo', 'saida');
 
@@ -119,7 +120,8 @@ class RelatorioComparativoNaturezaController extends Controller
                 'data_movimentacao',
                 'tipo',
                 'valor',
-                'referencia_id'
+                'referencia_id',
+                'origem'
             )
             ->where('tipo', 'saida');
 
@@ -127,22 +129,74 @@ class RelatorioComparativoNaturezaController extends Controller
 
         return DB::query()
             ->fromSub($union, 'x')
+
+            /*
+            * Algumas saídas referenciam contas_a_pagar.
+            */
             ->leftJoin('contas_a_pagar as cp', function ($join) {
                 $join->on('cp.id', '=', 'x.referencia_id')
                     ->on('cp.empresa_id', '=', 'x.empresa_id');
             })
-            ->leftJoin('fornecedores as f', function ($join) {
-                $join->on('f.id', '=', 'cp.fornecedor_id')
-                    ->on('f.empresa_id', '=', 'x.empresa_id');
+
+            /*
+            * Compras à vista e via PIX referenciam diretamente compras.id.
+            */
+            ->leftJoin('compras as c', function ($join) {
+                $join->on('c.id', '=', 'x.referencia_id')
+                    ->on('c.empresa_id', '=', 'x.empresa_id');
             })
-            ->leftJoin('naturezas_financeiras as nf', 'nf.id', '=', 'f.natureza_financeira_id')
+
+            /*
+            * Usa o fornecedor da conta a pagar quando existir.
+            * Caso contrário, utiliza o fornecedor da compra.
+            */
+            ->leftJoin('fornecedores as f', function ($join) {
+                $join->on(
+                    'f.id',
+                    '=',
+                    DB::raw('COALESCE(cp.fornecedor_id, c.fornecedor_id)')
+                )
+                ->on('f.empresa_id', '=', 'x.empresa_id');
+            })
+
+            ->leftJoin('naturezas_financeiras as nf', function ($join) {
+                $join->on('nf.id', '=', 'f.natureza_financeira_id');
+            })
+
             ->where('x.empresa_id', $empresaId)
             ->whereBetween('x.data_movimentacao', [$dataInicio, $dataFim])
+
+            /*
+            * Estorno de recebimento é uma saída técnica e não uma despesa.
+            */
+            ->where(function ($query) {
+                $query->whereNull('x.origem')
+                    ->orWhereRaw("UPPER(TRIM(x.origem)) <> 'ESTORNO'");
+            })
+
+            /*
+            * Não incluir DESP. NÃO CONTÁBIL, natureza ID 8.
+            */
+            ->where(function ($query) {
+                $query->whereNull('f.natureza_financeira_id')
+                    ->orWhere('f.natureza_financeira_id', '!=', 8);
+            })
+
             ->selectRaw("
-                COALESCE(nf.nome, 'Sem Natureza Financeira') as natureza,
+                COALESCE(
+                    NULLIF(TRIM(nf.nome), ''),
+                    'Sem Natureza Financeira'
+                ) as natureza,
                 SUM(x.valor) as total
             ")
-            ->groupByRaw("COALESCE(nf.nome, 'Sem Natureza Financeira')")
+
+            ->groupByRaw("
+                COALESCE(
+                    NULLIF(TRIM(nf.nome), ''),
+                    'Sem Natureza Financeira'
+                )
+            ")
+
             ->pluck('total', 'natureza')
             ->map(function ($valor) {
                 return (float) $valor;

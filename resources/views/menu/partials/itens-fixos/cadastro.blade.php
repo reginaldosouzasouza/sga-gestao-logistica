@@ -37,14 +37,15 @@
 @endphp
 
 
+
 {{-- Clientes --}}
 @if($podeVerClientes)
-    <a href="{{ url('/clientes') }}">
+    <a href="{{ url('/clientes') }}" target="_blank">
         Clientes
         <img src="{{ asset('images/imagem/clientes.png') }}" class="imagem">
     </a>
 
-    <a href="{{ route('clientes.aniversariantes') }}">
+    <a href="{{ route('clientes.aniversariantes') }}" target="_blank">
         Aniversariantes
         <i class="bi bi-cake2" style="margin-left:auto"></i>
     </a>
@@ -53,7 +54,7 @@
 
 {{-- Fornecedores --}}
 @if($podeVerFornecedores)
-    <a href="{{ url('/fornecedores') }}">
+    <a href="{{ url('/fornecedores') }}" target="_blank">
         Fornecedores
         <img src="{{ asset('images/imagem/fornecedor.png') }}" class="imagem">
     </a>
@@ -62,7 +63,7 @@
 
 {{-- Naturezas Financeiras --}}
 @if($podeVerNaturezas)
-    <a href="{{ url('/naturezas-financeiras') }}">
+    <a href="{{ url('/naturezas-financeiras') }}" target="_blank">
         Naturezas Financeiras
         <i class="bi bi-diagram-3" style="margin-left:auto"></i>
     </a>
@@ -71,7 +72,7 @@
 
 {{-- Produtos --}}
 @if($podeVerProdutos)
-    <a href="{{ url('/produtos') }}">
+    <a href="{{ url('/produtos') }}" target="_blank">
         Produtos
         <img src="{{ asset('images/imagem/produtos.png') }}" class="imagem">
     </a>
@@ -80,7 +81,7 @@
 
 {{-- Veículos --}}
 @if($podeVerVeiculos)
-    <a href="{{ url('/veiculos') }}">
+    <a href="{{ url('/veiculos') }}" target="_blank">
         Veículos
         <img src="{{ asset('images/imagem/veiculos.png') }}" class="imagem">
     </a>
@@ -89,7 +90,7 @@
 
 {{-- Motoristas --}}
 @if($podeVerMotoristas)
-    <a href="{{ url('/motoristas') }}">
+    <a href="{{ url('/motoristas') }}" target="_blank">
         Motoristas
         <img src="{{ asset('images/imagem/motorista.png') }}" class="imagem">
     </a>

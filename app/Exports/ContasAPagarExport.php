@@ -61,7 +61,12 @@ class ContasAPagarExport
             ->when($this->filtros['data_compra_final'] ?? null, fn($q, $v) => $q->whereDate('data_compra', '<=', $v))
             ->when($this->filtros['data_vencimento_inicial'] ?? null, fn($q, $v) => $q->whereDate('data_vencimento', '>=', $v))
             ->when($this->filtros['data_vencimento_final'] ?? null, fn($q, $v) => $q->whereDate('data_vencimento', '<=', $v))
-            ->when($this->filtros['data_pagamento'] ?? null, fn($q, $v) => $q->whereDate('data_pagamento', $v))
+            ->when($this->filtros['data_pagamento_inicial'] ?? null,fn($q, $v) => $q->whereDate('data_pagamento', '>=', $v)
+            )
+            ->when(
+                $this->filtros['data_pagamento_final'] ?? null,
+                fn($q, $v) => $q->whereDate('data_pagamento', '<=', $v)
+            )
             ->orderBy('data_vencimento')
             ->chunk(500, function ($contas) use ($sheet, &$linha) {
                 foreach ($contas as $conta) {
@@ -103,14 +108,43 @@ class ContasAPagarExport
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
+        // Garante que nenhuma saída anterior contamine o XLSX
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
         $response = new StreamedResponse(function () use ($spreadsheet) {
             $writer = new Xlsx($spreadsheet);
+
+            // Evita cálculo desnecessário de fórmulas durante a geração
+            $writer->setPreCalculateFormulas(false);
+
             $writer->save('php://output');
+
+            // Libera a memória utilizada pela planilha
+            $spreadsheet->disconnectWorksheets();
+
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
+
+            flush();
         });
 
-        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        $response->headers->set('Content-Disposition', "attachment; filename=\"{$fileName}\"");
-        $response->headers->set('Cache-Control', 'max-age=0');
+        $response->headers->set(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        $response->headers->set(
+            'Content-Disposition',
+            'attachment; filename="' . $fileName . '"'
+        );
+
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
 
         return $response;
     }

@@ -23,6 +23,42 @@ class ContasAPagarController extends Controller
         return empresaAtualId();
     }
 
+    private function isMaster(): bool
+    {
+        return auth()->check() && auth()->user()->tipo === 'MASTER';
+    }
+
+    /**
+     * Remove o lançamento financeiro criado na baixa da conta.
+     *
+     * Também reconhece lançamentos antigos que foram gravados
+     * incorretamente com origem "compra", desde que a descrição
+     * identifique claramente a conta a pagar.
+     */
+    private function removerMovimentacaoPagamento(ContasAPagar $contaAPagar): void
+    {
+        $empresaId = $this->empresaId();
+        $descricaoLegada = 'Pagamento conta a pagar #' . $contaAPagar->id;
+
+        $filtro = function ($query) use ($descricaoLegada) {
+            $query->where('origem', 'contas_a_pagar')
+                ->orWhere(function ($legado) use ($descricaoLegada) {
+                    $legado->where('origem', 'compra')
+                        ->where('descricao', $descricaoLegada);
+                });
+        };
+
+        Caixa::where('empresa_id', $empresaId)
+            ->where('referencia_id', $contaAPagar->id)
+            ->where($filtro)
+            ->delete();
+
+        CaixaBanco::where('empresa_id', $empresaId)
+            ->where('referencia_id', $contaAPagar->id)
+            ->where($filtro)
+            ->delete();
+    }
+
     public function index(Request $request)
     {
         $empresaId = $this->empresaId();
@@ -211,6 +247,18 @@ class ContasAPagarController extends Controller
 
             $statusAnterior = $contaAPagar->status;
 
+            if ($statusAnterior === 'pago' && $request->status !== 'pago') {
+                DB::rollBack();
+
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'Uma conta paga não pode voltar para pendente pela edição. Exclua o lançamento correspondente no Caixa ou Caixa Banco para realizar o estorno corretamente.'
+                    );
+            }
+
             $dadosAtualizacao = $request->only([
                 'fornecedor_id',
                 'descricao',
@@ -224,6 +272,11 @@ class ContasAPagarController extends Controller
 
             $dadosAtualizacao['empresa_id'] = $empresaId;
 
+            if ($statusAnterior !== 'pago' && $request->status === 'pago') {
+                $dadosAtualizacao['data_pagamento'] = $request->data_pagamento
+                    ?? now()->toDateString();
+            }
+
             $contaAPagar->update($dadosAtualizacao);
 
             if ($statusAnterior !== 'pago' && $request->status === 'pago') {
@@ -235,7 +288,7 @@ class ContasAPagarController extends Controller
                     'data_movimentacao' => $request->data_pagamento ?? now()->toDateString(),
                     'tipo' => 'saida',
                     'valor' => $contaAPagar->valor,
-                    'origem' => 'compra',
+                    'origem' => 'contas_a_pagar',
                     'descricao' => 'Pagamento conta a pagar #' . $contaAPagar->id,
                     'referencia_id' => $contaAPagar->id,
                 ];
@@ -278,10 +331,57 @@ class ContasAPagarController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        $contaAPagar->delete();
+        /*
+        * Usuário comum não pode excluir conta já paga.
+        */
+        if ($contaAPagar->status === 'pago' && !$this->isMaster()) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Esta conta já foi paga e não pode ser excluída por este usuário.
+                     Para desfazer o pagamento, utilize o estorno pelo Caixa ou Caixa Banco.'
+                );
+        }
 
-        return redirect($request->return_url ?? route('contas-a-pagar.index'))
-            ->with('success', 'Conta a pagar excluída com sucesso!');
+        DB::beginTransaction();
+
+        try {
+            /*
+            * Se for MASTER e a conta estiver paga,
+            * remove também o lançamento financeiro vinculado.
+            */
+            if ($contaAPagar->status === 'pago') {
+                $this->removerMovimentacaoPagamento($contaAPagar);
+            }
+
+            $contaAPagar->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->back()
+                ->with('success', 'Conta a pagar excluída com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao excluir conta a pagar', [
+                'conta_a_pagar_id' => $id,
+                'empresa_id' => $empresaId,
+                'usuario_id' => auth()->id(),
+                'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Não foi possível excluir a conta a pagar. Nenhuma alteração foi realizada.'
+                );
+        }
     }
 
     public function relatorioContasAPagar(Request $request)
@@ -345,21 +445,22 @@ class ContasAPagarController extends Controller
         ));
     }
 
-   public function exportarExcel(Request $request)
-{
-    $filtros = $request->only([
-        'fornecedor',
-        'status',
-        'forma_pagamento_id',
-        'data_compra_inicial',
-        'data_compra_final',
-        'data_vencimento_inicial',
-        'data_vencimento_final',
-        'data_pagamento',
-    ]);
+    public function exportarExcel(Request $request)
+    {
+        $filtros = $request->only([
+            'fornecedor',
+            'status',
+            'forma_pagamento_id',
+            'data_compra_inicial',
+            'data_compra_final',
+            'data_vencimento_inicial',
+            'data_vencimento_final',
+            'data_pagamento_inicial',
+            'data_pagamento_final',
+        ]);
 
-    $filtros['empresa_id'] = $this->empresaId();
+        $filtros['empresa_id'] = $this->empresaId();
 
-    return (new ContasAPagarExport($filtros))->download();
-}
+        return (new ContasAPagarExport($filtros))->download();
+    }
 }

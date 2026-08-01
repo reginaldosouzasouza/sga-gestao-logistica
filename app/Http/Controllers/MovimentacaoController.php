@@ -330,10 +330,148 @@ class MovimentacaoController extends Controller
         DB::beginTransaction();
 
         try {
-            $movimentacao = Movimentacao::where('empresa_id', $empresaId)
+            $movimentacao = Movimentacao::with('itens')
+                ->where('empresa_id', $empresaId)
                 ->where('id', $id)
+                ->lockForUpdate()
                 ->firstOrFail();
 
+            $isMaster = auth()->check()
+                && auth()->user()->tipo === 'MASTER';
+
+            $formaPagamento = FormaDePagamento::find(
+                $movimentacao->forma_pagamento_id
+            );
+
+            $nomeFormaPagamento = strtolower(
+                trim($formaPagamento->nome ?? '')
+            );
+
+            /*
+            * Localiza a Conta a Receber gerada por esta coleta.
+            *
+            * Atualmente a ligação é feita pela descrição porque
+            * contas_a_receber ainda não possui movimentacao_id.
+            */
+            $descricaoConta = 'Venda realizada - Coleta #' . $movimentacao->id;
+
+            $contaAReceber = ContasAReceber::where(
+                'empresa_id',
+                $empresaId
+            )
+                ->where('descricao', $descricaoConta)
+                ->first();
+
+            /*
+            * Se a Conta a Receber já foi recebida,
+            * somente o MASTER poderá cancelar a coleta.
+            */
+            if (
+                $contaAReceber
+                && $contaAReceber->status === 'recebido'
+                && !$isMaster
+            ) {
+                DB::rollBack();
+
+                return redirect()
+                    ->back()
+                    ->with(
+                        'error',
+                        'Esta coleta possui uma Conta a Receber já recebida. Somente o usuário MASTER pode realizar o cancelamento completo.'
+                    );
+            }
+
+            /*
+            * Remove entrada financeira gerada diretamente pela venda.
+            *
+            * Dinheiro: Caixa
+            * PIX: Caixa Banco
+            */
+            if ($movimentacao->gerar_financeiro) {
+                if ($nomeFormaPagamento === 'dinheiro') {
+                    Caixa::where('empresa_id', $empresaId)
+                        ->where('origem', 'venda')
+                        ->where('referencia_id', $movimentacao->id)
+                        ->delete();
+
+                } elseif ($nomeFormaPagamento === 'pix') {
+                    CaixaBanco::where('empresa_id', $empresaId)
+                        ->where('origem', 'venda')
+                        ->where('referencia_id', $movimentacao->id)
+                        ->delete();
+                }
+            }
+
+            /*
+            * Se existir Conta a Receber vinculada:
+            *
+            * - pendente ou atrasada: exclui a conta;
+            * - recebida e usuário MASTER: remove também o recebimento
+            *   correspondente no Caixa ou Caixa Banco.
+            */
+            if ($contaAReceber) {
+                if ($contaAReceber->status === 'recebido') {
+                    Caixa::where('empresa_id', $empresaId)
+                        ->where('origem', 'recebimento')
+                        ->where('referencia_id', $contaAReceber->id)
+                        ->delete();
+
+                    CaixaBanco::where('empresa_id', $empresaId)
+                        ->where('origem', 'recebimento')
+                        ->where('referencia_id', $contaAReceber->id)
+                        ->delete();
+                }
+
+                $contaAReceber->delete();
+            }
+
+            /*
+            * Devolve ao estoque cada produto vendido.
+            */
+            foreach ($movimentacao->itens as $item) {
+                $produto = Produto::where('empresa_id', $empresaId)
+                    ->where('id', $item->produto_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$produto) {
+                    throw new \Exception(
+                        'Produto do item #' . $item->id . ' não foi encontrado.'
+                    );
+                }
+
+                $quantidadeDevolvida = (float) $item->quantidade;
+
+                $produto->quantidade_estoque =
+                    (float) $produto->quantidade_estoque
+                    + $quantidadeDevolvida;
+
+                $produto->save();
+
+                /*
+                * Registra a entrada compensatória no histórico.
+                * Não apagamos a saída original para manter rastreabilidade.
+                */
+                Estoque::create([
+                    'empresa_id' => $empresaId,
+                    'produto_id' => $produto->id,
+                    'quantidade' => $quantidadeDevolvida,
+                    'tipo_movimentacao' => 'entrada',
+                    'origem' => 'cancelamento_venda',
+                    'data_movimentacao' => now(),
+                ]);
+            }
+
+            /*
+            * Remove eventual rastreio local vinculado à coleta.
+            */
+            EntregaRastreio::where('empresa_id', $empresaId)
+                ->where('movimentacao_id', $movimentacao->id)
+                ->delete();
+
+            /*
+            * Exclui os itens e, por último, a coleta.
+            */
             MovimentacaoItem::where('empresa_id', $empresaId)
                 ->where('movimentacao_id', $movimentacao->id)
                 ->delete();
@@ -344,34 +482,30 @@ class MovimentacaoController extends Controller
 
             return redirect()
                 ->route('movimentacao.index')
-                ->with('success', 'Movimentação excluída com sucesso.');
+                ->with(
+                    'success',
+                    'Coleta excluída com sucesso. O estoque e o saldo financeiro foram atualizados.'
+                );
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Erro ao excluir movimentação', [
+            Log::error('Erro ao cancelar movimentação', [
+                'movimentacao_id' => $id,
+                'empresa_id' => $empresaId,
+                'usuario_id' => auth()->id(),
                 'erro' => $e->getMessage(),
                 'linha' => $e->getLine(),
                 'arquivo' => $e->getFile(),
             ]);
 
             return redirect()
-                ->route('movimentacao.index')
-                ->with('error', 'Erro ao excluir movimentação: ' . $e->getMessage());
+                ->back()
+                ->with(
+                    'error',
+                    'Não foi possível excluir a coleta: ' . $e->getMessage()
+                );
         }
-    }
-
-    public function verificarEstoque(Request $request)
-    {
-        $empresaId = $this->empresaId();
-
-        $produto = Produto::where('empresa_id', $empresaId)
-            ->where('id', $request->produto_id)
-            ->first();
-
-        return response()->json([
-            'quantidade_estoque' => $produto?->quantidade_estoque ?? 0
-        ]);
     }
 
     public function confirmarRastreio($id)

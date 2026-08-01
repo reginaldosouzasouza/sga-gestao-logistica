@@ -1,65 +1,202 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 20px;
+.relatorio-contas-pagar {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding-top: 25px;
+    padding-bottom: 40px;
 }
 
-h2 {
+.relatorio-contas-pagar h2 {
+    margin-bottom: 25px;
     text-align: center;
-    color: #333;
+    color: #2d3436;
 }
 
-form {
-    background: white;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+.card-filtros {
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
 }
 
-form label {
-    font-weight: bold;
-    margin-right: 10px;
+.card-filtros .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -10px;
+    margin-left: -10px;
 }
 
-form input, form select {
-    padding: 5px;
-    margin-right: 10px;
+.card-filtros [class*="col-md-"] {
+    padding-right: 10px;
+    padding-left: 10px;
+    box-sizing: border-box;
 }
 
-table {
+.campo-filtro {
+    margin-bottom: 15px;
+}
+
+.campo-filtro label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #2d3436;
+}
+
+.campo-filtro .form-control {
+    display: block;
     width: 100%;
-    background: white;
-    border-collapse: collapse;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    height: 40px;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-sizing: border-box;
 }
 
-table th, table td {
-    padding: 10px;
-    border: 1px solid #ddd;
+.linha-periodos {
+    margin-top: 10px;
 }
 
-table td:hover {
-    background-color: aquamarine;
-   
+.grupo-periodo {
+    height: 100%;
+    padding: 16px;
+    background: #f8f9fa;
+    border: 1px solid #e3e6e8;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
-
-
-table th {
-    background: #007bff;
-    color: white;
-    text-align: left;
+.grupo-periodo h4 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #343a40;
 }
 
-button {
-    background: #007bff;
-    color: white;
-    padding: 5px 10px;
+.acoes-filtros {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.acoes-filtros .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    min-height: 40px;
+    padding: 9px 18px;
     border: none;
-    cursor: pointer;
+    border-radius: 6px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-sizing: border-box;
 }
 
-button:hover {
-    background: #0056b3;
+.resumo-relatorio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 20px 0;
+}
+
+.resumo-item {
+    min-width: 220px;
+    padding: 16px 20px;
+    background: #ffffff;
+    border-left: 5px solid #1f78ff;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.resumo-item span {
+    display: block;
+    margin-bottom: 5px;
+    color: #636e72;
+    font-size: 14px;
+}
+
+.resumo-item strong {
+    color: #2d3436;
+    font-size: 20px;
+}
+
+.tabela-responsiva {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabela-responsiva table {
+    width: 100%;
+    min-width: 1100px;
+    background: #ffffff;
+}
+
+.tabela-responsiva th {
+    white-space: nowrap;
+}
+
+@media (min-width: 992px) {
+    .col-md-3 {
+        width: 25%;
+    }
+
+    .col-md-4 {
+        width: 33.333333%;
+    }
+
+    .col-md-5 {
+        width: 41.666667%;
+    }
+
+    .col-md-6 {
+        width: 50%;
+    }
+}
+
+@media (max-width: 991px) {
+    .card-filtros [class*="col-md-"] {
+        width: 100%;
+    }
+
+    .grupo-periodo {
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 600px) {
+    .relatorio-contas-pagar {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .card-filtros {
+        padding: 16px;
+    }
+
+    .grupo-periodo .col-md-6 {
+        width: 100%;
+    }
+
+    .acoes-filtros {
+        flex-direction: column;
+    }
+
+    .acoes-filtros .btn {
+        width: 100%;
+    }
+
+    .resumo-relatorio {
+        flex-direction: column;
+    }
+
+    .resumo-item {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
 }

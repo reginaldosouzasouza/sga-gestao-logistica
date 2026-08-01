@@ -390,199 +390,352 @@ class DashboardController extends Controller
     return response()->json($resultado);
 }
 
-public function previsaoGiroCaixa(Request $request, PrevisaoGiroService $previsaoGiroService)
-{
-    $empresaId = $this->empresaId();
+    public function previsaoGiroCaixa(
+        Request $request,
+        PrevisaoGiroService $previsaoGiroService
+    ) {
+        $empresaId = $this->empresaId();
 
-    $dataInicio = $request->input('data_inicio') ?? now()->startOfMonth()->toDateString();
-    $dataFim = $request->input('data_fim') ?? now()->endOfMonth()->toDateString();
+        $dataInicio = $request->input('data_inicio')
+            ?? now()->startOfMonth()->toDateString();
 
-    $inicio = \Carbon\Carbon::parse($dataInicio);
-    $fim = \Carbon\Carbon::parse($dataFim);
-    $hoje = now();
+        $dataFim = $request->input('data_fim')
+            ?? now()->endOfMonth()->toDateString();
 
-    $diasPeriodo = $inicio->diffInDays($fim) + 1;
+        $inicio = \Carbon\Carbon::parse($dataInicio)->startOfDay();
+        $fim = \Carbon\Carbon::parse($dataFim)->startOfDay();
+        $hoje = now()->startOfDay();
+        $ontem = $hoje->copy()->subDay();
 
-    if ($diasPeriodo <= 0) {
-        $diasPeriodo = 1;
-    }
-
-    $diasRestantesAteFim = $hoje->lte($fim)
-        ? $hoje->copy()->startOfDay()->diffInDays($fim->copy()->startOfDay()) + 1
-        : 0;
-
-/*
- * RECEBIMENTO REAL DO PERÍODO
- * Fonte oficial: caixa + caixa_banco.
- *
- * Motivo:
- * Existem entradas via dinheiro e PIX que podem não passar pelo contas_a_receber.
- * Como este relatório é de giro e caixa, a base correta é o dinheiro que entrou
- * efetivamente no caixa/banco.
- */
-$entradasCaixa = DB::table('caixa')
-    ->where('empresa_id', $empresaId)
-    ->where('tipo', 'entrada')
-    ->whereBetween('data_movimentacao', [$dataInicio, $hoje->toDateString()])
-    ->sum('valor');
-
-$entradasCaixaBanco = DB::table('caixa_banco')
-    ->where('empresa_id', $empresaId)
-    ->where('tipo', 'entrada')
-    ->whereBetween('data_movimentacao', [$dataInicio, $hoje->toDateString()])
-    ->sum('valor');
-
-$recebidoPeriodo = $entradasCaixa + $entradasCaixaBanco;
-
-/*
- * Média diária de recebimento até hoje.
- */
-/*
- * Dias corridos até hoje, considerando dias inteiros.
- * Exemplo:
- * 01/06 até 24/06 = 24 dias.
- */
-$diasAteHoje = $inicio->copy()->startOfDay()
-    ->diffInDays($hoje->copy()->startOfDay()) + 1;
-
-if ($diasAteHoje <= 0) {
-    $diasAteHoje = 1;
-}
-
-$mediaRecebimentoDia = $recebidoPeriodo / $diasAteHoje;
-
-/*
- * Projeção do que ainda pode entrar até o final do período.
- */
-$recebimentoProjetadoRestante = $mediaRecebimentoDia * $diasRestantesAteFim;
-    /*
-     * CONTAS A PAGAR EM ABERTO ATÉ A DATA FINAL
-     */
-    $contasPagarAberto = DB::table('contas_a_pagar')
-        ->where('empresa_id', $empresaId)
-        ->whereIn('status', ['pendente', 'em aberto', 'aberto'])
-        ->whereBetween('data_vencimento', [$hoje->toDateString(), $dataFim])
-        ->sum('valor');
-
-    /*
-     * PRODUTOS VÁLIDOS PARA PREVISÃO
-     */
-    $produtos = DB::table('produtos')
-        ->select('id', 'nome', 'quantidade_estoque', 'preco_compra')
-        ->where('empresa_id', $empresaId)
-        ->where(function ($q) {
-            $q->where('nome', 'like', '%GAS%')
-              ->orWhere('nome', 'like', '%GÁS%')
-              ->orWhere('nome', 'like', '%AGUA%')
-              ->orWhere('nome', 'like', '%ÁGUA%');
-        })
-        ->whereNotIn('nome', [
-            'PRODUTOS DIVERSOS',
-            'COMPRAS -MERCADO',
-            'COMPRAS- MERCADO',
-            'COMPRAS-MERCADO',
-            'COMPRAS MERCADO',
-        ])
-        ->get();
-
-    $previsoesProdutos = [];
-    $totalCompraMinima = 0;
-    $totalCompraRecomendada = 0;
-
-    foreach ($produtos as $produto) {
         /*
-        * Para previsão mensal de compra, usamos apenas dias fechados.
-        *
-        * Exemplo:
-        * Hoje: 12/07
-        * Base de cálculo: 01/07 até 11/07
-        *
-        * Assim evitamos distorção causada pelo dia atual parcial.
+        * Garante que a data inicial não seja maior
+        * do que a data final.
         */
-        $ontem = $hoje->copy()->subDay()->startOfDay();
+        if ($inicio->gt($fim)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'A data inicial não pode ser maior que a data final.'
+                );
+        }
 
+        /*
+        * Quantidade total de dias do período selecionado.
+        */
+        $diasPeriodo = $inicio->diffInDays($fim) + 1;
+
+        if ($diasPeriodo <= 0) {
+            $diasPeriodo = 1;
+        }
+
+        /*
+        * DIAS RESTANTES PARA PROJEÇÃO
+        *
+        * Se o período ainda não começou:
+        * considera todos os dias do período.
+        *
+        * Se hoje estiver dentro do período:
+        * considera hoje até a data final.
+        *
+        * Se o período já terminou:
+        * não há dias restantes.
+        */
+        if ($hoje->lt($inicio)) {
+            $diasRestantesAteFim = $inicio->diffInDays($fim) + 1;
+        } elseif ($hoje->lte($fim)) {
+            $diasRestantesAteFim = $hoje->diffInDays($fim) + 1;
+        } else {
+            $diasRestantesAteFim = 0;
+        }
+
+        /*
+        * DATA FINAL DOS RECEBIMENTOS REAIS
+        *
+        * Usa somente dias fechados:
+        * da data inicial até ontem.
+        *
+        * Se o período selecionado terminou antes de ontem,
+        * utiliza a própria data final do período.
+        */
+        $dataBaseFimRecebimentos = $ontem->lte($fim)
+            ? $ontem->copy()
+            : $fim->copy();
+
+        /*
+        * RECEBIMENTOS REAIS DO PERÍODO
+        *
+        * Fonte oficial:
+        * - caixa
+        * - caixa_banco
+        *
+        * O dia atual não entra nessa soma porque ainda
+        * pode estar incompleto.
+        */
+        $entradasCaixa = 0;
+        $entradasCaixaBanco = 0;
+        $diasBaseRecebimento = 0;
+
+        if ($dataBaseFimRecebimentos->gte($inicio)) {
+            $entradasCaixa = DB::table('caixa')
+                ->where('empresa_id', $empresaId)
+                ->where('tipo', 'entrada')
+                ->whereBetween('data_movimentacao', [
+                    $inicio->toDateString(),
+                    $dataBaseFimRecebimentos->toDateString(),
+                ])
+                ->sum('valor');
+
+            $entradasCaixaBanco = DB::table('caixa_banco')
+                ->where('empresa_id', $empresaId)
+                ->where('tipo', 'entrada')
+                ->whereBetween('data_movimentacao', [
+                    $inicio->toDateString(),
+                    $dataBaseFimRecebimentos->toDateString(),
+                ])
+                ->sum('valor');
+
+            /*
+            * Quantidade de dias fechados utilizados
+            * para calcular a média de recebimentos.
+            *
+            * Exemplo:
+            * 01/07 até 27/07 = 27 dias.
+            */
+            $diasBaseRecebimento = $inicio
+                ->diffInDays($dataBaseFimRecebimentos) + 1;
+        }
+
+        $recebidoPeriodo =
+            (float) $entradasCaixa +
+            (float) $entradasCaixaBanco;
+
+        /*
+        * Média diária baseada somente em dias fechados.
+        */
+        $mediaRecebimentoDia = $diasBaseRecebimento > 0
+            ? $recebidoPeriodo / $diasBaseRecebimento
+            : 0;
+
+        /*
+        * Projeção do que ainda poderá entrar.
+        *
+        * Média dos dias fechados
+        * multiplicada pelos dias restantes.
+        */
+        $recebimentoProjetadoRestante =
+            $mediaRecebimentoDia * $diasRestantesAteFim;
+
+        /*
+        * CONTAS A PAGAR EM ABERTO
+        *
+        * Considera vencimentos de hoje até a data final.
+        */
+        $contasPagarAberto = 0;
+
+        if ($hoje->lte($fim)) {
+            $dataInicioContasPagar = $hoje->gte($inicio)
+                ? $hoje->toDateString()
+                : $inicio->toDateString();
+
+            $contasPagarAberto = DB::table('contas_a_pagar')
+                ->where('empresa_id', $empresaId)
+                ->whereIn('status', [
+                    'pendente',
+                    'atrasado',
+                    'em aberto',
+                    'aberto',
+                ])
+                ->whereBetween('data_vencimento', [
+                    $dataInicioContasPagar,
+                    $fim->toDateString(),
+                ])
+                ->sum('valor');
+        }
+
+        /*
+        * PRODUTOS VÁLIDOS PARA PREVISÃO
+        *
+        * Atualmente considera somente:
+        * - Gás
+        * - Água
+        */
+        $produtos = DB::table('produtos')
+            ->select(
+                'id',
+                'nome',
+                'quantidade_estoque',
+                'preco_compra'
+            )
+            ->where('empresa_id', $empresaId)
+            ->where(function ($query) {
+                $query
+                    ->where('nome', 'like', '%GAS%')
+                    ->orWhere('nome', 'like', '%GÁS%')
+                    ->orWhere('nome', 'like', '%AGUA%')
+                    ->orWhere('nome', 'like', '%ÁGUA%');
+            })
+            ->whereNotIn('nome', [
+                'PRODUTOS DIVERSOS',
+                'COMPRAS -MERCADO',
+                'COMPRAS- MERCADO',
+                'COMPRAS-MERCADO',
+                'COMPRAS MERCADO',
+            ])
+            ->get();
+
+        $previsoesProdutos = [];
+
+        $totalCompraMinima = 0;
+        $totalCompraRecomendada = 0;
+
+        /*
+        * DATA FINAL DAS VENDAS UTILIZADAS NA MÉDIA
+        *
+        * Também utiliza somente dias fechados.
+        */
         $dataBaseFimVendas = $ontem->lte($fim)
             ? $ontem->copy()
             : $fim->copy();
 
         /*
-        * Se a data inicial for maior que ontem, não há dias fechados válidos.
-        * Nesse caso, usamos a própria data inicial como base para evitar erro.
+        * Indica se existem dias fechados válidos
+        * dentro do período selecionado.
         */
-        if ($dataBaseFimVendas->lt($inicio)) {
-            $dataBaseFimVendas = $inicio->copy();
+        $possuiDiasFechados = $dataBaseFimVendas->gte($inicio);
+
+        foreach ($produtos as $produto) {
+            $totalVendido = 0;
+            $diasBaseVendas = 0;
+            $mediaDia = 0;
+
+            if ($possuiDiasFechados) {
+                $totalVendido = DB::table('movimentacao_itens as mi')
+                    ->join(
+                        'movimentacao as m',
+                        'm.id',
+                        '=',
+                        'mi.movimentacao_id'
+                    )
+                    ->where('m.empresa_id', $empresaId)
+                    ->where('mi.empresa_id', $empresaId)
+                    ->where('mi.produto_id', $produto->id)
+                    ->whereBetween('m.data_coleta', [
+                        $inicio->toDateString(),
+                        $dataBaseFimVendas->toDateString(),
+                    ])
+                    ->sum('mi.quantidade');
+
+                /*
+                * Quantidade de dias fechados usada
+                * na média de vendas do produto.
+                */
+                $diasBaseVendas = $inicio
+                    ->diffInDays($dataBaseFimVendas) + 1;
+
+                if ($diasBaseVendas > 0) {
+                    $mediaDia = $totalVendido / $diasBaseVendas;
+                }
+            }
+
+            /*
+            * Aplica:
+            * - ajuste de fim de mês;
+            * - sazonalidade;
+            * - estoque de segurança;
+            * - regra especial de sexta-feira.
+            */
+            $previsao = $previsaoGiroService->calcular([
+                'empresa_id' => $empresaId,
+                'produto_id' => $produto->id,
+                'media_diaria_base' => $mediaDia,
+                'estoque_atual' =>
+                    (float) $produto->quantidade_estoque,
+                'dias_restantes' => $diasRestantesAteFim,
+                'custo_unitario' =>
+                    (float) ($produto->preco_compra ?? 0),
+                'data_referencia' => $hoje,
+            ]);
+
+            $totalCompraMinima +=
+                $previsao['custo_compra_minima'];
+
+            $totalCompraRecomendada +=
+                $previsao['custo_compra_recomendada'];
+
+            $previsoesProdutos[] = [
+                'produto' => $produto->nome,
+
+                'estoque' =>
+                    (float) $produto->quantidade_estoque,
+
+                'vendido_periodo' =>
+                    (float) $totalVendido,
+
+                'dias_base_vendas' =>
+                    $diasBaseVendas,
+
+                'media_base' =>
+                    round($mediaDia, 2),
+
+                'media_ajustada' =>
+                    $previsao['media_diaria_ajustada'],
+
+                'venda_prevista' =>
+                    $previsao['venda_prevista'],
+
+                'compra_minima' =>
+                    $previsao['compra_minima'],
+
+                'compra_recomendada' =>
+                    $previsao['compra_recomendada'],
+
+                'custo_compra_minima' =>
+                    $previsao['custo_compra_minima'],
+
+                'custo_compra_recomendada' =>
+                    $previsao['custo_compra_recomendada'],
+
+                'ajustes_aplicados' =>
+                    $previsao['ajustes_aplicados'],
+            ];
         }
 
-        $totalVendido = DB::table('movimentacao_itens as mi')
-            ->join('movimentacao as m', 'm.id', '=', 'mi.movimentacao_id')
-            ->where('m.empresa_id', $empresaId)
-            ->where('mi.empresa_id', $empresaId)
-            ->where('mi.produto_id', $produto->id)
-            ->whereBetween('m.data_coleta', [$dataInicio, $dataBaseFimVendas->toDateString()])
-            ->sum('mi.quantidade');
+        /*
+        * CENÁRIOS FINANCEIROS
+        */
+        $resultadoSemReposicao =
+            $recebimentoProjetadoRestante -
+            $contasPagarAberto;
 
-        $diasBaseVendas = $inicio->copy()->startOfDay()
-            ->diffInDays($dataBaseFimVendas->copy()->startOfDay()) + 1;
+        $resultadoComCompraMinima =
+            $resultadoSemReposicao -
+            $totalCompraMinima;
 
-        if ($diasBaseVendas <= 0) {
-            $diasBaseVendas = 1;
-        }
+        $resultadoComCompraRecomendada =
+            $resultadoSemReposicao -
+            $totalCompraRecomendada;
 
-        $mediaDia = $totalVendido / $diasBaseVendas; 
-        
-
-        $previsao = $previsaoGiroService->calcular([
-            'empresa_id' => $empresaId,
-            'produto_id' => $produto->id,
-            'media_diaria_base' => $mediaDia,
-            'estoque_atual' => (float) $produto->quantidade_estoque,
-            'dias_restantes' => $diasRestantesAteFim,
-            'custo_unitario' => (float) ($produto->preco_compra ?? 0),
-            'data_referencia' => $hoje,
-        ]);
-
-        $totalCompraMinima += $previsao['custo_compra_minima'];
-        $totalCompraRecomendada += $previsao['custo_compra_recomendada'];
-
-        $previsoesProdutos[] = [
-            'produto' => $produto->nome,
-            'estoque' => (float) $produto->quantidade_estoque,
-            'vendido_periodo' => (float) $totalVendido,
-            'media_base' => round($mediaDia, 2),
-            'media_ajustada' => $previsao['media_diaria_ajustada'],
-            'venda_prevista' => $previsao['venda_prevista'],
-            'compra_minima' => $previsao['compra_minima'],
-            'compra_recomendada' => $previsao['compra_recomendada'],
-            'custo_compra_minima' => $previsao['custo_compra_minima'],
-            'custo_compra_recomendada' => $previsao['custo_compra_recomendada'],
-            'ajustes_aplicados' => $previsao['ajustes_aplicados'],
-        ];
+        return view(
+            'dashboard.previsao_giro_caixa',
+            compact(
+                'dataInicio',
+                'dataFim',
+                'diasRestantesAteFim',
+                'diasBaseRecebimento',
+                'recebidoPeriodo',
+                'mediaRecebimentoDia',
+                'recebimentoProjetadoRestante',
+                'contasPagarAberto',
+                'previsoesProdutos',
+                'totalCompraMinima',
+                'totalCompraRecomendada',
+                'resultadoSemReposicao',
+                'resultadoComCompraMinima',
+                'resultadoComCompraRecomendada'
+            )
+        );
     }
-
-    /*
-     * CENÁRIOS FINANCEIROS
-     */
-    $resultadoSemReposicao = $recebimentoProjetadoRestante - $contasPagarAberto;
-
-    $resultadoComCompraMinima = $resultadoSemReposicao - $totalCompraMinima;
-
-    $resultadoComCompraRecomendada = $resultadoSemReposicao - $totalCompraRecomendada;
-
-    return view('dashboard.previsao_giro_caixa', compact(
-        'dataInicio',
-        'dataFim',
-        'diasRestantesAteFim',
-        'recebidoPeriodo',
-        'mediaRecebimentoDia',
-        'recebimentoProjetadoRestante',
-        'contasPagarAberto',
-        'previsoesProdutos',
-        'totalCompraMinima',
-        'totalCompraRecomendada',
-        'resultadoSemReposicao',
-        'resultadoComCompraMinima',
-        'resultadoComCompraRecomendada'
-    ));
-}
 
 }

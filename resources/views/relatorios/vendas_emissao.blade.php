@@ -44,7 +44,7 @@
 
     <a href="{{ route('relatorio.vendas-emissao.exportar', request()->query()) }}"
        class="btn btn-success">
-        📥 Exportar Excel
+        📥 Exportar Planilha
     </a>
 
     <hr>

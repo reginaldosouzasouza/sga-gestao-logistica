@@ -108,6 +108,19 @@
         line-height: 1.5;
     }
 
+    .alert-errors {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.alert-errors ul {
+    margin: 8px 0 0 20px;
+}
+
     @media (max-width: 900px) {
         .config-grid {
             grid-template-columns: repeat(2, minmax(160px, 1fr));
@@ -131,6 +144,18 @@
     @if(session('success'))
         <div class="alert-success">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert-errors">
+            <strong>Não foi possível salvar a configuração:</strong>
+
+            <ul>
+                @foreach($errors->all() as $erro)
+                    <li>{{ $erro }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -223,7 +248,8 @@
                                step="0.01"
                                min="0"
                                max="365"
-                               value="{{ old('estoque_seguranca_dias', $config->estoque_seguranca_dias) }}">
+                               value="{{ old('estoque_seguranca_dias',
+                                number_format((float)  $config->estoque_seguranca_dias, 2, '.', '')) }}">
                     </div>
 
                     <div class="form-group">

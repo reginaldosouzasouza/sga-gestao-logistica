@@ -11,6 +11,7 @@ use App\Models\ContasAReceber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\FormaDePagamento;
 
 class CaixaController extends Controller
 {
@@ -447,6 +448,62 @@ class CaixaController extends Controller
         ];
     }
 
+
+    /**
+     * Confirma se a movimentação pertence ao dia atual.
+     */
+    private function movimentoEhDeHoje($movimento): bool
+    {
+        return Carbon::parse($movimento->data_movimentacao)->isToday();
+    }
+
+    /**
+     * Identifica pagamentos antigos de Contas a Pagar que foram gravados
+     * incorretamente com origem "compra".
+     */
+    private function ehPagamentoLegadoContaPagar($movimento): bool
+    {
+        return $movimento->origem === 'compra'
+            && str_starts_with(
+                (string) $movimento->descricao,
+                'Pagamento conta a pagar #'
+            );
+    }
+
+    /**
+     * Devolve a Conta a Pagar ao status correto após a exclusão do pagamento.
+     */
+    private function reabrirContaPagar($movimento, int $empresaId): void
+    {
+        $contaAPagar = ContasAPagar::where('empresa_id', $empresaId)
+            ->where('id', $movimento->referencia_id)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$contaAPagar) {
+            throw new \RuntimeException(
+                'A Conta a Pagar vinculada a esta movimentação não foi encontrada.'
+            );
+        }
+
+        $status = Carbon::parse($contaAPagar->data_vencimento)
+            ->lt(Carbon::today())
+                ? 'atrasado'
+                : 'pendente';
+
+        $formaNotaAssinada = \App\Models\FormaDePagamento::whereRaw(
+            'LOWER(TRIM(nome)) = ?',
+            ['nota assinada']
+        )->first();
+
+        $contaAPagar->update([
+            'status' => $status,
+            'data_pagamento' => null,
+            'forma_pagamento_id' => $formaNotaAssinada?->id
+                ?? $contaAPagar->forma_pagamento_id,
+        ]);
+    }
+
     public function destroyCaixaBanco($id)
     {
         $empresaId = $this->empresaId();
@@ -455,11 +512,167 @@ class CaixaController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        $movimento->delete();
+        /*
+        * Somente movimentações do dia atual podem ser excluídas.
+        */
+        if (!Carbon::parse($movimento->data_movimentacao)->isToday()) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Não é permitido excluir movimentações de dias anteriores.'
+                );
+        }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Registro excluído!');
+        /*
+        * Somente o usuário MASTER pode utilizar a exclusão.
+        * Os demais usuários deverão utilizar o estorno.
+        */
+        $isMaster = auth()->check()
+            && auth()->user()->tipo === 'MASTER';
+
+        if (!$isMaster) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Somente o usuário MASTER pode excluir uma movimentação. Para desfazer o pagamento, utilize a opção Estornar.'
+                );
+        }
+
+        /*
+        * Compra paga diretamente por PIX deve ser cancelada
+        * pela tela de Compras, pois também envolve estoque.
+        *
+        * A exceção abaixo reconhece pagamentos antigos de Contas a Pagar
+        * que foram gravados incorretamente com origem "compra".
+        */
+        $pagamentoLegadoContaPagar =
+            $movimento->origem === 'compra'
+            && str_starts_with(
+                (string) $movimento->descricao,
+                'Pagamento conta a pagar #'
+            );
+
+        if (
+            $movimento->origem === 'compra'
+            && !$pagamentoLegadoContaPagar
+        ) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Este lançamento foi gerado diretamente por uma compra. Faça o cancelamento pela tela de Compras.'
+                );
+        }
+
+        /*
+        * Recebimentos ainda não devem ser excluídos até aplicarmos
+        * a mesma amarração em Contas a Receber.
+        */
+        if ($movimento->origem === 'contas_a_receber') {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Este lançamento pertence a uma Conta a Receber e ainda não pode ser excluído diretamente.'
+                );
+        }
+
+        /*
+        * Impede exclusão de um lançamento que já representa estorno.
+        */
+        if ($movimento->origem === 'estorno') {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Um lançamento de estorno não pode ser excluído diretamente.'
+                );
+        }
+
+        DB::beginTransaction();
+
+        try {
+            /*
+            * Quando o lançamento pertence a Contas a Pagar,
+            * a conta volta para pendente ou atrasada.
+            */
+            if (
+                $movimento->origem === 'contas_a_pagar'
+                || $pagamentoLegadoContaPagar
+            ) {
+                $contaAPagar = ContasAPagar::where(
+                    'empresa_id',
+                    $empresaId
+                )
+                    ->where('id', $movimento->referencia_id)
+                    ->first();
+
+                if (!$contaAPagar) {
+                    DB::rollBack();
+
+                    return redirect()
+                        ->back()
+                        ->with(
+                            'error',
+                            'A Conta a Pagar vinculada não foi encontrada. O lançamento não foi excluído.'
+                        );
+                }
+
+                $statusRetorno = Carbon::parse(
+                    $contaAPagar->data_vencimento
+                )->lt(Carbon::today())
+                    ? 'atrasado'
+                    : 'pendente';
+
+                $notaAssinada = FormaDePagamento::whereRaw(
+                    'LOWER(TRIM(nome)) = ?',
+                    ['nota assinada']
+                )->first();
+
+                $dadosConta = [
+                    'status' => $statusRetorno,
+                    'data_pagamento' => null,
+                ];
+
+                if ($notaAssinada) {
+                    $dadosConta['forma_pagamento_id'] = $notaAssinada->id;
+                }
+
+                $contaAPagar->update($dadosConta);
+            }
+
+            $movimento->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->back()
+                ->with(
+                    'success',
+                    'Movimentação do Caixa Banco excluída com sucesso.'
+                );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Erro ao excluir movimentação do Caixa Banco', [
+                'movimento_id' => $id,
+                'empresa_id' => $empresaId,
+                'usuario_id' => auth()->id(),
+                'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Não foi possível excluir a movimentação. Nenhuma alteração foi realizada.'
+                );
+        }
     }
 
     public function destroyCaixa($id)
@@ -470,10 +683,166 @@ class CaixaController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        $movimento->delete();
+        /*
+        * Somente movimentações do dia atual podem ser excluídas.
+        */
+        if (!Carbon::parse($movimento->data_movimentacao)->isToday()) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Não é permitido excluir movimentações de dias anteriores.'
+                );
+        }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Registro do caixa excluído com sucesso!');
+        /*
+        * Somente o usuário MASTER pode utilizar a exclusão.
+        * Os demais usuários deverão utilizar o estorno.
+        */
+        $isMaster = auth()->check()
+            && auth()->user()->tipo === 'MASTER';
+
+        if (!$isMaster) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Somente o usuário MASTER pode excluir uma movimentação. Para desfazer o pagamento, utilize a opção Estornar.'
+                );
+        }
+
+        /*
+        * Compra paga diretamente em dinheiro deve ser cancelada
+        * pela tela de Compras, pois também envolve estoque.
+        *
+        * A exceção reconhece pagamentos antigos de Contas a Pagar
+        * gravados incorretamente com origem "compra".
+        */
+        $pagamentoLegadoContaPagar =
+            $movimento->origem === 'compra'
+            && str_starts_with(
+                (string) $movimento->descricao,
+                'Pagamento conta a pagar #'
+            );
+
+        if (
+            $movimento->origem === 'compra'
+            && !$pagamentoLegadoContaPagar
+        ) {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Este lançamento foi gerado diretamente por uma compra. Faça o cancelamento pela tela de Compras.'
+                );
+        }
+
+        /*
+        * Recebimentos ainda ficam protegidos até ajustarmos
+        * o módulo de Contas a Receber.
+        */
+        if ($movimento->origem === 'contas_a_receber') {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Este lançamento pertence a uma Conta a Receber e ainda não pode ser excluído diretamente.'
+                );
+        }
+
+        /*
+        * Impede exclusão de um lançamento de estorno.
+        */
+        if ($movimento->origem === 'estorno') {
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Um lançamento de estorno não pode ser excluído diretamente.'
+                );
+        }
+
+        DB::beginTransaction();
+
+        try {
+            /*
+            * Quando pertence a Contas a Pagar,
+            * restaura a situação da conta.
+            */
+            if (
+                $movimento->origem === 'contas_a_pagar'
+                || $pagamentoLegadoContaPagar
+            ) {
+                $contaAPagar = ContasAPagar::where(
+                    'empresa_id',
+                    $empresaId
+                )
+                    ->where('id', $movimento->referencia_id)
+                    ->first();
+
+                if (!$contaAPagar) {
+                    DB::rollBack();
+
+                    return redirect()
+                        ->back()
+                        ->with(
+                            'error',
+                            'A Conta a Pagar vinculada não foi encontrada. O lançamento não foi excluído.'
+                        );
+                }
+
+                $statusRetorno = Carbon::parse(
+                    $contaAPagar->data_vencimento
+                )->lt(Carbon::today())
+                    ? 'atrasado'
+                    : 'pendente';
+
+                $notaAssinada = FormaDePagamento::whereRaw(
+                    'LOWER(TRIM(nome)) = ?',
+                    ['nota assinada']
+                )->first();
+
+                $dadosConta = [
+                    'status' => $statusRetorno,
+                    'data_pagamento' => null,
+                ];
+
+                if ($notaAssinada) {
+                    $dadosConta['forma_pagamento_id'] = $notaAssinada->id;
+                }
+
+                $contaAPagar->update($dadosConta);
+            }
+
+            $movimento->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->back()
+                ->with(
+                    'success',
+                    'Movimentação do Caixa excluída com sucesso.'
+                );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Erro ao excluir movimentação do Caixa', [
+                'movimento_id' => $id,
+                'empresa_id' => $empresaId,
+                'usuario_id' => auth()->id(),
+                'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Não foi possível excluir a movimentação. Nenhuma alteração foi realizada.'
+                );
+        }
     }
 }

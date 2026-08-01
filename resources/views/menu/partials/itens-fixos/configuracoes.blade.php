@@ -53,6 +53,18 @@
         ($user && $user->temPermissao('backup_gerar')) ||
         ($user && $user->temPermissao('backup_excluir'));
 
+
+    /*
+        * Configuração Previsão de Vendas com Sazonalidade
+        */
+        $podeVerconfiguracaoprevisaovendas =
+            $isMaster ||
+            ($user && $user->temPermissao('backup_visualizar')) ||
+            ($user && $user->temPermissao('backup_gerar')) ||
+            ($user && $user->temPermissao('backup_excluir'));
+
+
+
     /*
      * Emissão de NF-e
      */
@@ -232,6 +244,17 @@
         rel="noopener noreferrer"
     >
         Backup do Sistema
+    </a>
+@endif
+
+{{-- Configuração Previsão de Vendas com Sazonalidade --}}
+@if($podeVerEmissaoNfe)
+    <a
+        href="http://127.0.0.1:8010/configuracao-previsao-vendas"
+        target="_blank"
+        rel="noopener noreferrer"
+    >
+        Configuração Previsão de Vendas com Sazonalidade
     </a>
 @endif
 

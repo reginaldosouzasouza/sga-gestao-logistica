@@ -38,11 +38,31 @@ class DashboardFinanceiroService
 
        $hojeString = $hoje->toDateString();
 
-        $fimRecebido = $fimPeriodo->lessThan($hoje)
+        /*
+         * O card "Recebido no Período" considera entradas até hoje.
+         */
+        $fimRecebidoPeriodo = $fimPeriodo->lessThan($hoje)
             ? $fimPeriodo->toDateString()
             : $hojeString;
 
-        $recebidoAteOntem = $this->getRecebidoMes($inicioMes, $fimRecebido);
+        $recebidoNoPeriodo = $this->getRecebidoMes(
+            $inicioMes,
+            $fimRecebidoPeriodo
+        );
+
+        /*
+         * A média diária considera somente dias encerrados, portanto
+         * consulta caixa e caixa_banco no máximo até ontem.
+         */
+        $fimRecebidoAteOntem = $fimPeriodo->lessThanOrEqualTo($ontem)
+            ? $fimPeriodo->toDateString()
+            : $ontemString;
+
+        $recebidoAteOntem = $this->getRecebidoMes(
+            $inicioMes,
+            $fimRecebidoAteOntem
+        );
+
         $contasReceberPendentesMes = $this->getContasReceberPendentesMes($inicioMes, $fimMes);
 
         $comparativoSemanal = $this->getComparativoSemanal();
@@ -82,7 +102,7 @@ class DashboardFinanceiroService
 
         $projecaoReposicao = $this->getProjecaoReposicaoProdutos(
             $inicioMes,
-            $fimRecebido,
+            $fimRecebidoAteOntem,
             $diasCompletos,
             $diasRestantes
         );
@@ -102,7 +122,7 @@ class DashboardFinanceiroService
         $resultadoProjetadoMes = round($projecaoRecebimentoMes - $projecaoDespesasMes, 2);
         $resultadoProjetadoComReposicao = round($projecaoRecebimentoMes - $despesasTotaisComReposicao, 2);
 
-        $faltaReceberParaCobrirMes = max($despesasTotaisComReposicao - $recebidoAteOntem, 0);
+        $faltaReceberParaCobrirMes = max($despesasTotaisComReposicao - $recebidoNoPeriodo, 0);
 
         $metaDiariaCobrirAberto = $diasRestantes > 0
             ? round($contasPagarAberto / $diasRestantes, 2)
@@ -133,7 +153,8 @@ class DashboardFinanceiroService
                 'ontem' => $ontemString,
                 'inicio_mes' => $inicioMes,
                 'fim_mes' => $fimMes,
-                'fim_recebido' => $fimRecebido,
+                'fim_recebido' => $fimRecebidoPeriodo,
+                'fim_recebido_ate_ontem' => $fimRecebidoAteOntem,
                 'dia_atual' => (int) $hoje->day,
                 'dia_base_calculo' => (int) $ontem->day,
                 'dias_no_mes' => (int) $diasNoPeriodo,
@@ -143,7 +164,13 @@ class DashboardFinanceiroService
             'cards' => [
                 'vendido_ontem' => $vendidoOntem,
                 'acumulado_mes' => $acumuladoMes,
-                'recebido_ate_ontem' => $recebidoAteOntem,
+                /*
+                 * Mantém a chave antiga para não quebrar a Blade atual.
+                 * Ela continua exibindo o total recebido no período até hoje.
+                 */
+                'recebido_ate_ontem' => $recebidoNoPeriodo,
+                'recebido_no_periodo' => $recebidoNoPeriodo,
+                'recebido_base_media_ate_ontem' => $recebidoAteOntem,
                 'contas_receber_pendentes_mes' => $contasReceberPendentesMes,
 
                 'compras_pagas_mes' => $comprasPagasMes,

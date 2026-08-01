@@ -11,9 +11,12 @@ class ConfiguracaoPrevisaoVendaController extends Controller
     /**
      * Retorna a empresa atual do usuário logado.
      */
-    private function getEmpresaId()
+    private function getEmpresaId(): int
     {
-        return session('empresa_id') ?? auth()->user()->empresa_id;
+        return (int) (
+            session('empresa_id')
+            ?? auth()->user()->empresa_id
+        );
     }
 
     /**
@@ -23,20 +26,19 @@ class ConfiguracaoPrevisaoVendaController extends Controller
     {
         $empresaId = $this->getEmpresaId();
 
-       $produtos = Produto::where('empresa_id', $empresaId)
-    ->whereNotIn('nome', [
-        'PRODUTOS DIVERSOS',
-        'COMPRAS -MERCADO',
-        'COMPRAS- MERCADO',
-        'COMPRAS-MERCADO',
-        'COMPRAS MERCADO',
-    ])
-    ->orderBy('nome')
-    ->get();
+        $produtos = Produto::where('empresa_id', $empresaId)
+            ->whereNotIn('nome', [
+                'PRODUTOS DIVERSOS',
+                'COMPRAS -MERCADO',
+                'COMPRAS- MERCADO',
+                'COMPRAS-MERCADO',
+                'COMPRAS MERCADO',
+            ])
+            ->orderBy('nome')
+            ->get();
 
         /*
          * Garante que cada produto tenha uma configuração inicial.
-         * Assim a tela já abre pronta para editar.
          */
         foreach ($produtos as $produto) {
             ConfiguracaoPrevisaoVenda::firstOrCreate(
@@ -69,48 +71,137 @@ class ConfiguracaoPrevisaoVendaController extends Controller
             ->orderBy('produto_id')
             ->get();
 
-        return view('configuracao_previsao_vendas.index', compact('configuracoes'));
+        return view(
+            'configuracao_previsao_vendas.index',
+            compact('configuracoes')
+        );
     }
 
     /**
      * Atualiza uma configuração específica.
      */
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
         $empresaId = $this->getEmpresaId();
 
-        $configuracao = ConfiguracaoPrevisaoVenda::where('empresa_id', $empresaId)
-            ->findOrFail($id);
+        $configuracao = ConfiguracaoPrevisaoVenda::where(
+            'empresa_id',
+            $empresaId
+        )->findOrFail($id);
 
-        $request->validate([
-            'dia_inicio_fim_mes' => 'nullable|integer|min:1|max:31',
-            'percentual_ajuste_fim_mes' => 'nullable|numeric|min:-100|max:100',
+        /*
+        * Normaliza campos decimais antes da validação.
+        */
+        $camposDecimais = [
+            'percentual_ajuste_fim_mes',
+            'percentual_ajuste_sazonalidade',
+            'estoque_seguranca_dias',
+        ];
 
-            'mes_inicio_sazonalidade' => 'nullable|integer|min:1|max:12',
-            'mes_fim_sazonalidade' => 'nullable|integer|min:1|max:12',
-            'percentual_ajuste_sazonalidade' => 'nullable|numeric|min:-100|max:100',
+        $dadosNormalizados = [];
 
-            'estoque_seguranca_dias' => 'nullable|numeric|min:0|max:365',
-            'base_historica_inicio' => 'nullable|date',
+        foreach ($camposDecimais as $campo) {
+            $valor = $request->input($campo);
+
+            if ($valor !== null && $valor !== '') {
+                $valor = trim((string) $valor);
+
+                /*
+                * Só remove ponto de milhar quando existir vírgula decimal.
+                */
+                if (str_contains($valor, ',')) {
+                    $valor = str_replace('.', '', $valor);
+                    $valor = str_replace(',', '.', $valor);
+                }
+
+                $dadosNormalizados[$campo] = $valor;
+            }
+        }
+
+        $request->merge($dadosNormalizados);
+
+        $dadosValidados = $request->validate([
+            'dia_inicio_fim_mes' => [
+                'nullable',
+                'integer',
+                'between:1,31',
+            ],
+
+            'percentual_ajuste_fim_mes' => [
+                'nullable',
+                'numeric',
+                'between:-100,100',
+            ],
+
+            'mes_inicio_sazonalidade' => [
+                'nullable',
+                'integer',
+                'between:1,12',
+            ],
+
+            'mes_fim_sazonalidade' => [
+                'nullable',
+                'integer',
+                'between:1,12',
+            ],
+
+            'percentual_ajuste_sazonalidade' => [
+                'nullable',
+                'numeric',
+                'between:-100,100',
+            ],
+
+            'estoque_seguranca_dias' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:365',
+            ],
+
+            'base_historica_inicio' => [
+                'nullable',
+                'date',
+            ],
         ]);
 
         $configuracao->update([
-            'usar_ajuste_fim_mes' => $request->has('usar_ajuste_fim_mes'),
-            'dia_inicio_fim_mes' => $request->dia_inicio_fim_mes,
-            'percentual_ajuste_fim_mes' => $request->percentual_ajuste_fim_mes ?? 0,
+            'usar_ajuste_fim_mes' => $request->boolean(
+                'usar_ajuste_fim_mes'
+            ),
 
-            'usar_sazonalidade_manual' => $request->has('usar_sazonalidade_manual'),
-            'mes_inicio_sazonalidade' => $request->mes_inicio_sazonalidade,
-            'mes_fim_sazonalidade' => $request->mes_fim_sazonalidade,
-            'percentual_ajuste_sazonalidade' => $request->percentual_ajuste_sazonalidade ?? 0,
+            'dia_inicio_fim_mes' =>
+                $dadosValidados['dia_inicio_fim_mes'] ?? null,
 
-            'estoque_seguranca_dias' => $request->estoque_seguranca_dias ?? 0,
-            'base_historica_inicio' => $request->base_historica_inicio,
-            'ativo' => $request->has('ativo'),
+            'percentual_ajuste_fim_mes' =>
+                $dadosValidados['percentual_ajuste_fim_mes'] ?? 0,
+
+            'usar_sazonalidade_manual' => $request->boolean(
+                'usar_sazonalidade_manual'
+            ),
+
+            'mes_inicio_sazonalidade' =>
+                $dadosValidados['mes_inicio_sazonalidade'] ?? null,
+
+            'mes_fim_sazonalidade' =>
+                $dadosValidados['mes_fim_sazonalidade'] ?? null,
+
+            'percentual_ajuste_sazonalidade' =>
+                $dadosValidados['percentual_ajuste_sazonalidade'] ?? 0,
+
+            'estoque_seguranca_dias' =>
+                $dadosValidados['estoque_seguranca_dias'] ?? 0,
+
+            'base_historica_inicio' =>
+                $dadosValidados['base_historica_inicio'] ?? null,
+
+            'ativo' => $request->boolean('ativo'),
         ]);
 
         return redirect()
             ->route('configuracao-previsao-vendas.index')
-            ->with('success', 'Configuração de previsão atualizada com sucesso.');
+            ->with(
+                'success',
+                'Configuração de previsão atualizada com sucesso.'
+            );
     }
 }
