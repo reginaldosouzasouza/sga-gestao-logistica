@@ -813,7 +813,7 @@ Route::get('/dashboard-financeiro', [DashboardFinanceiroController::class, 'inde
             ->name('vendasPorProduto');
 
         Route::get('/saldo_estoque', [RelatorioController::class, 'saldoEstoque'])
-            ->name('saldoEstoque');
+            ->name('saldoEstoqueGeral');
 
         Route::get('/gerencial/margem', [RelatorioController::class, 'gerencialMargem'])
             ->name('gerencial.margem');
