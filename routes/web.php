@@ -1172,9 +1172,12 @@ Route::middleware('auth')->get('/menu/salao', function () {
     $dados = [
         'user_id' => $usuario->id,
         'empresa_id' => $empresa->id,
-        'nome' => $usuario->nome_completo
-            ?? $usuario->usuario
-            ?? 'UsuÃ¡rio',
+        'empresa_nome' => $empresa->nome_fantasia
+            ?? $empresa->razao_social
+            ?? ('Empresa ' . $empresa->id),
+                'nome' => $usuario->nome_completo
+                    ?? $usuario->usuario
+                    ?? 'UsuÃ¡rio',
         'usuario' => $usuario->usuario ?? '',
         'email' => $usuario->email,
         'tipo' => strtoupper(
@@ -1193,6 +1196,7 @@ Route::middleware('auth')->get('/menu/salao', function () {
     $payload = implode('|', [
         (string) $dados['user_id'],
         (string) $dados['empresa_id'],
+        (string) $dados['empresa_nome'],
         (string) $dados['nome'],
         (string) $dados['usuario'],
         (string) $dados['email'],
