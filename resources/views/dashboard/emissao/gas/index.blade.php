@@ -108,7 +108,7 @@
                 },
                 {
                     type: 'line',
-                    label: 'Meta Cumulativa',
+                    label: 'Meta para o Dia',
                     data: metaLinha,
                     tension: 0.35,
                     pointRadius: 0,
@@ -117,7 +117,7 @@
                 },
                 {
                     type: 'line',
-                    label: 'Projeção',
+                    label: 'Esta com',
                     data: projecaoLinha,
                     yAxisID: 'y1',
                     tension: 0.35,

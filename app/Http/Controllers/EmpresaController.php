@@ -9,11 +9,53 @@ use Illuminate\Support\Facades\DB;
 
 class EmpresaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $empresas = Empresa::orderBy('nome_fantasia', 'asc')->paginate(15);
+        $usuario = auth()->user();
 
-        return view('empresas.index', compact('empresas'));
+        if (!$usuario || !$usuario->isMaster()) {
+            return redirect('/sga')
+                ->with('error', 'Acesso permitido somente para MASTER.');
+        }
+
+        $busca = $request->input('busca');
+        $modulo = $request->input('modulo');
+        $status = $request->input('status');
+        $plano = $request->input('plano');
+
+        $queryBase = Empresa::query();
+
+        $empresas = Empresa::query()
+            ->when($busca, function ($query) use ($busca) {
+                $query->where(function ($q) use ($busca) {
+                    $q->where('nome_fantasia', 'like', "%{$busca}%")
+                        ->orWhere('razao_social', 'like', "%{$busca}%")
+                        ->orWhere('cnpj', 'like', "%{$busca}%")
+                        ->orWhere('cidade', 'like', "%{$busca}%")
+                        ->orWhere('email', 'like', "%{$busca}%");
+                });
+            })
+            ->when($modulo, function ($query) use ($modulo) {
+                $query->where('modulo', $modulo);
+            })
+            ->when($status, function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->when($plano, function ($query) use ($plano) {
+                $query->where('plano', $plano);
+            })
+            ->orderBy('modulo', 'asc')
+            ->paginate(15)
+            ->appends($request->query());
+
+        $resumo = [
+            'total' => (clone $queryBase)->count(),
+            'ativas' => (clone $queryBase)->where('status', 'ativo')->count(),
+            'teste' => (clone $queryBase)->where('status', 'teste')->count(),
+            'bloqueadas' => (clone $queryBase)->where('status', 'bloqueado')->count(),
+        ];
+
+        return view('empresas.index', compact('empresas', 'resumo'));
     }
 
     public function create()

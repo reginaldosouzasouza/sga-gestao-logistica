@@ -33,8 +33,14 @@ class UserController extends Controller
         return auth()->user()->empresa_id;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $busca = $request->input('busca');
+        $modulo = $request->input('modulo');
+        $empresaId = $request->input('empresa_id');
+        $perfilId = $request->input('perfil_id');
+        $tipo = $request->input('tipo');
+
         $query = User::leftJoin('perfis', 'perfis.id', '=', 'users.perfil_id')
             ->leftJoin('empresas', 'empresas.id', '=', 'users.empresa_id')
             ->select(
@@ -44,19 +50,71 @@ class UserController extends Controller
                 'users.email',
                 'users.tipo',
                 'users.empresa_id',
+                'users.perfil_id',
                 'perfis.nome as perfil',
-                'empresas.nome_fantasia as empresa'
+                'perfis.modulo as perfil_modulo',
+                'empresas.nome_fantasia as empresa',
+                'empresas.modulo as modulo'
             );
 
         if (!$this->isMaster()) {
             $query->where('users.empresa_id', $this->empresaId());
         }
 
-        $usuarios = $query
-            ->orderBy('users.id', 'asc')
-            ->get();
+        $query
+            ->when($busca, function ($query) use ($busca) {
+                $query->where(function ($q) use ($busca) {
+                    $q->where('users.usuario', 'like', "%{$busca}%")
+                        ->orWhere('users.nome_completo', 'like', "%{$busca}%")
+                        ->orWhere('users.email', 'like', "%{$busca}%")
+                        ->orWhere('empresas.nome_fantasia', 'like', "%{$busca}%")
+                        ->orWhere('perfis.nome', 'like', "%{$busca}%");
+                });
+            })
+            ->when($modulo, function ($query) use ($modulo) {
+                $query->where('empresas.modulo', $modulo);
+            })
+            ->when($empresaId, function ($query) use ($empresaId) {
+                $query->where('users.empresa_id', $empresaId);
+            })
+            ->when($perfilId, function ($query) use ($perfilId) {
+                $query->where('users.perfil_id', $perfilId);
+            })
+            ->when($tipo, function ($query) use ($tipo) {
+                $query->where('users.tipo', $tipo);
+            });
 
-        return view('usuarios.index', compact('usuarios'));
+        $usuarios = $query
+            ->orderByRaw("CASE empresas.modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
+            ->orderBy('empresas.nome_fantasia', 'asc')
+            ->orderBy('users.usuario', 'asc')
+            ->paginate(15)
+            ->appends($request->query());
+
+        if ($this->isMaster()) {
+            $empresas = Empresa::orderByRaw("CASE modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
+                ->orderBy('nome_fantasia')
+                ->get();
+
+            $perfis = DB::table('perfis')
+                ->orderByRaw("CASE modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
+                ->orderBy('nome')
+                ->get();
+        } else {
+            $empresas = Empresa::where('id', $this->empresaId())
+                ->orderBy('nome_fantasia')
+                ->get();
+
+            $perfis = DB::table('perfis')
+                ->where(function ($query) {
+                    $query->where('empresa_id', $this->empresaId())
+                        ->orWhereNull('empresa_id');
+                })
+                ->orderBy('nome')
+                ->get();
+        }
+
+        return view('usuarios.index', compact('usuarios', 'empresas', 'perfis'));
     }
 
     public function monitorAcessos()
@@ -86,15 +144,15 @@ class UserController extends Controller
             $query->where('users.empresa_id', $this->empresaId());
         }
 
-            $timezone = 'America/Sao_Paulo';
+        $timezone = 'America/Sao_Paulo';
 
-            $usuarios = $query
-                ->orderByRaw('users.last_seen_at IS NULL')
-                ->orderByDesc('users.last_seen_at')
-                ->orderBy('empresas.nome_fantasia')
-                ->orderBy('users.nome_completo')
-                ->get()
-                ->map(function ($usuario) use ($timezone) {
+        $usuarios = $query
+            ->orderByRaw('users.last_seen_at IS NULL')
+            ->orderByDesc('users.last_seen_at')
+            ->orderBy('empresas.nome_fantasia')
+            ->orderBy('users.nome_completo')
+            ->get()
+            ->map(function ($usuario) use ($timezone) {
                 $lastSeen = $usuario->last_seen_at;
 
                 if (!$lastSeen) {
@@ -117,10 +175,10 @@ class UserController extends Controller
                     $usuario->status_classe = 'status-offline';
                 }
 
-               $usuario->ultima_atividade_formatada = $lastSeen
-                ->copy()
-                ->timezone($timezone)
-                ->format('d/m/Y H:i:s');
+                $usuario->ultima_atividade_formatada = $lastSeen
+                    ->copy()
+                    ->timezone($timezone)
+                    ->format('d/m/Y H:i:s');
 
                 return $usuario;
             });
@@ -128,16 +186,19 @@ class UserController extends Controller
         return view('usuarios.monitor_acessos', compact('usuarios'));
     }
 
-   public function create()
+    public function create()
     {
         if ($this->isMaster()) {
-            $empresas = Empresa::orderBy('nome_fantasia')->get();
+            $empresas = Empresa::orderByRaw("CASE modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
+                ->orderBy('nome_fantasia')
+                ->get();
 
             /*
             * O MASTER escolhe primeiro a empresa no formulário.
             * Os perfis serão filtrados também na validação do store.
             */
             $perfis = DB::table('perfis')
+                ->orderByRaw("CASE modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
                 ->orderBy('nome')
                 ->get();
         } else {
@@ -153,7 +214,7 @@ class UserController extends Controller
         }
 
         return view('usuarios.create', compact('perfis', 'empresas'));
-    } 
+    }
 
     public function store(Request $request)
     {
@@ -181,26 +242,22 @@ class UserController extends Controller
                 ->with('error', 'Somente o MASTER pode criar outro usuário MASTER.');
         }
 
-
         if ($request->filled('perfil_id')) {
-    $perfilValido = DB::table('perfis')
-        ->where('id', $request->perfil_id)
-        ->where(function ($query) use ($request) {
-            $query->where('empresa_id', $request->empresa_id)
-                ->orWhereNull('empresa_id');
-        })
-        ->exists();
+            $perfilValido = DB::table('perfis')
+                ->where('id', $request->perfil_id)
+                ->where(function ($query) use ($request) {
+                    $query->where('empresa_id', $request->empresa_id)
+                        ->orWhereNull('empresa_id');
+                })
+                ->exists();
 
-    if (!$perfilValido) {
-        return redirect()
-            ->back()
-            ->withInput()
-            ->with(
-                'error',
-                'O perfil selecionado não pertence à empresa informada.'
-            );
-    }
-}
+            if (!$perfilValido) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'O perfil selecionado não pertence à empresa informada.');
+            }
+        }
 
         User::create([
             'empresa_id' => $request->empresa_id,
@@ -220,29 +277,32 @@ class UserController extends Controller
     public function edit($id)
     {
         $usuario = User::findOrFail($id);
+
         if ($this->isMaster()) {
-        $perfis = DB::table('perfis')
-            ->where(function ($query) use ($usuario) {
-                $query->where('empresa_id', $usuario->empresa_id)
-                    ->orWhereNull('empresa_id');
-            })
-            ->orderBy('nome')
-            ->get();
+            $perfis = DB::table('perfis')
+                ->where(function ($query) use ($usuario) {
+                    $query->where('empresa_id', $usuario->empresa_id)
+                        ->orWhereNull('empresa_id');
+                })
+                ->orderByRaw("CASE modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
+                ->orderBy('nome')
+                ->get();
 
-        $empresas = Empresa::orderBy('nome_fantasia')->get();
-    } else {
-        $perfis = DB::table('perfis')
-            ->where(function ($query) {
-                $query->where('empresa_id', $this->empresaId())
-                    ->orWhereNull('empresa_id');
-            })
-            ->orderBy('nome')
-            ->get();
+            $empresas = Empresa::orderByRaw("CASE modulo WHEN 'gas' THEN 1 WHEN 'oficina' THEN 2 WHEN 'salao' THEN 3 ELSE 9 END")
+                ->orderBy('nome_fantasia')
+                ->get();
+        } else {
+            $perfis = DB::table('perfis')
+                ->where(function ($query) {
+                    $query->where('empresa_id', $this->empresaId())
+                        ->orWhereNull('empresa_id');
+                })
+                ->orderBy('nome')
+                ->get();
 
-        $empresas = Empresa::where('id', $this->empresaId())->get();
-    }
+            $empresas = Empresa::where('id', $this->empresaId())->get();
+        }
 
-        
         return view('usuarios.edit', compact('usuario', 'perfis', 'empresas'));
     }
 
@@ -260,28 +320,6 @@ class UserController extends Controller
                 ->with('error', 'O usuário MASTER é protegido e só pode ser alterado pelo próprio MASTER.');
         }
 
-
-
-        if ($request->filled('perfil_id')) {
-    $perfilValido = DB::table('perfis')
-        ->where('id', $request->perfil_id)
-        ->where(function ($query) use ($request) {
-            $query->where('empresa_id', $request->empresa_id)
-                ->orWhereNull('empresa_id');
-        })
-        ->exists();
-
-    if (!$perfilValido) {
-        return redirect()
-            ->back()
-            ->withInput()
-            ->with(
-                'error',
-                'O perfil selecionado não pertence à empresa informada.'
-            );
-    }
-}
-
         $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'usuario' => 'required|string|max:255|unique:users,usuario,' . $usuario->id,
@@ -291,6 +329,23 @@ class UserController extends Controller
             'tipo' => 'required|in:MASTER,ADMIN,FUNCIONARIO',
             'perfil_id' => 'nullable|exists:perfis,id',
         ]);
+
+        if ($request->filled('perfil_id')) {
+            $perfilValido = DB::table('perfis')
+                ->where('id', $request->perfil_id)
+                ->where(function ($query) use ($request) {
+                    $query->where('empresa_id', $request->empresa_id)
+                        ->orWhereNull('empresa_id');
+                })
+                ->exists();
+
+            if (!$perfilValido) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'O perfil selecionado não pertence à empresa informada.');
+            }
+        }
 
         if (!$this->isMaster() && (int) $request->empresa_id !== (int) $this->empresaId()) {
             return redirect()
