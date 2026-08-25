@@ -103,6 +103,12 @@ Route::get('/demo/gas-e-agua', [DemoController::class, 'gas'])
     ->middleware('throttle:20,1')
     ->name('demo.gas');
 
+Route::get('/sistemas/financeiro-pessoal', function () {
+    return view('site.sistemas.financeiro-pessoal');
+})->name('site.sistemas.financeiro');    
+
+
+
 
 // CONFIGURAÇÃO DA PREVISÃO DE VENDAS
 Route::middleware(['auth'])->group(function () {

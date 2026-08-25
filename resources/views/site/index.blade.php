@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>S.G.A. Sistemas - Gestão para Gás, Oficina, Salão e Barbearia</title>
-    <meta name="description" content="Soluções de gestão para revendas de gás e água, oficinas mecânicas, salões de beleza e barbearias. Organize clientes, financeiro, estoque, serviços e agendamentos em um só lugar.">
+    <title>S.G.A. Sistemas - Gestão para Gás, Oficina, Salão, Barbearia e Finanças Pessoais</title>
+    <meta name="description" content="Soluções de gestão para revendas de gás e água, oficinas mecânicas, salões de beleza, barbearias e controle financeiro pessoal. Organize sua rotina, clientes, financeiro, estoque, serviços, agendamentos e finanças em um só lugar.">
 
     <style>
         :root {
@@ -19,6 +19,7 @@
             --cor-gas: #1976d2;
             --cor-oficina: #e85d04;
             --cor-salao: #c2185b;
+            --cor-financeiro: #0f9d58;
         }
 
         * {
@@ -336,7 +337,7 @@
 
         .sistemas-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 24px;
         }
 
@@ -379,6 +380,10 @@
 
         .sistema-salao {
             --cor-card: var(--cor-salao);
+        }
+
+        .sistema-financeiro {
+            --cor-card: var(--cor-financeiro);
         }
 
         .sistema-icone {
@@ -825,9 +830,9 @@
                     </h1>
 
                     <p>
-                        Sistemas para revendas de gás e água, oficinas mecânicas, salões de beleza
-                        e barbearias. Controle clientes, financeiro, estoque, serviços e agendamentos
-                        com mais clareza e segurança.
+                        Sistemas para revendas de gás e água, oficinas mecânicas, salões de beleza,
+                        barbearias e também para o controle das finanças pessoais. Organize clientes,
+                        financeiro, estoque, serviços, agendamentos, receitas e despesas com mais clareza e segurança.
                     </p>
 
                     <div class="acoes">
@@ -875,6 +880,14 @@
                                 <span>Agendamentos, profissionais, caixa e atendimento.</span>
                             </div>
                         </div>
+
+                        <div class="resumo-item">
+                            <div class="resumo-icone">💰</div>
+                            <div>
+                                <strong>Controle Financeiro Pessoal</strong>
+                                <span>Receitas, despesas, contas, cartões e planejamento financeiro.</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -884,9 +897,9 @@
             <div class="container">
                 <div class="titulo-secao">
                     <span class="etiqueta">Escolha sua solução</span>
-                    <h2>Um sistema pensado para cada tipo de negócio</h2>
+                    <h2>Uma solução pensada para cada necessidade</h2>
                     <p>
-                        Cada solução possui recursos específicos para a rotina do segmento,
+                        Cada solução possui recursos específicos para a rotina de cada segmento ou usuário,
                         mantendo a mesma proposta: simplicidade, organização e visão financeira.
                     </p>
                 </div>
@@ -958,6 +971,29 @@
                             class="btn btn-card"
                         >
                             Conhecer sistema de Salão
+                        </a>
+                    </article>
+
+                    <article class="sistema-card sistema-financeiro">
+                        <div class="sistema-icone">💰</div>
+                        <h3>Financeiro Pessoal</h3>
+                        <p>
+                            Para quem deseja organizar a vida financeira e acompanhar com clareza para onde o dinheiro está indo.
+                        </p>
+
+                        <ul class="lista-recursos">
+                            <li>Receitas e despesas</li>
+                            <li>Contas e saldos</li>
+                            <li>Cartões, compras e faturas</li>
+                            <li>Parcelamentos e recorrências</li>
+                            <li>Visão mensal e planejamento financeiro</li>
+                        </ul>
+
+                        <a
+                           href="{{ route('site.sistemas.financeiro') }}"
+                            class="btn btn-card"
+                        >
+                            Conhecer Financeiro Pessoal
                         </a>
                     </article>
                 </div>
@@ -1033,7 +1069,8 @@
 
                         <p>
                             Com a evolução do sistema, a mesma experiência prática foi aplicada na criação
-                            de soluções para oficinas mecânicas, salões de beleza e barbearias.
+                            de soluções para oficinas mecânicas, salões de beleza, barbearias e também para
+                            o controle financeiro pessoal.
                         </p>
 
                         <p>
@@ -1103,7 +1140,7 @@
                     <h3>S.G.A. Sistemas</h3>
                     <p>
                         Soluções de gestão para revendas de gás e água, oficinas,
-                        salões de beleza e barbearias.
+                        salões de beleza, barbearias e controle financeiro pessoal.
                     </p>
                 </div>
 
@@ -1113,6 +1150,7 @@
                         <a href="{{ route('site.sistemas.gas') }}">Gás e Água</a>
                         <a href="{{ route('site.sistemas.oficina') }}">Oficina</a>
                         <a href="{{ route('site.sistemas.salao') }}">Salão e Barbearia</a>
+                       <a href="{{ route('site.sistemas.financeiro') }}">Financeiro Pessoal</a>
                     </div>
                 </div>
 
