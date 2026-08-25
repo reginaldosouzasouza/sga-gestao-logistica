@@ -40,4 +40,9 @@ return [
     'url' => env('SALAO_URL', 'http://127.0.0.1:8030'),
     ],
 
+    'custo_pessoal_sso' => [
+        'url' => env('CUSTO_PESSOAL_SSO_URL'),
+        'secret' => env('CUSTO_PESSOAL_SSO_SECRET'),
+    ],
+
 ];

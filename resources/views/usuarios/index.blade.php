@@ -266,6 +266,11 @@
         color: #9d174d;
     }
 
+    .badge-financas {
+        background: #dff7f4;
+        color: #0f766e;
+    }
+
     .badge-default {
         background: #e2e8f0;
         color: #334155;
@@ -314,6 +319,11 @@
     .perfil-salao {
         background: #fce7f3;
         color: #9d174d;
+    }
+
+    .perfil-financas {
+        background: #dff7f4;
+        color: #0f766e;
     }
 
     .acoes-box {
@@ -466,6 +476,7 @@
                         <option value="gas" {{ request('modulo') === 'gas' ? 'selected' : '' }}>Gás</option>
                         <option value="oficina" {{ request('modulo') === 'oficina' ? 'selected' : '' }}>Oficina</option>
                         <option value="salao" {{ request('modulo') === 'salao' ? 'selected' : '' }}>Salão / Barbearia</option>
+                        <option value="financas" {{ request('modulo') === 'financas' ? 'selected' : '' }}>SGA Finanças</option>
                     </select>
                 </div>
 
@@ -543,6 +554,8 @@
                                 $perfilClasse = 'perfil-oficina';
                             } elseif (str_contains($perfilTexto, 'salão') || str_contains($perfilTexto, 'salao')) {
                                 $perfilClasse = 'perfil-salao';
+                            } elseif (str_contains($perfilTexto, 'sga finanças') || str_contains($perfilTexto, 'sga financas')) {
+                                $perfilClasse = 'perfil-financas';
                             } elseif (str_contains($perfilTexto, 'admin')) {
                                 $perfilClasse = 'perfil-admin';
                             } elseif (str_contains($perfilTexto, 'oper')) {
@@ -556,6 +569,7 @@
                                 'gas' => 'badge-gas',
                                 'oficina' => 'badge-oficina',
                                 'salao' => 'badge-salao',
+                                'financas' => 'badge-financas',
                                 default => 'badge-default',
                             };
 
@@ -563,6 +577,7 @@
                                 'gas' => 'Gás',
                                 'oficina' => 'Oficina',
                                 'salao' => 'Salão',
+                                'financas' => 'Finanças',
                                 default => '-',
                             };
 

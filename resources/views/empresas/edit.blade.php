@@ -79,6 +79,9 @@
                             >
                                 Oficina
                             </option>
+
+                            <option value="financas" {{ old('modulo', $empresa->modulo) === 'financas' ? 'selected' : '' }}>
+                                SGA Finanças</option>
                         </select>
                     </div>
 

@@ -69,6 +69,10 @@
                             <option value="oficina" {{ old('modulo') === 'oficina' ? 'selected' : '' }}>
                                 Oficina
                             </option>
+
+                            <option value="financas" {{ old('modulo') === 'financas' ? 'selected' : '' }}>
+                                SGA Finanças
+                            </option>
                         </select>
                     </div>
 

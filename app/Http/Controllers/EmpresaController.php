@@ -6,7 +6,6 @@ use App\Models\Empresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-
 class EmpresaController extends Controller
 {
     public function index(Request $request)
@@ -67,7 +66,7 @@ class EmpresaController extends Controller
     {
         $validatedData = $request->validate([
             'nome_fantasia' => 'required|string|max:255',
-            'modulo' => 'required|in:gas,salao,oficina',
+            'modulo' => 'required|in:gas,salao,oficina,financas',
             'razao_social' => 'nullable|string|max:255',
             'cnpj' => 'nullable|string|max:20|unique:empresas,cnpj',
             'telefone' => 'nullable|string|max:30',
@@ -79,11 +78,8 @@ class EmpresaController extends Controller
             'estado' => 'nullable|string|max:2',
             'cep' => 'nullable|string|max:20',
 
-
-            // Controle geral
             'status' => 'required|in:ativo,inativo,bloqueado,teste',
 
-            // Controle SaaS
             'plano' => 'nullable|string|max:50',
             'status_assinatura' => 'nullable|in:teste,ativa,vencida,bloqueada,cancelada',
             'data_inicio_teste' => 'nullable|date',
@@ -94,22 +90,17 @@ class EmpresaController extends Controller
             'limite_clientes' => 'nullable|integer|min:1',
         ], [
             'nome_fantasia.required' => 'Informe o nome fantasia da empresa.',
-            'cnpj.unique' => 'Este CNPJ jÃ¡ estÃ¡ cadastrado.',
-            'email.email' => 'Informe um e-mail vÃ¡lido.',
+            'modulo.in' => 'Selecione um módulo válido.',
+            'cnpj.unique' => 'Este CNPJ já está cadastrado.',
+            'email.email' => 'Informe um e-mail válido.',
         ]);
 
-        /*
-         * Checkbox: quando desmarcado, o campo nÃ£o vem no request.
-         */
         $validatedData['bloqueada'] = $request->has('bloqueada') ? 1 : 0;
 
-        /*
-         * Valores padrÃ£o SaaS
-         */
         $validatedData['plano'] = $validatedData['plano'] ?? 'teste';
         $validatedData['status_assinatura'] = $validatedData['status_assinatura'] ?? 'teste';
 
-       DB::transaction(function () use ($validatedData) {
+        DB::transaction(function () use ($validatedData) {
             $empresa = Empresa::create($validatedData);
 
             $this->garantirPerfilSalao($empresa);
@@ -140,7 +131,7 @@ class EmpresaController extends Controller
 
         $validatedData = $request->validate([
             'nome_fantasia' => 'required|string|max:255',
-            'modulo' => 'required|in:gas,salao,oficina',
+            'modulo' => 'required|in:gas,salao,oficina,financas',
             'razao_social' => 'nullable|string|max:255',
             'cnpj' => 'nullable|string|max:20|unique:empresas,cnpj,' . $empresa->id,
             'telefone' => 'nullable|string|max:30',
@@ -152,10 +143,8 @@ class EmpresaController extends Controller
             'estado' => 'nullable|string|max:2',
             'cep' => 'nullable|string|max:20',
 
-            // Controle geral
             'status' => 'required|in:ativo,inativo,bloqueado,teste',
 
-            // Controle SaaS
             'plano' => 'nullable|string|max:50',
             'status_assinatura' => 'nullable|in:teste,ativa,vencida,bloqueada,cancelada',
             'data_inicio_teste' => 'nullable|date',
@@ -166,22 +155,17 @@ class EmpresaController extends Controller
             'limite_clientes' => 'nullable|integer|min:1',
         ], [
             'nome_fantasia.required' => 'Informe o nome fantasia da empresa.',
-            'cnpj.unique' => 'Este CNPJ jÃ¡ estÃ¡ cadastrado.',
-            'email.email' => 'Informe um e-mail vÃ¡lido.',
+            'modulo.in' => 'Selecione um módulo válido.',
+            'cnpj.unique' => 'Este CNPJ já está cadastrado.',
+            'email.email' => 'Informe um e-mail válido.',
         ]);
 
-        /*
-         * Checkbox: quando desmarcado, o campo nÃ£o vem no request.
-         */
         $validatedData['bloqueada'] = $request->has('bloqueada') ? 1 : 0;
 
-        /*
-         * Valores padrÃ£o SaaS
-         */
         $validatedData['plano'] = $validatedData['plano'] ?? 'teste';
         $validatedData['status_assinatura'] = $validatedData['status_assinatura'] ?? 'teste';
 
-       DB::transaction(function () use ($empresa, $validatedData) {
+        DB::transaction(function () use ($empresa, $validatedData) {
             $empresa->update($validatedData);
 
             $this->garantirPerfilSalao($empresa);
@@ -191,7 +175,6 @@ class EmpresaController extends Controller
             ->route('empresas.index')
             ->with('success', 'Empresa atualizada com sucesso.');
     }
-
 
     private function garantirPerfilSalao(Empresa $empresa): void
     {
@@ -206,7 +189,7 @@ class EmpresaController extends Controller
 
         if (!$perfil) {
             $perfilId = DB::table('perfis')->insertGetId([
-                'nome' => 'Administrador do SalÃ£o',
+                'nome' => 'Administrador do Salão',
                 'empresa_id' => $empresa->id,
                 'modulo' => 'salao',
                 'created_at' => now(),
@@ -235,13 +218,13 @@ class EmpresaController extends Controller
         if ($empresa->id == 1) {
             return redirect()
                 ->route('empresas.index')
-                ->with('error', 'A empresa principal MARIGÃS nÃ£o pode ser excluÃ­da.');
+                ->with('error', 'A empresa principal MARIGÁS não pode ser excluída.');
         }
 
         $empresa->delete();
 
         return redirect()
             ->route('empresas.index')
-            ->with('success', 'Empresa excluÃ­da com sucesso.');
+            ->with('success', 'Empresa excluída com sucesso.');
     }
 }

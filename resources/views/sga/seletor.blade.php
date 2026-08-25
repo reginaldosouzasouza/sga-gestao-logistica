@@ -315,6 +315,12 @@
         }
 
 
+        .card.financas:hover {
+            background: rgba(14, 165, 168, .10);
+        }
+
+
+
         /* RESPONSIVO - CELULAR */
         @media (max-width: 900px) {
             .header-inner {
@@ -474,6 +480,12 @@
 
     $podeAcessarGas = $isMaster
     || ($usuario && $usuario->temPermissao('gas_acessar'));    
+
+    $podeAcessarOficina = $isMaster
+    || ($usuario && $usuario->temPermissao('oficina_acessar'));
+
+    $podeAcessarFinancas = $isMaster
+    || ($usuario && $usuario->temPermissao('financas_acessar'));
     
        
 
@@ -609,8 +621,23 @@
 
     <div class="grid">
 
-        @if($isMaster)
-            <a href="{{ url('/menu/oficina') }}" class="card oficina">
+        @if($podeAcessarFinancas)
+            <a href="{{ route('menu.custo-pessoal') }}"
+               class="card financas">
+                <span class="icon">💰</span>
+                <h4>SGA Finanças</h4>
+            </a>
+        @else
+            <a href="#"
+               class="card financas bloqueado"
+               onclick="return moduloNaoAutorizado();">
+                <span class="icon">💰</span>
+                <h4>SGA Finanças</h4>
+            </a>
+        @endif
+
+       @if($podeAcessarOficina)
+            <a href="{{ url('/oficina-link/menu') }}" class="card oficina">
                 <span class="icon">🧰</span>
                 <h4>Oficina</h4>
             </a>

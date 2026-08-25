@@ -97,6 +97,11 @@
         color: #9d174d;
     }
 
+    .badge-financas {
+        background: #dff7f4;
+        color: #0f766e;
+    }
+
     @media (max-width: 1000px) {
         .filtros-empresas {
             grid-template-columns: 1fr 1fr;
@@ -192,6 +197,7 @@
                 <option value="gas" {{ request('modulo') === 'gas' ? 'selected' : '' }}>Revenda de Gás</option>
                 <option value="oficina" {{ request('modulo') === 'oficina' ? 'selected' : '' }}>Oficina</option>
                 <option value="salao" {{ request('modulo') === 'salao' ? 'selected' : '' }}>Salão / Barbearia</option>
+                <option value="financas" {{ request('modulo') === 'financas' ? 'selected' : '' }}>SGA Finanças</option>
             </select>
         </div>
 
@@ -261,6 +267,8 @@
                                     <span class="badge-modulo badge-oficina">Oficina</span>
                                 @elseif($empresa->modulo === 'salao')
                                     <span class="badge-modulo badge-salao">Salão</span>
+                                @elseif($empresa->modulo === 'financas')
+                                    <span class="badge-modulo badge-financas">Finanças</span>
                                 @else
                                     <span class="badge-modulo">-</span>
                                 @endif
