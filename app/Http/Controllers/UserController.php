@@ -117,8 +117,11 @@ class UserController extends Controller
         return view('usuarios.index', compact('usuarios', 'empresas', 'perfis'));
     }
 
-    public function monitorAcessos()
+    public function monitorAcessos(Request $request)
     {
+        // Monitor global: acesso exclusivo do MASTER, inclusive pela URL direta.
+        abort_unless($this->isMaster(), 403);
+
         $query = User::leftJoin('perfis', 'perfis.id', '=', 'users.perfil_id')
             ->leftJoin('empresas', 'empresas.id', '=', 'users.empresa_id')
             ->select(
@@ -183,7 +186,81 @@ class UserController extends Controller
                 return $usuario;
             });
 
-        return view('usuarios.monitor_acessos', compact('usuarios'));
+        // As opções são montadas somente com usuários que o operador pode consultar.
+        $empresasFiltro = $usuarios->filter(fn ($u) => $u->empresa_id !== null)
+            ->unique('empresa_id')->sortBy('empresa')->values();
+        $tiposFiltro = $usuarios->pluck('tipo')->filter()->unique()->sort()->values();
+
+        $filtros = [
+            'busca' => trim((string) $request->query('busca', '')),
+            'empresa_id' => (string) $request->query('empresa_id', ''),
+            'status' => (string) $request->query('status', ''),
+            'tipo' => (string) $request->query('tipo', ''),
+            'periodo' => (string) $request->query('periodo', ''),
+        ];
+
+        if (!in_array($filtros['status'], ['', 'Online', 'Inativo', 'Offline', 'Nunca acessou'], true)) {
+            $filtros['status'] = '';
+        }
+        if (!in_array($filtros['periodo'], ['', 'hoje', '7', '30', 'mais30', 'nunca'], true)) {
+            $filtros['periodo'] = '';
+        }
+
+        $totalUsuarios = $usuarios->count();
+        $resumoAcessos = [
+            'online' => $usuarios->where('status_acesso', 'Online')->count(),
+            'inativo' => $usuarios->where('status_acesso', 'Inativo')->count(),
+            'offline' => $usuarios->where('status_acesso', 'Offline')->count(),
+        ];
+        // Total dos três cartões; usuários que nunca acessaram não entram.
+        $resumoAcessos['total'] = $resumoAcessos['online']
+            + $resumoAcessos['inativo'] + $resumoAcessos['offline'];
+        $usuarios = $usuarios->filter(function ($usuario) use ($filtros) {
+            if ($filtros['busca'] !== '') {
+                $texto = mb_strtolower(implode(' ', [
+                    $usuario->usuario, $usuario->nome_completo, $usuario->email,
+                ]));
+                if (!str_contains($texto, mb_strtolower($filtros['busca']))) {
+                    return false;
+                }
+            }
+
+            if ($filtros['empresa_id'] !== '' && (string) $usuario->empresa_id !== $filtros['empresa_id']) {
+                return false;
+            }
+            if ($filtros['tipo'] !== '' && (string) $usuario->tipo !== $filtros['tipo']) {
+                return false;
+            }
+            if ($filtros['status'] !== '' && $usuario->status_acesso !== $filtros['status']) {
+                return false;
+            }
+
+            if ($filtros['periodo'] !== '') {
+                $atividade = $usuario->last_seen_at;
+                if ($filtros['periodo'] === 'nunca') {
+                    return $atividade === null;
+                }
+                if ($atividade === null) {
+                    return false;
+                }
+
+                $agora = now();
+                $limite = match ($filtros['periodo']) {
+                    'hoje' => $agora->copy()->timezone('America/Sao_Paulo')->startOfDay()->timezone('UTC'),
+                    '7' => $agora->copy()->subDays(7),
+                    '30' => $agora->copy()->subDays(30),
+                    'mais30' => $agora->copy()->subDays(30),
+                };
+                return $filtros['periodo'] === 'mais30'
+                    ? $atividade->lt($limite)
+                    : $atividade->gte($limite) && $atividade->lte($agora);
+            }
+            return true;
+        })->values();
+
+        return view('usuarios.monitor_acessos', compact(
+            'usuarios', 'empresasFiltro', 'tiposFiltro', 'filtros', 'totalUsuarios', 'resumoAcessos'
+        ));
     }
 
     public function create()
